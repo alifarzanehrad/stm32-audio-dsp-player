@@ -1,1 +1,28 @@
+# پوشه‌های بیلد (خروجی کامپایلر)
 Debug/
+Release/
+build/
+
+# فایل‌های آبجکت و باینری
+*.o
+*.d
+*.elf
+*.bin
+*.hex
+*.map
+*.list
+*.su
+*.cyclo
+
+# تنظیمات محلی Eclipse/CubeIDE (مخصوص هر کاربر)
+.metadata/
+.settings/
+
+# فایل‌های موقت ویرایشگر
+*~
+*.bak
+*.swp
+
+# فایل‌های سیستم‌عامل
+.DS_Store
+Thumbs.db

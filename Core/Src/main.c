@@ -67,6 +67,7 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
+FATFS SDFatFs;
 /*
  * 1 kHz sine wave
  * Sample rate = 48 kHz
@@ -163,6 +164,10 @@ int main(void)
   MX_USART6_UART_Init();
   MX_FATFS_Init();
   /* USER CODE BEGIN 2 */
+  if(f_mount(&SDFatFs, "", 1) != FR_OK)
+  {
+      Error_Handler();
+  }
   audio_status = BSP_AUDIO_OUT_Init(
       OUTPUT_DEVICE_HEADPHONE,
       70,

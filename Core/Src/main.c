@@ -41,11 +41,12 @@
 #include "stm32746g_discovery_audio.h"
 #include <stdio.h>
 #include <string.h>
+#include <math.h>
 #include "ff.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include "stm32746g_discovery_audio.h"
+
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -66,43 +67,30 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-FRESULT res;
-UINT bytesRead;
-FIL wavFile;
-
-/* بافر استریم */
-#define AUDIO_BUFFER_SIZE   (8192)
-
-uint16_t AudioBuffer[AUDIO_BUFFER_SIZE/2];
-
-/* وضعیت پایان فایل */
-volatile uint8_t EndOfFile = 0;
-
-/* Sample Rate فایل wav */
-uint32_t WaveSampleRate = 48000;
-
-/* Header فایل wav */
-typedef struct
+/*
+ * 1 kHz sine wave
+ * Sample rate = 48 kHz
+ * 48 sample per period
+ * Stereo format: Left, Right, Left, Right, ...
+ */
+static const int16_t sine_1khz_48k_stereo[] =
 {
-    char RIFF[4];
-    uint32_t ChunkSize;
-    char WAVE[4];
+      0,      0,   1566,   1566,   3106,   3106,   4592,   4592,
+   6000,   6000,   7305,   7305,   8485,   8485,   9520,   9520,
+  10392,  10392,  11087,  11087,  11591,  11591,  11897,  11897,
+  12000,  12000,  11897,  11897,  11591,  11591,  11087,  11087,
+  10392,  10392,   9520,   9520,   8485,   8485,   7305,   7305,
+   6000,   6000,   4592,   4592,   3106,   3106,   1566,   1566,
 
-    char fmt[4];
-    uint32_t Subchunk1Size;
-    uint16_t AudioFormat;
-    uint16_t NumChannels;
-    uint32_t SampleRate;
-    uint32_t ByteRate;
-    uint16_t BlockAlign;
-    uint16_t BitsPerSample;
+      0,      0,  -1566,  -1566,  -3106,  -3106,  -4592,  -4592,
+  -6000,  -6000,  -7305,  -7305,  -8485,  -8485,  -9520,  -9520,
+ -10392, -10392, -11087, -11087, -11591, -11591, -11897, -11897,
+ -12000, -12000, -11897, -11897, -11591, -11591, -11087, -11087,
+ -10392, -10392,  -9520,  -9520,  -8485,  -8485,  -7305,  -7305,
+  -6000,  -6000,  -4592,  -4592,  -3106,  -3106,  -1566,  -1566,
+};
 
-    char data[4];
-    uint32_t DataSize;
-
-}WAV_HeaderTypeDef;
-
-WAV_HeaderTypeDef WavHeader;
+uint8_t audio_status;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -110,47 +98,12 @@ void SystemClock_Config(void);
 void PeriphCommonClock_Config(void);
 void MX_FREERTOS_Init(void);
 /* USER CODE BEGIN PFP */
-uint8_t WAV_Open(char *filename);
-void FillBuffer(uint32_t offset,uint32_t size);
+
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-uint8_t WAV_Open(char *filename)
-{
-    if(f_mount(&SDFatFS, SDPath, 1)!=FR_OK)
-        return 0;
 
-    if(f_open(&wavFile, filename, FA_READ)!=FR_OK)
-        return 0;
-
-    f_read(&wavFile,&WavHeader,sizeof(WAV_HeaderTypeDef),&bytesRead);
-    if(memcmp(WavHeader.RIFF,"RIFF",4)!=0)
-        return 0;
-
-    if(memcmp(WavHeader.WAVE,"WAVE",4)!=0)
-        return 0;
-
-    WaveSampleRate=WavHeader.SampleRate;
-
-    return 1;
-}
-void FillBuffer(uint32_t offset,uint32_t size)
-{
-    f_read(&wavFile,
-           ((uint8_t*)AudioBuffer)+offset,
-           size,
-           &bytesRead);
-
-    if(bytesRead<size)
-    {
-        memset(((uint8_t*)AudioBuffer)+offset+bytesRead,
-               0,
-               size-bytesRead);
-
-        EndOfFile=1;
-    }
-}
 /* USER CODE END 0 */
 
 /**
@@ -210,31 +163,27 @@ int main(void)
   MX_USART6_UART_Init();
   MX_FATFS_Init();
   /* USER CODE BEGIN 2 */
-  char msg[] = "1\r\n";
-  HAL_UART_Transmit(&huart1, (uint8_t*)msg, strlen(msg), 100);
+  audio_status = BSP_AUDIO_OUT_Init(
+      OUTPUT_DEVICE_HEADPHONE,
+      70,
+      AUDIO_FREQUENCY_48K
+  );
 
-  if(!WAV_Open("one.wav"))
+  if(audio_status != AUDIO_OK)
   {
-      char msg[] = "2\r\n";
-      HAL_UART_Transmit(&huart1, (uint8_t*)msg, strlen(msg), 100);
-
       Error_Handler();
   }
 
-  char msg3[] = "3\r\n";
-  HAL_UART_Transmit(&huart1, (uint8_t*)msg3, strlen(msg3), 100);
+  audio_status = BSP_AUDIO_OUT_Play(
+      (uint16_t *)sine_1khz_48k_stereo,
+      sizeof(sine_1khz_48k_stereo)
+  );
 
-  if(BSP_AUDIO_OUT_Init(OUTPUT_DEVICE_HEADPHONE, 80, WaveSampleRate)!=AUDIO_OK)
+  if(audio_status != AUDIO_OK)
   {
-      char msg[] = "4\r\n";
-      HAL_UART_Transmit(&huart1, (uint8_t*)msg, strlen(msg), 100);
-
       Error_Handler();
   }
-
-  char msg5[] = "5\r\n";
-  HAL_UART_Transmit(&huart1, (uint8_t*)msg5, strlen(msg5), 100);
-   /* USER CODE END 2 */
+  /* USER CODE END 2 */
 
   /* Call init function for freertos objects (in cmsis_os2.c) */
   //MX_FREERTOS_Init();
@@ -248,12 +197,6 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-	  if(EndOfFile)
-	  {
-	      BSP_AUDIO_OUT_Stop(CODEC_PDWN_SW);
-	      f_close(&wavFile);
-	      break;
-	  }
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -346,38 +289,12 @@ void PeriphCommonClock_Config(void)
 }
 
 /* USER CODE BEGIN 4 */
-void BSP_AUDIO_IN_TransferComplete_CallBack(void)
-{
-}
-
-void BSP_AUDIO_IN_HalfTransfer_CallBack(void)
-{
-}
-
-void BSP_AUDIO_IN_Error_Callback(void)
-{
-    Error_Handler();
-}
 void BSP_AUDIO_OUT_HalfTransfer_CallBack(void)
 {
-    if(!EndOfFile)
-    {
-        FillBuffer(0, AUDIO_BUFFER_SIZE / 2);
-    }
 }
 
 void BSP_AUDIO_OUT_TransferComplete_CallBack(void)
 {
-    if(!EndOfFile)
-    {
-        FillBuffer(AUDIO_BUFFER_SIZE / 2,
-                   AUDIO_BUFFER_SIZE / 2);
-    }
-}
-
-void BSP_AUDIO_OUT_Error_CallBack(void)
-{
-    Error_Handler();
 }
 /* USER CODE END 4 */
 
@@ -413,8 +330,7 @@ void Error_Handler(void)
   __disable_irq();
   while (1)
   {
-      BSP_LED_Toggle(LED1);
-      HAL_Delay(200);
+
   }
   /* USER CODE END Error_Handler_Debug */
 }

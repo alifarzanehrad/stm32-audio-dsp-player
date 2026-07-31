@@ -1,0 +1,10 @@
+../Drivers/BSP/STM32F769I_EVAL/stm32f769i_eval_io.c:127:9:BSP_IO_Init	4
+../Drivers/BSP/STM32F769I_EVAL/stm32f769i_eval_io.c:163:9:BSP_IO_DeInit	1
+../Drivers/BSP/STM32F769I_EVAL/stm32f769i_eval_io.c:175:10:BSP_IO_ITGetStatus	1
+../Drivers/BSP/STM32F769I_EVAL/stm32f769i_eval_io.c:185:6:BSP_IO_ITClear	1
+../Drivers/BSP/STM32F769I_EVAL/stm32f769i_eval_io.c:195:6:BSP_IO_ITClearPin	1
+../Drivers/BSP/STM32F769I_EVAL/stm32f769i_eval_io.c:234:9:BSP_IO_ConfigPin	1
+../Drivers/BSP/STM32F769I_EVAL/stm32f769i_eval_io.c:248:9:BSP_IO_ConfigIrqOutPin	3
+../Drivers/BSP/STM32F769I_EVAL/stm32f769i_eval_io.c:267:6:BSP_IO_WritePin	1
+../Drivers/BSP/STM32F769I_EVAL/stm32f769i_eval_io.c:279:10:BSP_IO_ReadPin	1
+../Drivers/BSP/STM32F769I_EVAL/stm32f769i_eval_io.c:291:6:BSP_IO_TogglePin	2

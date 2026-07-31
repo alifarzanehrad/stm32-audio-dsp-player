@@ -1,0 +1,3 @@
+../Core/Src/spdifrx.c:30:6:MX_SPDIFRX_Init	2
+../Core/Src/spdifrx.c:61:6:HAL_SPDIFRX_MspInit	3
+../Core/Src/spdifrx.c:105:6:HAL_SPDIFRX_MspDeInit	2

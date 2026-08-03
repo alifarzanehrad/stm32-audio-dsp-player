@@ -68,30 +68,33 @@
 
 /* USER CODE BEGIN PV */
 FATFS SDFatFs;
-/*
- * 1 kHz sine wave
- * Sample rate = 48 kHz
- * 48 sample per period
- * Stereo format: Left, Right, Left, Right, ...
- */
-static const int16_t sine_1khz_48k_stereo[] =
-{
-      0,      0,   1566,   1566,   3106,   3106,   4592,   4592,
-   6000,   6000,   7305,   7305,   8485,   8485,   9520,   9520,
-  10392,  10392,  11087,  11087,  11591,  11591,  11897,  11897,
-  12000,  12000,  11897,  11897,  11591,  11591,  11087,  11087,
-  10392,  10392,   9520,   9520,   8485,   8485,   7305,   7305,
-   6000,   6000,   4592,   4592,   3106,   3106,   1566,   1566,
-
-      0,      0,  -1566,  -1566,  -3106,  -3106,  -4592,  -4592,
-  -6000,  -6000,  -7305,  -7305,  -8485,  -8485,  -9520,  -9520,
- -10392, -10392, -11087, -11087, -11591, -11591, -11897, -11897,
- -12000, -12000, -11897, -11897, -11591, -11591, -11087, -11087,
- -10392, -10392,  -9520,  -9520,  -8485,  -8485,  -7305,  -7305,
-  -6000,  -6000,  -4592,  -4592,  -3106,  -3106,  -1566,  -1566,
-};
-
 uint8_t audio_status;
+/* ساختار هدر WAV استاندارد (44 بایت) */
+typedef struct
+{
+  char     RIFF[4];        // "RIFF"
+  uint32_t ChunkSize;
+  char     WAVE[4];        // "WAVE"
+  char     fmt[4];         // "fmt "
+  uint32_t Subchunk1Size;
+  uint16_t AudioFormat;    // 1 = PCM
+  uint16_t NumChannels;    // 1=mono, 2=stereo
+  uint32_t SampleRate;
+  uint32_t ByteRate;
+  uint16_t BlockAlign;
+  uint16_t BitsPerSample;
+  char     Subchunk2ID[4]; // "data"
+  uint32_t Subchunk2Size;  // اندازه دیتای صوتی به بایت
+} WAV_HeaderTypeDef;
+
+#define AUDIO_BUFFER_SIZE   8192   // کل بافر (به بایت)
+#define AUDIO_HALF_BUFFER   (AUDIO_BUFFER_SIZE / 2)
+
+FIL WavFile;
+WAV_HeaderTypeDef WavHeader;
+static uint8_t AudioBuffer[AUDIO_BUFFER_SIZE];
+volatile uint32_t AudioRemainingBytes = 0;
+volatile uint8_t  AudioPlaying = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -99,7 +102,7 @@ void SystemClock_Config(void);
 void PeriphCommonClock_Config(void);
 void MX_FREERTOS_Init(void);
 /* USER CODE BEGIN PFP */
-
+uint8_t WavPlayer_Start(const char *filename);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -164,31 +167,42 @@ int main(void)
   MX_USART6_UART_Init();
   MX_FATFS_Init();
   /* USER CODE BEGIN 2 */
-  if(f_mount(&SDFatFs, "", 1) != FR_OK)
-  {
-      Error_Handler();
-  }
-  audio_status = BSP_AUDIO_OUT_Init(
-      OUTPUT_DEVICE_HEADPHONE,
-      70,
-      AUDIO_FREQUENCY_48K
-  );
+    HAL_UART_Transmit(&huart1, (uint8_t*)"RAW TEST\r\n", 10, HAL_MAX_DELAY);
 
-  if(audio_status != AUDIO_OK)
-  {
-      Error_Handler();
-  }
+    setvbuf(stdout, NULL, _IONBF, 0);
+    printf("Boot OK, entering main setup...\r\n");
 
-  audio_status = BSP_AUDIO_OUT_Play(
-      (uint16_t *)sine_1khz_48k_stereo,
-      sizeof(sine_1khz_48k_stereo)
-  );
+    uint8_t sd_init_ret = BSP_SD_Init();
+    printf("BSP_SD_Init returned = %d (MSD_OK=0)\r\n", sd_init_ret);
 
-  if(audio_status != AUDIO_OK)
-  {
+    if (sd_init_ret != MSD_OK)
+    {
+      printf("Retrying BSP_SD_Init...\r\n");
+      HAL_Delay(200);
+      sd_init_ret = BSP_SD_Init();
+      printf("BSP_SD_Init retry returned = %d\r\n", sd_init_ret);
+    }
+
+    uint8_t card_state = BSP_SD_GetCardState();
+    printf("BSP_SD_GetCardState = %d (SD_TRANSFER_OK=0)\r\n", card_state);
+
+    printf("Mounting SD card...\r\n");
+    FRESULT mount_res = f_mount(&SDFatFs, "", 1);
+    printf("f_mount result code = %d\r\n", mount_res);
+    if(mount_res != FR_OK)
+    {
+        printf("f_mount FAILED!\r\n");
+        Error_Handler();
+    }
+    printf("SD card mounted OK\r\n");
+
+    printf("Calling WavPlayer_Start...\r\n");
+    if (!WavPlayer_Start("one.wav"))
+    {
+      printf("WavPlayer_Start FAILED, entering Error_Handler\r\n");
       Error_Handler();
-  }
-  /* USER CODE END 2 */
+    }
+    /* USER CODE END 2 */
 
   /* Call init function for freertos objects (in cmsis_os2.c) */
   //MX_FREERTOS_Init();
@@ -294,13 +308,89 @@ void PeriphCommonClock_Config(void)
 }
 
 /* USER CODE BEGIN 4 */
-void BSP_AUDIO_OUT_HalfTransfer_CallBack(void)
+
+int __io_putchar(int ch)
 {
+  HAL_UART_Transmit(&huart1, (uint8_t *)&ch, 1, HAL_MAX_DELAY);
+  return ch;
 }
 
-void BSP_AUDIO_OUT_TransferComplete_CallBack(void)
+int _write(int file, char *ptr, int len)
 {
+  HAL_UART_Transmit(&huart1, (uint8_t *)ptr, len, HAL_MAX_DELAY);
+  return len;
 }
+uint8_t WavPlayer_Start(const char *filename)
+{
+  FRESULT res;
+  UINT bytesread;
+
+  printf("Opening file %s...\r\n", filename);
+  res = f_open(&WavFile, filename, FA_READ);
+  if (res != FR_OK)
+  {
+    printf("f_open failed, res=%d\r\n", res);
+    return 0;
+  }
+  printf("File opened OK\r\n");
+
+  res = f_read(&WavFile, &WavHeader, sizeof(WAV_HeaderTypeDef), &bytesread);
+  if (res != FR_OK || bytesread != sizeof(WAV_HeaderTypeDef))
+  {
+    printf("Header read failed, res=%d, bytesread=%u\r\n", res, bytesread);
+    f_close(&WavFile);
+    return 0;
+  }
+  printf("Header read OK, RIFF=%.4s WAVE=%.4s fmt=%.4s dataTag=%.4s\r\n",
+         WavHeader.RIFF, WavHeader.WAVE, WavHeader.fmt, WavHeader.Subchunk2ID);
+  printf("AudioFormat=%u NumChannels=%u SampleRate=%lu BitsPerSample=%u DataSize=%lu\r\n",
+         WavHeader.AudioFormat, WavHeader.NumChannels,
+         (unsigned long)WavHeader.SampleRate, WavHeader.BitsPerSample,
+         (unsigned long)WavHeader.Subchunk2Size);
+
+  if (strncmp(WavHeader.RIFF, "RIFF", 4) != 0 ||
+      strncmp(WavHeader.WAVE, "WAVE", 4) != 0 ||
+      WavHeader.AudioFormat != 1)
+  {
+    printf("Invalid WAV file!\r\n");
+    f_close(&WavFile);
+    return 0;
+  }
+
+  AudioRemainingBytes = WavHeader.Subchunk2Size;
+
+  audio_status = BSP_AUDIO_OUT_Init(OUTPUT_DEVICE_HEADPHONE, 70, WavHeader.SampleRate);
+  if (audio_status != AUDIO_OK)
+  {
+    printf("BSP_AUDIO_OUT_Init failed, status=%u\r\n", audio_status);
+    f_close(&WavFile);
+    return 0;
+  }
+  printf("Audio codec init OK\r\n");
+
+  f_read(&WavFile, AudioBuffer, AUDIO_BUFFER_SIZE, &bytesread);
+  if (bytesread < AUDIO_BUFFER_SIZE)
+  {
+    memset(&AudioBuffer[bytesread], 0, AUDIO_BUFFER_SIZE - bytesread);
+  }
+  AudioRemainingBytes -= bytesread;
+  printf("Initial buffer filled, bytesread=%u\r\n", bytesread);
+
+  AudioPlaying = 1;
+
+  audio_status = BSP_AUDIO_OUT_Play((uint16_t *)AudioBuffer, AUDIO_BUFFER_SIZE);
+  if (audio_status != AUDIO_OK)
+  {
+    printf("BSP_AUDIO_OUT_Play failed, status=%u\r\n", audio_status);
+    AudioPlaying = 0;
+    f_close(&WavFile);
+    return 0;
+  }
+  printf("Playback started!\r\n");
+
+  return 1;
+}
+
 /* USER CODE END 4 */
 
 /**

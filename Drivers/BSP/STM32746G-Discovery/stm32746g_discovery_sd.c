@@ -70,6 +70,7 @@ EndDependencies */
 
 /* Includes ------------------------------------------------------------------*/
 #include "stm32746g_discovery_sd.h"
+#include <stdio.h>
 
 /** @addtogroup BSP
   * @{
@@ -145,8 +146,10 @@ uint8_t BSP_SD_Init(void)
   
   /* Msp SD Detect pin initialization */
   BSP_SD_Detect_MspInit(&uSdHandle, NULL);
+  printf("BSP_SD_IsDetected = %d (SD_PRESENT=1)\r\n", BSP_SD_IsDetected());
   if(BSP_SD_IsDetected() != SD_PRESENT)   /* Check if SD card is present */
   {
+    printf("SD card NOT detected physically!\r\n");
     return MSD_ERROR_SD_NOT_PRESENT;
   }
   
@@ -154,7 +157,10 @@ uint8_t BSP_SD_Init(void)
   BSP_SD_MspInit(&uSdHandle, NULL);
 
   /* HAL SD initialization */
-  if(HAL_SD_Init(&uSdHandle) != HAL_OK)
+  HAL_StatusTypeDef init_result = HAL_SD_Init(&uSdHandle);
+  printf("HAL_SD_Init raw result = %d (HAL_OK=0)\r\n", init_result);
+  printf("HAL_SD_Init error code = 0x%08lX\r\n", (unsigned long)HAL_SD_GetError(&uSdHandle));
+  if(init_result != HAL_OK)
   {
     sd_state = MSD_ERROR;
   }
@@ -162,10 +168,13 @@ uint8_t BSP_SD_Init(void)
   /* Configure SD Bus width */
   if(sd_state == MSD_OK)
   {
-    /* Enable wide operation */ 
+    /* Try to enable wide (4-bit) operation. Known HAL/BSP bug on this
+       board sometimes fails this step (HAL_SD_ERROR_REQUEST_NOT_APPLICABLE)
+       even though the card itself is fine. Don't treat this as a fatal
+       error — fall back to 1-bit mode, which is still fast enough. */
     if(HAL_SD_ConfigWideBusOperation(&uSdHandle, SDMMC_BUS_WIDE_4B) != HAL_OK)
     {
-      sd_state = MSD_ERROR;
+      sd_state = MSD_OK;
     }
     else
     {

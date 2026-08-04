@@ -87,11 +87,11 @@
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
-						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Core"/>
 						<entry excluding="BSP/Adafruit_Shield/stm32_adafruit_sd.c|BSP/STM32746G-Discovery/stm32746g_discovery_sd.c|BSP/Adafruit_Shield/stm32_adafruit_lcd.c|BSP/STM32746G-Discovery/stm32746g_discovery_lcd.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Drivers"/>
+						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="USB_HOST"/>
+						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Core"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="FATFS"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Middlewares"/>
-						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="USB_HOST"/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
@@ -179,11 +179,11 @@
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
-						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Core"/>
 						<entry excluding="BSP/Adafruit_Shield/stm32_adafruit_sd.c|BSP/STM32746G-Discovery/stm32746g_discovery_sd.c|BSP/Adafruit_Shield/stm32_adafruit_lcd.c|BSP/STM32746G-Discovery/stm32746g_discovery_lcd.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Drivers"/>
+						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="USB_HOST"/>
+						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Core"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="FATFS"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Middlewares"/>
-						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="USB_HOST"/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>

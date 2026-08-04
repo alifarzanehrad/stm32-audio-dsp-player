@@ -33,7 +33,6 @@
 /* USER CODE END FirstSection */
 /* Includes ------------------------------------------------------------------*/
 #include "bsp_driver_sd.h"
-#include <stdio.h>
 
 /* Extern variables ---------------------------------------------------------*/
 
@@ -50,20 +49,21 @@ __weak uint8_t BSP_SD_Init(void)
 {
   uint8_t sd_state = MSD_OK;
   /* Check if the SD card is plugged in the slot */
-  printf("BSP_SD_IsDetected = %d (SD_PRESENT=1)\r\n", BSP_SD_IsDetected());
   if (BSP_SD_IsDetected() != SD_PRESENT)
   {
-    printf("SD card NOT detected physically!\r\n");
     return MSD_ERROR_SD_NOT_PRESENT;
   }
   /* HAL SD initialization */
   sd_state = HAL_SD_Init(&hsd1);
-  printf("HAL_SD_Init raw result = %d (HAL_OK=0)\r\n", sd_state);
-  printf("HAL_SD_Init error code = 0x%08lX\r\n", (unsigned long)HAL_SD_GetError(&hsd1));
-
   /* Configure SD Bus width (4 bits mode selected) */
-  /* NOTE: Skipping wide-bus (4-bit) configuration entirely */
-  printf("Staying in 1-bit bus mode (skipping wide-bus attempt)\r\n");
+  if (sd_state == MSD_OK)
+  {
+    /* Enable wide operation */
+    if (HAL_SD_ConfigWideBusOperation(&hsd1, SDMMC_BUS_WIDE_4B) != HAL_OK)
+    {
+      sd_state = MSD_ERROR;
+    }
+  }
 
   return sd_state;
 }
@@ -100,17 +100,14 @@ __weak uint8_t BSP_SD_ReadBlocks(uint32_t *pData, uint32_t ReadAddr, uint32_t Nu
 {
   uint8_t sd_state = MSD_OK;
 
-  HAL_StatusTypeDef hal_ret = HAL_SD_ReadBlocks(&hsd1, (uint8_t *)pData, ReadAddr, NumOfBlocks, Timeout);
-  printf("BSP_SD_ReadBlocks: hal_ret=%d (0=OK), error=0x%08lX, card_state=%d\r\n",
-         hal_ret, (unsigned long)HAL_SD_GetError(&hsd1), HAL_SD_GetCardState(&hsd1));
-
-  if (hal_ret != HAL_OK)
+  if (HAL_SD_ReadBlocks(&hsd1, (uint8_t *)pData, ReadAddr, NumOfBlocks, Timeout) != HAL_OK)
   {
     sd_state = MSD_ERROR;
   }
 
   return sd_state;
 }
+
 /* USER CODE BEGIN BeforeWriteBlocksSection */
 /* can be used to modify previous code / undefine following code / add code */
 /* USER CODE END BeforeWriteBlocksSection */

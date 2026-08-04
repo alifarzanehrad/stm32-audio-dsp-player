@@ -127,7 +127,7 @@ void MX_GPIO_Init(void)
   /*Configure GPIO pin : uSD_Detect_Pin */
   GPIO_InitStruct.Pin = uSD_Detect_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
   HAL_GPIO_Init(uSD_Detect_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pin : LCD_BL_CTRL_Pin */

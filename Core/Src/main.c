@@ -22,6 +22,7 @@
 #include "adc.h"
 #include "crc.h"
 #include "dcmi.h"
+#include "dma.h"
 #include "dma2d.h"
 #include "eth.h"
 #include "fatfs.h"
@@ -38,15 +39,14 @@
 #include "usb_host.h"
 #include "gpio.h"
 #include "fmc.h"
+
+/* Private includes ----------------------------------------------------------*/
+/* USER CODE BEGIN Includes */
 #include "stm32746g_discovery_audio.h"
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
 #include "ff.h"
-
-/* Private includes ----------------------------------------------------------*/
-/* USER CODE BEGIN Includes */
-
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -142,6 +142,7 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
+  MX_DMA_Init();
   MX_ADC3_Init();
   MX_CRC_Init();
   MX_DCMI_Init();
@@ -167,48 +168,14 @@ int main(void)
   MX_USART6_UART_Init();
   MX_FATFS_Init();
   /* USER CODE BEGIN 2 */
-    HAL_UART_Transmit(&huart1, (uint8_t*)"RAW TEST\r\n", 10, HAL_MAX_DELAY);
 
-    setvbuf(stdout, NULL, _IONBF, 0);
-    printf("Boot OK, entering main setup...\r\n");
-
-    uint8_t sd_init_ret = BSP_SD_Init();
-    printf("BSP_SD_Init returned = %d (MSD_OK=0)\r\n", sd_init_ret);
-
-    if (sd_init_ret != MSD_OK)
-    {
-      printf("Retrying BSP_SD_Init...\r\n");
-      HAL_Delay(200);
-      sd_init_ret = BSP_SD_Init();
-      printf("BSP_SD_Init retry returned = %d\r\n", sd_init_ret);
-    }
-
-    uint8_t card_state = BSP_SD_GetCardState();
-    printf("BSP_SD_GetCardState = %d (SD_TRANSFER_OK=0)\r\n", card_state);
-
-    printf("Mounting SD card...\r\n");
-    FRESULT mount_res = f_mount(&SDFatFs, "", 1);
-    printf("f_mount result code = %d\r\n", mount_res);
-    if(mount_res != FR_OK)
-    {
-        printf("f_mount FAILED!\r\n");
-        Error_Handler();
-    }
-    printf("SD card mounted OK\r\n");
-
-    printf("Calling WavPlayer_Start...\r\n");
-    if (!WavPlayer_Start("one.wav"))
-    {
-      printf("WavPlayer_Start FAILED, entering Error_Handler\r\n");
-      Error_Handler();
-    }
-    /* USER CODE END 2 */
+  /* USER CODE END 2 */
 
   /* Call init function for freertos objects (in cmsis_os2.c) */
-  //MX_FREERTOS_Init();
+  MX_FREERTOS_Init();
 
   /* Start scheduler */
-  //osKernelStart();
+  osKernelStart();
 
   /* We should never get here as control is now taken by the scheduler */
 
@@ -324,6 +291,8 @@ uint8_t WavPlayer_Start(const char *filename)
 {
   FRESULT res;
   UINT bytesread;
+  char chunkId[4];
+  uint32_t chunkSize;
 
   printf("Opening file %s...\r\n", filename);
   res = f_open(&WavFile, filename, FA_READ);
@@ -334,32 +303,93 @@ uint8_t WavPlayer_Start(const char *filename)
   }
   printf("File opened OK\r\n");
 
-  res = f_read(&WavFile, &WavHeader, sizeof(WAV_HeaderTypeDef), &bytesread);
-  if (res != FR_OK || bytesread != sizeof(WAV_HeaderTypeDef))
+  /* Read RIFF header (12 bytes total: "RIFF" + size(4) + "WAVE") */
+  char riff[4], wave[4];
+  uint32_t riffSize;
+  f_read(&WavFile, riff, 4, &bytesread);
+  f_read(&WavFile, &riffSize, 4, &bytesread);
+  f_read(&WavFile, wave, 4, &bytesread);
+
+  if (strncmp(riff, "RIFF", 4) != 0 || strncmp(wave, "WAVE", 4) != 0)
   {
-    printf("Header read failed, res=%d, bytesread=%u\r\n", res, bytesread);
+    printf("Invalid WAV file (bad RIFF/WAVE header)!\r\n");
     f_close(&WavFile);
     return 0;
   }
-  printf("Header read OK, RIFF=%.4s WAVE=%.4s fmt=%.4s dataTag=%.4s\r\n",
-         WavHeader.RIFF, WavHeader.WAVE, WavHeader.fmt, WavHeader.Subchunk2ID);
+  printf("RIFF/WAVE header OK\r\n");
+
+  uint8_t foundFmt = 0, foundData = 0;
+  uint16_t audioFormat = 0, numChannels = 0, bitsPerSample = 0, blockAlign = 0;
+  uint32_t sampleRate = 0, byteRate = 0;
+  uint32_t dataSize = 0;
+
+  /* Walk chunks until we find both "fmt " and "data" */
+  while (!foundData)
+  {
+    res = f_read(&WavFile, chunkId, 4, &bytesread);
+    if (res != FR_OK || bytesread != 4)
+    {
+      printf("Failed to read chunk id (EOF before data chunk found)\r\n");
+      f_close(&WavFile);
+      return 0;
+    }
+
+    res = f_read(&WavFile, &chunkSize, 4, &bytesread);
+    if (res != FR_OK || bytesread != 4)
+    {
+      printf("Failed to read chunk size\r\n");
+      f_close(&WavFile);
+      return 0;
+    }
+
+    printf("Found chunk '%.4s' size=%lu\r\n", chunkId, (unsigned long)chunkSize);
+
+    if (strncmp(chunkId, "fmt ", 4) == 0)
+    {
+      FSIZE_t fmtChunkStart = f_tell(&WavFile);
+
+      f_read(&WavFile, &audioFormat, 2, &bytesread);
+      f_read(&WavFile, &numChannels, 2, &bytesread);
+      f_read(&WavFile, &sampleRate, 4, &bytesread);
+      f_read(&WavFile, &byteRate, 4, &bytesread);
+      f_read(&WavFile, &blockAlign, 2, &bytesread);
+      f_read(&WavFile, &bitsPerSample, 2, &bytesread);
+
+      f_lseek(&WavFile, fmtChunkStart + chunkSize);
+      foundFmt = 1;
+    }
+    else if (strncmp(chunkId, "data", 4) == 0)
+    {
+      dataSize = chunkSize;
+      foundData = 1;
+    }
+    else
+    {
+      FSIZE_t currentPos = f_tell(&WavFile);
+      f_lseek(&WavFile, currentPos + chunkSize);
+    }
+  }
+
+  if (!foundFmt)
+  {
+    printf("No fmt chunk found!\r\n");
+    f_close(&WavFile);
+    return 0;
+  }
+
   printf("AudioFormat=%u NumChannels=%u SampleRate=%lu BitsPerSample=%u DataSize=%lu\r\n",
-         WavHeader.AudioFormat, WavHeader.NumChannels,
-         (unsigned long)WavHeader.SampleRate, WavHeader.BitsPerSample,
-         (unsigned long)WavHeader.Subchunk2Size);
+         audioFormat, numChannels, (unsigned long)sampleRate, bitsPerSample, (unsigned long)dataSize);
 
-  if (strncmp(WavHeader.RIFF, "RIFF", 4) != 0 ||
-      strncmp(WavHeader.WAVE, "WAVE", 4) != 0 ||
-      WavHeader.AudioFormat != 1)
+  if (audioFormat != 1)
   {
-    printf("Invalid WAV file!\r\n");
+    printf("Not PCM format!\r\n");
     f_close(&WavFile);
     return 0;
   }
 
-  AudioRemainingBytes = WavHeader.Subchunk2Size;
+  AudioRemainingBytes = dataSize;
 
-  audio_status = BSP_AUDIO_OUT_Init(OUTPUT_DEVICE_HEADPHONE, 70, WavHeader.SampleRate);
+  audio_status = BSP_AUDIO_OUT_Init(OUTPUT_DEVICE_HEADPHONE, 70, sampleRate);
   if (audio_status != AUDIO_OK)
   {
     printf("BSP_AUDIO_OUT_Init failed, status=%u\r\n", audio_status);

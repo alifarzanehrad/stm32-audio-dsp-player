@@ -92,9 +92,11 @@ typedef struct
 
 FIL WavFile;
 WAV_HeaderTypeDef WavHeader;
-static uint8_t AudioBuffer[AUDIO_BUFFER_SIZE];
+uint8_t AudioBuffer[AUDIO_BUFFER_SIZE];
 volatile uint32_t AudioRemainingBytes = 0;
 volatile uint8_t  AudioPlaying = 0;
+volatile uint8_t  HalfBufferNeedsFill = 0;
+volatile uint8_t  FullBufferNeedsFill = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -103,6 +105,7 @@ void PeriphCommonClock_Config(void);
 void MX_FREERTOS_Init(void);
 /* USER CODE BEGIN PFP */
 uint8_t WavPlayer_Start(const char *filename);
+void WavPlayer_FillHalf(uint8_t *half);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -287,6 +290,44 @@ int _write(int file, char *ptr, int len)
   HAL_UART_Transmit(&huart1, (uint8_t *)ptr, len, HAL_MAX_DELAY);
   return len;
 }
+
+void WavPlayer_FillHalf(uint8_t *half)
+{
+  UINT bytesread = 0;
+
+  if (!AudioPlaying)
+    return;
+
+  if (AudioRemainingBytes > 0)
+  {
+    UINT toRead = (AudioRemainingBytes < AUDIO_HALF_BUFFER) ? AudioRemainingBytes : AUDIO_HALF_BUFFER;
+    f_read(&WavFile, half, toRead, &bytesread);
+    AudioRemainingBytes -= bytesread;
+
+    if (bytesread < AUDIO_HALF_BUFFER)
+    {
+      memset(&half[bytesread], 0, AUDIO_HALF_BUFFER - bytesread);
+    }
+  }
+  else
+  {
+    memset(half, 0, AUDIO_HALF_BUFFER);
+    AudioPlaying = 0;
+    f_close(&WavFile);
+    printf("Playback finished!\r\n");
+  }
+}
+
+void BSP_AUDIO_OUT_HalfTransfer_CallBack(void)
+{
+  HalfBufferNeedsFill = 1;
+}
+
+void BSP_AUDIO_OUT_TransferComplete_CallBack(void)
+{
+  FullBufferNeedsFill = 1;
+}
+
 uint8_t WavPlayer_Start(const char *filename)
 {
   FRESULT res;

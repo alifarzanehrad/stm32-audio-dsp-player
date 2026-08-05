@@ -29,8 +29,13 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 extern uint8_t WavPlayer_Start(const char *filename);
+extern void WavPlayer_FillHalf(uint8_t *half);
 extern FATFS SDFatFs;
 extern SD_HandleTypeDef hsd1;
+extern volatile uint8_t HalfBufferNeedsFill;
+extern volatile uint8_t FullBufferNeedsFill;
+extern uint8_t AudioBuffer[];
+#define AUDIO_HALF_BUFFER 4096
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -174,6 +179,16 @@ void StartDefaultTask(void const * argument)
   /* Infinite loop */
   for(;;)
   {
+    if (HalfBufferNeedsFill)
+    {
+      HalfBufferNeedsFill = 0;
+      WavPlayer_FillHalf(&AudioBuffer[0]);
+    }
+    if (FullBufferNeedsFill)
+    {
+      FullBufferNeedsFill = 0;
+      WavPlayer_FillHalf(&AudioBuffer[AUDIO_HALF_BUFFER]);
+    }
     osDelay(1);
   }
   /* USER CODE END StartDefaultTask */

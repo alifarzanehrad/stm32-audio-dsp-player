@@ -430,7 +430,8 @@ uint8_t WavPlayer_Start(const char *filename)
 
   AudioRemainingBytes = dataSize;
 
-  audio_status = BSP_AUDIO_OUT_Init(OUTPUT_DEVICE_HEADPHONE, 70, sampleRate);
+  printf("Calling BSP_AUDIO_OUT_Init with sampleRate=%lu\r\n", (unsigned long)sampleRate);
+  audio_status = BSP_AUDIO_OUT_Init(OUTPUT_DEVICE_HEADPHONE, 70, 44100);  /* هاردکد موقت برای تست */
   if (audio_status != AUDIO_OK)
   {
     printf("BSP_AUDIO_OUT_Init failed, status=%u\r\n", audio_status);

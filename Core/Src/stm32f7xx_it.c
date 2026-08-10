@@ -60,7 +60,6 @@ extern DMA2D_HandleTypeDef hdma2d;
 extern LTDC_HandleTypeDef hltdc;
 extern DMA_HandleTypeDef hdma_sdmmc1_rx;
 extern DMA_HandleTypeDef hdma_sdmmc1_tx;
-extern SAI_HandleTypeDef haudio_out_sai;
 extern SD_HandleTypeDef hsd1;
 extern TIM_HandleTypeDef htim6;
 
@@ -206,10 +205,6 @@ void DMA2_Stream3_IRQHandler(void)
   /* USER CODE BEGIN DMA2_Stream3_IRQn 1 */
 
   /* USER CODE END DMA2_Stream3_IRQn 1 */
-}
-void DMA2_Stream4_IRQHandler(void)
-{
-  HAL_DMA_IRQHandler(haudio_out_sai.hdmatx);
 }
 
 /**

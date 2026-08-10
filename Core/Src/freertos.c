@@ -22,12 +22,12 @@
 #include "task.h"
 #include "main.h"
 #include "cmsis_os.h"
-#include "fatfs.h"
-#include <stdio.h>
-#include "sdmmc.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include "fatfs.h"
+#include <stdio.h>
+#include "sdmmc.h"
 extern uint8_t WavPlayer_Start(const char *filename);
 extern void WavPlayer_FillHalf(uint8_t *half);
 extern FATFS SDFatFs;
@@ -58,6 +58,7 @@ extern uint8_t AudioBuffer[];
 
 /* USER CODE END Variables */
 osThreadId defaultTaskHandle;
+osThreadId TouchGFXTaskHandle;
 
 /* Private function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN FunctionPrototypes */
@@ -65,6 +66,7 @@ osThreadId defaultTaskHandle;
 /* USER CODE END FunctionPrototypes */
 
 void StartDefaultTask(void const * argument);
+extern void TouchGFX_Task(void const * argument);
 
 extern void MX_USB_HOST_Init(void);
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
@@ -134,6 +136,10 @@ void MX_FREERTOS_Init(void) {
   osThreadDef(defaultTask, StartDefaultTask, osPriorityNormal, 0, 4096);
   defaultTaskHandle = osThreadCreate(osThread(defaultTask), NULL);
 
+  /* definition and creation of TouchGFXTask */
+  osThreadDef(TouchGFXTask, TouchGFX_Task, osPriorityNormal, 0, 4096);
+  TouchGFXTaskHandle = osThreadCreate(osThread(TouchGFXTask), NULL);
+
   /* USER CODE BEGIN RTOS_THREADS */
   /* USER CODE END RTOS_THREADS */
 
@@ -198,3 +204,4 @@ void StartDefaultTask(void const * argument)
 /* USER CODE BEGIN Application */
 
 /* USER CODE END Application */
+

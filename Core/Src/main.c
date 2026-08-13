@@ -155,17 +155,32 @@ int main(void)
   MX_ETH_Init();
   MX_FMC_Init();
   SDRAM_Initialization_Sequence(&hsdram1);
+  MX_I2C1_Init();
+  MX_I2C3_Init();
+  MX_LTDC_Init();
+  HAL_GPIO_WritePin(GPIOI, GPIO_PIN_12, GPIO_PIN_SET); // LCD_DISP
+  HAL_GPIO_WritePin(GPIOK, GPIO_PIN_3, GPIO_PIN_SET);  // Backlight
+
   volatile uint16_t *fb = (uint16_t *)0xC0000000;
 
   for (uint32_t i = 0; i < 480 * 272; i++)
   {
-      fb[i] = 0xF800;
+      fb[i] = 0xF800; // RED
   }
 
+  /* خیلی مهم برای Cortex-M7 D-Cache */
+  SCB_CleanDCache_by_Addr((uint32_t *)0xC0000000, 480 * 272 * 2);
+  __DSB();
+  __ISB();
+
   HAL_LTDC_SetAddress(&hltdc, 0xC0000000, LTDC_LAYER_1);
-  MX_I2C1_Init();
-  MX_I2C3_Init();
-  MX_LTDC_Init();
+  HAL_LTDC_Reload(&hltdc, LTDC_RELOAD_IMMEDIATE);
+
+  /* نگذار TouchGFX framebuffer را دوباره عوض کند */
+  while (1)
+  {
+      __NOP();
+  }
   MX_QUADSPI_Init();
   MX_RTC_Init();
   MX_SAI2_Init();

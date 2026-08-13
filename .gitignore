@@ -26,3 +26,6 @@ build/
 # فایل‌های سیستم‌عامل
 .DS_Store
 Thumbs.db
+# STM32CubeIDE local settings
+.settings/
+*.launch

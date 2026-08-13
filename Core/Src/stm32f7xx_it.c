@@ -64,7 +64,7 @@ extern SD_HandleTypeDef hsd1;
 extern TIM_HandleTypeDef htim6;
 
 /* USER CODE BEGIN EV */
-
+extern SAI_HandleTypeDef haudio_out_sai;
 /* USER CODE END EV */
 
 /******************************************************************************/
@@ -264,5 +264,8 @@ void DMA2D_IRQHandler(void)
 }
 
 /* USER CODE BEGIN 1 */
-
+void DMA2_Stream4_IRQHandler(void)
+{
+    HAL_DMA_IRQHandler(haudio_out_sai.hdmatx);
+}
 /* USER CODE END 1 */

@@ -69,30 +69,10 @@
 
 /* USER CODE BEGIN PV */
 FATFS SDFatFs;
-uint8_t audio_status;
-/* ساختار هدر WAV استاندارد (44 بایت) */
-typedef struct
-{
-  char     RIFF[4];        // "RIFF"
-  uint32_t ChunkSize;
-  char     WAVE[4];        // "WAVE"
-  char     fmt[4];         // "fmt "
-  uint32_t Subchunk1Size;
-  uint16_t AudioFormat;    // 1 = PCM
-  uint16_t NumChannels;    // 1=mono, 2=stereo
-  uint32_t SampleRate;
-  uint32_t ByteRate;
-  uint16_t BlockAlign;
-  uint16_t BitsPerSample;
-  char     Subchunk2ID[4]; // "data"
-  uint32_t Subchunk2Size;  // اندازه دیتای صوتی به بایت
-} WAV_HeaderTypeDef;
 
-#define AUDIO_BUFFER_SIZE   8192   // کل بافر (به بایت)
+#define AUDIO_BUFFER_SIZE   8192
 #define AUDIO_HALF_BUFFER   (AUDIO_BUFFER_SIZE / 2)
-
 FIL WavFile;
-WAV_HeaderTypeDef WavHeader;
 uint8_t AudioBuffer[AUDIO_BUFFER_SIZE];
 volatile uint32_t AudioRemainingBytes = 0;
 volatile uint8_t  AudioPlaying = 0;
@@ -415,6 +395,7 @@ uint8_t WavPlayer_Start(const char *filename)
 {
   FRESULT res;
   UINT bytesread;
+  uint8_t audio_status;
   char chunkId[4];
   uint32_t chunkSize;
 
@@ -514,13 +495,14 @@ uint8_t WavPlayer_Start(const char *filename)
   AudioRemainingBytes = dataSize;
 
   printf("Calling BSP_AUDIO_OUT_Init with sampleRate=%lu\r\n", (unsigned long)sampleRate);
-  audio_status = BSP_AUDIO_OUT_Init(OUTPUT_DEVICE_HEADPHONE, 70, 44100);  /* هاردکد موقت برای تست */
+  audio_status = BSP_AUDIO_OUT_Init(OUTPUT_DEVICE_HEADPHONE, 70, sampleRate);
   if (audio_status != AUDIO_OK)
   {
     printf("BSP_AUDIO_OUT_Init failed, status=%u\r\n", audio_status);
     f_close(&WavFile);
     return 0;
   }
+  BSP_AUDIO_OUT_SetAudioFrameSlot(CODEC_AUDIOFRAME_SLOT_02);
   printf("Audio codec init OK\r\n");
 
   f_read(&WavFile, AudioBuffer, AUDIO_BUFFER_SIZE, &bytesread);

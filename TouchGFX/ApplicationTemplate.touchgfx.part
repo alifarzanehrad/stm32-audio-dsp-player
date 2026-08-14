@@ -1,7 +1,7 @@
 
 {
   "Application": {
-    "Name": "afshar",
+    "Name": "STM32_Audio_DSP_Player",
     "TouchGfxPath": "../Middlewares/ST/touchgfx",
     "AvailableColorDepths": [ 16 ],
     "AvailableLCDs":
@@ -19,7 +19,7 @@
     "SubFamily": "STM32F7x6",
     "Platform": "m7",
     "Toolchain": "STM32CubeIDE",
-    "ProjectFile": "../afshar.ioc",
+    "ProjectFile": "../STM32_Audio_DSP_Player.ioc",
     "OptionalComponentsRoot": "../Middlewares/ST/touchgfx_components",
     "OptionalComponents": [
     ],

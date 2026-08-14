@@ -6,6 +6,6 @@
 
 static unsigned short SIM_WIDTH = 480;
 static unsigned short SIM_HEIGHT = 272;
-#define SIM_TITLE "afshar"
+#define SIM_TITLE "STM32_Audio_DSP_Player"
 
 #endif // SIMCONSTANTS_HPP

@@ -21,3 +21,18 @@ void Screen1Presenter::play()
 {
     model->play();
 }
+
+void Screen1Presenter::pause()
+{
+    model->pause();
+}
+
+void Screen1Presenter::next()
+{
+    model->next();
+}
+
+void Screen1Presenter::previous()
+{
+    model->previous();
+}

@@ -381,6 +381,23 @@ void WavPlayer_FillHalf(uint8_t *half)
   }
 }
 
+void WavPlayer_Stop(void)
+{
+    if (AudioPlaying)
+    {
+        BSP_AUDIO_OUT_Stop(CODEC_PDWN_SW);
+
+        AudioPlaying = 0;
+
+        HalfBufferNeedsFill = 0;
+        FullBufferNeedsFill = 0;
+
+        f_close(&WavFile);
+
+        printf("Playback stopped\r\n");
+    }
+}
+
 void BSP_AUDIO_OUT_HalfTransfer_CallBack(void)
 {
   HalfBufferNeedsFill = 1;

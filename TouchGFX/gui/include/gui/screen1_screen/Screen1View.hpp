@@ -17,8 +17,14 @@ public:
 protected:
 
     touchgfx::Callback<Screen1View, const touchgfx::AbstractButton&> playButtonCallback;
+    touchgfx::Callback<Screen1View, const touchgfx::AbstractButton&> pauseButtonCallback;
+    touchgfx::Callback<Screen1View, const touchgfx::AbstractButton&> nextButtonCallback;
+    touchgfx::Callback<Screen1View, const touchgfx::AbstractButton&> previousButtonCallback;
 
     void playButtonClicked(const touchgfx::AbstractButton& source);
+    void pauseButtonClicked(const touchgfx::AbstractButton& source);
+    void nextButtonClicked(const touchgfx::AbstractButton& source);
+    void previousButtonClicked(const touchgfx::AbstractButton& source);
 };
 
 #endif

@@ -25,11 +25,13 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include "stm32746g_discovery_audio.h"
 #include "fatfs.h"
 #include <stdio.h>
 #include "sdmmc.h"
 extern uint8_t WavPlayer_Start(const char *filename);
 extern void WavPlayer_FillHalf(uint8_t *half);
+extern void WavPlayer_Stop(void);
 
 extern FATFS SDFatFs;
 extern SD_HandleTypeDef hsd1;
@@ -61,7 +63,31 @@ extern uint8_t AudioBuffer[];
 /* Private variables ---------------------------------------------------------*/
 /* USER CODE BEGIN Variables */
 
+typedef enum
+{
+    PLAYER_STOPPED = 0,
+    PLAYER_PLAYING,
+    PLAYER_PAUSED
+} PlayerState_t;
+
+volatile PlayerState_t PlayerState = PLAYER_STOPPED;
+
 volatile uint8_t AudioPlayRequested = 0;
+volatile uint8_t AudioPauseRequested = 0;
+
+const char *playlist[] =
+{
+    "one.wav",
+    "two.wav",
+    "three.wav"
+};
+
+#define TRACK_COUNT (sizeof(playlist) / sizeof(playlist[0]))
+
+volatile int currentTrack = 0;
+
+volatile uint8_t AudioNextRequested = 0;
+volatile uint8_t AudioPreviousRequested = 0;
 
 /* USER CODE END Variables */
 osThreadId defaultTaskHandle;
@@ -192,20 +218,90 @@ void StartDefaultTask(void const * argument)
   /* Infinite loop */
   for(;;)
   {
-      if (AudioPlayRequested)
-      {
-          AudioPlayRequested = 0;
+	  if (AudioPlayRequested)
+	  {
+	      AudioPlayRequested = 0;
 
-          if (!AudioPlaying)
-          {
-              printf("PLAY requested from TouchGFX\r\n");
+	      if (PlayerState == PLAYER_STOPPED)
+	      {
+	    	  printf("PLAY requested\r\n");
+	    	  printf("Track: %s\r\n", playlist[currentTrack]);
 
-              if (!WavPlayer_Start("one.wav"))
-              {
-                  printf("WavPlayer_Start FAILED\r\n");
-              }
-          }
-      }
+	          if (WavPlayer_Start(playlist[currentTrack]))
+	          {
+	              PlayerState = PLAYER_PLAYING;
+
+	              printf("Player state = PLAYING\r\n");
+	          }
+	          else
+	          {
+	              printf("WavPlayer_Start FAILED\r\n");
+	          }
+	      }
+	  }
+	  if (AudioPauseRequested)
+	  {
+	      AudioPauseRequested = 0;
+
+	      if (PlayerState == PLAYER_PLAYING)
+	      {
+	          BSP_AUDIO_OUT_Pause();
+
+	          PlayerState = PLAYER_PAUSED;
+
+	          printf("Player state = PAUSED\r\n");
+	      }
+	      else if (PlayerState == PLAYER_PAUSED)
+	      {
+	          BSP_AUDIO_OUT_Resume();
+
+	          PlayerState = PLAYER_PLAYING;
+
+	          printf("Player state = PLAYING\r\n");
+	      }
+	  }
+
+	  if (AudioNextRequested)
+	  {
+	      AudioNextRequested = 0;
+
+	      WavPlayer_Stop();
+
+	      currentTrack++;
+
+	      if (currentTrack >= TRACK_COUNT)
+	      {
+	          currentTrack = 0;
+	      }
+
+	      printf("NEXT -> %s\r\n", playlist[currentTrack]);
+
+	      if (WavPlayer_Start(playlist[currentTrack]))
+	      {
+	          PlayerState = PLAYER_PLAYING;
+	      }
+	  }
+
+	  if (AudioPreviousRequested)
+	  {
+	      AudioPreviousRequested = 0;
+
+	      WavPlayer_Stop();
+
+	      currentTrack--;
+
+	      if (currentTrack < 0)
+	      {
+	          currentTrack = TRACK_COUNT - 1;
+	      }
+
+	      printf("PREVIOUS -> %s\r\n", playlist[currentTrack]);
+
+	      if (WavPlayer_Start(playlist[currentTrack]))
+	      {
+	          PlayerState = PLAYER_PLAYING;
+	      }
+	  }
 
       if (HalfBufferNeedsFill)
       {
@@ -230,6 +326,21 @@ void StartDefaultTask(void const * argument)
 void AudioPlayer_RequestPlay(void)
 {
     AudioPlayRequested = 1;
+}
+
+void AudioPlayer_RequestPause(void)
+{
+    AudioPauseRequested = 1;
+}
+
+void AudioPlayer_RequestNext(void)
+{
+    AudioNextRequested = 1;
+}
+
+void AudioPlayer_RequestPrevious(void)
+{
+    AudioPreviousRequested = 1;
 }
 
 /* USER CODE END Application */

@@ -16,6 +16,9 @@ public:
     void tick();
 
     void play();
+    void pause();
+    void next();
+    void previous();
 
 protected:
     ModelListener* modelListener;

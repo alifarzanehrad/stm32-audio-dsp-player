@@ -14,6 +14,9 @@ public:
     }
 
     void tick();
+
+    void play();
+
 protected:
     ModelListener* modelListener;
 };

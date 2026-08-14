@@ -3,15 +3,22 @@
 
 #include <gui_generated/screen1_screen/Screen1ViewBase.hpp>
 #include <gui/screen1_screen/Screen1Presenter.hpp>
+#include <touchgfx/Callback.hpp>
 
 class Screen1View : public Screen1ViewBase
 {
 public:
     Screen1View();
     virtual ~Screen1View() {}
+
     virtual void setupScreen();
     virtual void tearDownScreen();
+
 protected:
+
+    touchgfx::Callback<Screen1View, const touchgfx::AbstractButton&> playButtonCallback;
+
+    void playButtonClicked(const touchgfx::AbstractButton& source);
 };
 
-#endif // SCREEN1VIEW_HPP
+#endif

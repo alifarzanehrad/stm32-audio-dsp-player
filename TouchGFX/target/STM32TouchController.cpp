@@ -24,26 +24,30 @@
 
 #include <STM32TouchController.hpp>
 
+extern "C"
+{
+#include "stm32746g_discovery_ts.h"
+}
+
 void STM32TouchController::init()
 {
-    /**
-     * Initialize touch controller and driver
-     *
-     */
+    BSP_TS_Init(480, 272);
 }
 
 bool STM32TouchController::sampleTouch(int32_t& x, int32_t& y)
 {
-    /**
-     * By default sampleTouch returns false,
-     * return true if a touch has been detected, otherwise false.
-     *
-     * Coordinates are passed to the caller by reference by x and y.
-     *
-     * This function is called by the TouchGFX framework.
-     * By default sampleTouch is called every tick, this can be adjusted by HAL::setTouchSampleRate(int8_t);
-     *
-     */
+    TS_StateTypeDef TS_State;
+
+    BSP_TS_GetState(&TS_State);
+
+    if (TS_State.touchDetected > 0)
+    {
+        x = TS_State.touchX[0];
+        y = TS_State.touchY[0];
+
+        return true;
+    }
+
     return false;
 }
 

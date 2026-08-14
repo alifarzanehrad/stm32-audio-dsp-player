@@ -30,11 +30,16 @@
 #include "sdmmc.h"
 extern uint8_t WavPlayer_Start(const char *filename);
 extern void WavPlayer_FillHalf(uint8_t *half);
+
 extern FATFS SDFatFs;
 extern SD_HandleTypeDef hsd1;
+
+extern volatile uint8_t AudioPlaying;
 extern volatile uint8_t HalfBufferNeedsFill;
 extern volatile uint8_t FullBufferNeedsFill;
+
 extern uint8_t AudioBuffer[];
+
 #define AUDIO_HALF_BUFFER 4096
 /* USER CODE END Includes */
 
@@ -55,6 +60,8 @@ extern uint8_t AudioBuffer[];
 
 /* Private variables ---------------------------------------------------------*/
 /* USER CODE BEGIN Variables */
+
+volatile uint8_t AudioPlayRequested = 0;
 
 /* USER CODE END Variables */
 osThreadId defaultTaskHandle;
@@ -176,32 +183,54 @@ void StartDefaultTask(void const * argument)
     }
   printf("SD card mounted OK\r\n");
 
-  if (!WavPlayer_Start("one.wav"))
-  {
-    printf("WavPlayer_Start FAILED\r\n");
-    Error_Handler();
-  }
+//  if (!WavPlayer_Start("one.wav"))
+//  {
+//    printf("WavPlayer_Start FAILED\r\n");
+//    Error_Handler();
+//  }
 
   /* Infinite loop */
   for(;;)
   {
-    if (HalfBufferNeedsFill)
-    {
-      HalfBufferNeedsFill = 0;
-      WavPlayer_FillHalf(&AudioBuffer[0]);
-    }
-    if (FullBufferNeedsFill)
-    {
-      FullBufferNeedsFill = 0;
-      WavPlayer_FillHalf(&AudioBuffer[AUDIO_HALF_BUFFER]);
-    }
-    osDelay(1);
+      if (AudioPlayRequested)
+      {
+          AudioPlayRequested = 0;
+
+          if (!AudioPlaying)
+          {
+              printf("PLAY requested from TouchGFX\r\n");
+
+              if (!WavPlayer_Start("one.wav"))
+              {
+                  printf("WavPlayer_Start FAILED\r\n");
+              }
+          }
+      }
+
+      if (HalfBufferNeedsFill)
+      {
+          HalfBufferNeedsFill = 0;
+          WavPlayer_FillHalf(&AudioBuffer[0]);
+      }
+
+      if (FullBufferNeedsFill)
+      {
+          FullBufferNeedsFill = 0;
+          WavPlayer_FillHalf(&AudioBuffer[AUDIO_HALF_BUFFER]);
+      }
+
+      osDelay(1);
   }
   /* USER CODE END StartDefaultTask */
 }
 
 /* Private application code --------------------------------------------------*/
 /* USER CODE BEGIN Application */
+
+void AudioPlayer_RequestPlay(void)
+{
+    AudioPlayRequested = 1;
+}
 
 /* USER CODE END Application */
 

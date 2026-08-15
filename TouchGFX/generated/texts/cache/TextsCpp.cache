@@ -1,1 +1,1 @@
-{"remap":"yes","languages":["Gb"],"characters":[80,114,101,118,105,111,117,115,0,78,101,120,116,0,80,108,97,121,0,83,116,111,112,0],"copy_translations_to_ram":"no","generate_binary_translations":"no"}
+{"remap":"yes","languages":["Gb"],"characters":[80,108,97,121,32,47,32,80,97,117,115,101,0,80,114,101,118,105,111,117,115,0,111,110,101,46,119,97,118,10,0,78,101,120,116,0,43,0,45,0],"copy_translations_to_ram":"no","generate_binary_translations":"no"}

@@ -6,17 +6,23 @@
   <Texts>
     <TextGroup Id="Group1" />
     <TextGroup Id="Unsorted">
+      <Text Id="__SingleUse_AWN3" Alignment="Center" TypographyId="Default">
+        <Translation Language="GB">+</Translation>
+      </Text>
+      <Text Id="__SingleUse_20I2" Alignment="Center" TypographyId="Default">
+        <Translation Language="GB">-</Translation>
+      </Text>
+      <Text Id="__SingleUse_4DIF" Alignment="Center" TypographyId="Default">
+        <Translation Language="GB">one.wav&#10;</Translation>
+      </Text>
       <Text Id="__SingleUse_NYEE" Alignment="Center" TypographyId="Default">
-        <Translation Language="GB">Stop</Translation>
+        <Translation Language="GB">Play / Pause</Translation>
       </Text>
       <Text Id="__SingleUse_YANH" Alignment="Center" TypographyId="Default">
         <Translation Language="GB">Next</Translation>
       </Text>
       <Text Id="__SingleUse_V7EU" Alignment="Center" TypographyId="Default">
         <Translation Language="GB">Previous</Translation>
-      </Text>
-      <Text Id="__SingleUse_OIHI" Alignment="Center" TypographyId="Default">
-        <Translation Language="GB">Play</Translation>
       </Text>
     </TextGroup>
   </Texts>

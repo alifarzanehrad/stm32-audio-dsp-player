@@ -8,8 +8,9 @@
 #include <mvp/View.hpp>
 #include <gui/screen1_screen/Screen1Presenter.hpp>
 #include <touchgfx/widgets/Box.hpp>
-#include <touchgfx/widgets/Image.hpp>
 #include <touchgfx/widgets/ButtonWithLabel.hpp>
+#include <touchgfx/widgets/TextArea.hpp>
+#include <touchgfx/widgets/BoxWithBorder.hpp>
 
 class Screen1ViewBase : public touchgfx::View<Screen1Presenter>
 {
@@ -27,11 +28,14 @@ protected:
      * Member Declarations
      */
     touchgfx::Box __background;
-    touchgfx::Image background_image;
-    touchgfx::ButtonWithLabel Play_button;
+    touchgfx::Box box1;
     touchgfx::ButtonWithLabel Previous_button;
     touchgfx::ButtonWithLabel Next_button;
     touchgfx::ButtonWithLabel Stop_button;
+    touchgfx::TextArea textArea1;
+    touchgfx::BoxWithBorder FFT_Background;
+    touchgfx::ButtonWithLabel VolumeDown_button;
+    touchgfx::ButtonWithLabel VolumeUp_button;
 
 private:
 

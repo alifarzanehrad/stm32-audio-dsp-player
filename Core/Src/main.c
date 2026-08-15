@@ -48,6 +48,7 @@
 #include <string.h>
 #include <math.h>
 #include "ff.h"
+#include "arm_math.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -79,6 +80,14 @@ volatile uint8_t  AudioPlaying = 0;
 volatile uint8_t  HalfBufferNeedsFill = 0;
 volatile uint8_t  FullBufferNeedsFill = 0;
 volatile uint8_t AudioTrackFinished = 0;
+
+#define FFT_SIZE 1024
+
+float32_t fftInput[FFT_SIZE];
+float32_t fftOutput[FFT_SIZE];
+float32_t fftMagnitude[FFT_SIZE / 2];
+
+arm_rfft_fast_instance_f32 fftInstance;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -89,6 +98,7 @@ void MX_FREERTOS_Init(void);
 static void SDRAM_Initialization_Sequence(SDRAM_HandleTypeDef *hsdram);
 uint8_t WavPlayer_Start(const char *filename);
 void WavPlayer_FillHalf(uint8_t *half);
+void AudioFFT_Process(uint8_t *audioData);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -167,7 +177,11 @@ int main(void)
   /* Call PreOsInit function */
   MX_TouchGFX_PreOSInit();
   /* USER CODE BEGIN 2 */
-
+  if (arm_rfft_fast_init_f32(&fftInstance, FFT_SIZE) != ARM_MATH_SUCCESS)
+  {
+      printf("FFT init failed\r\n");
+      Error_Handler();
+  }
   /* USER CODE END 2 */
 
   /* Call init function for freertos objects (in cmsis_os2.c) */
@@ -551,6 +565,82 @@ uint8_t WavPlayer_Start(const char *filename)
   printf("Playback started!\r\n");
 
   return 1;
+}
+
+void AudioFFT_Process(uint8_t *audioData)
+{
+    int16_t *samples = (int16_t *)audioData;
+
+    for (uint32_t i = 0; i < FFT_SIZE; i++)
+    {
+        int32_t left  = samples[2 * i];
+        int32_t right = samples[2 * i + 1];
+
+        fftInput[i] = ((float32_t)left + (float32_t)right) * 0.5f;
+    }
+
+    float32_t mean = 0.0f;
+
+    for (uint32_t i = 0; i < FFT_SIZE; i++)
+    {
+        mean += fftInput[i];
+    }
+
+    mean /= FFT_SIZE;
+
+    for (uint32_t i = 0; i < FFT_SIZE; i++)
+    {
+        fftInput[i] -= mean;
+    }
+
+    for (uint32_t i = 0; i < FFT_SIZE; i++)
+    {
+    	float32_t window =
+    	    0.5f *
+    	    (1.0f -
+    	     cosf(
+    	         (2.0f * PI * i) /
+    	         (FFT_SIZE - 1)
+    	     ));
+
+        fftInput[i] *= window;
+    }
+
+    arm_rfft_fast_f32(
+        &fftInstance,
+        fftInput,
+        fftOutput,
+        0
+    );
+
+    fftMagnitude[0] = fabsf(fftOutput[0])/ FFT_SIZE;
+
+    for (uint32_t k = 1; k < FFT_SIZE / 2; k++)
+    {
+        float32_t real = fftOutput[2 * k];
+        float32_t imag = fftOutput[2 * k + 1];
+
+        fftMagnitude[k] =
+            sqrtf(real * real + imag * imag)/ FFT_SIZE;
+    }
+
+    uint32_t maxBin = 1;
+    float32_t maxMagnitude = fftMagnitude[1];
+
+    for (uint32_t k = 2; k < FFT_SIZE / 2; k++)
+    {
+        if (fftMagnitude[k] > maxMagnitude)
+        {
+            maxMagnitude = fftMagnitude[k];
+            maxBin = k;
+        }
+    }
+
+    printf(
+        "FFT Peak: bin=%lu magnitude=%.2f\r\n",
+        (unsigned long)maxBin,
+        maxMagnitude
+    );
 }
 
 /* USER CODE END 4 */

@@ -78,6 +78,7 @@ volatile uint32_t AudioRemainingBytes = 0;
 volatile uint8_t  AudioPlaying = 0;
 volatile uint8_t  HalfBufferNeedsFill = 0;
 volatile uint8_t  FullBufferNeedsFill = 0;
+volatile uint8_t AudioTrackFinished = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -374,10 +375,17 @@ void WavPlayer_FillHalf(uint8_t *half)
   }
   else
   {
-    memset(half, 0, AUDIO_HALF_BUFFER);
-    AudioPlaying = 0;
-    f_close(&WavFile);
-    printf("Playback finished!\r\n");
+      memset(half, 0, AUDIO_HALF_BUFFER);
+
+      AudioPlaying = 0;
+      HalfBufferNeedsFill = 0;
+      FullBufferNeedsFill = 0;
+
+      f_close(&WavFile);
+
+      AudioTrackFinished = 1;
+
+      printf("Playback finished!\r\n");
   }
 }
 

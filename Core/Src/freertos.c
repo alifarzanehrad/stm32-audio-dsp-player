@@ -29,17 +29,17 @@
 #include "fatfs.h"
 #include <stdio.h>
 #include "sdmmc.h"
+
+
 extern uint8_t WavPlayer_Start(const char *filename);
 extern void WavPlayer_FillHalf(uint8_t *half);
 extern void WavPlayer_Stop(void);
-
 extern FATFS SDFatFs;
 extern SD_HandleTypeDef hsd1;
-
 extern volatile uint8_t AudioPlaying;
 extern volatile uint8_t HalfBufferNeedsFill;
 extern volatile uint8_t FullBufferNeedsFill;
-
+extern volatile uint8_t AudioTrackFinished;
 extern uint8_t AudioBuffer[];
 
 #define AUDIO_HALF_BUFFER 4096
@@ -72,8 +72,7 @@ typedef enum
 
 volatile PlayerState_t PlayerState = PLAYER_STOPPED;
 
-volatile uint8_t AudioPlayRequested = 0;
-volatile uint8_t AudioPauseRequested = 0;
+volatile uint8_t AudioPlayPauseRequested = 0;
 
 const char *playlist[] =
 {
@@ -218,14 +217,14 @@ void StartDefaultTask(void const * argument)
   /* Infinite loop */
   for(;;)
   {
-	  if (AudioPlayRequested)
+	  if (AudioPlayPauseRequested)
 	  {
-	      AudioPlayRequested = 0;
+	      AudioPlayPauseRequested = 0;
 
 	      if (PlayerState == PLAYER_STOPPED)
 	      {
-	    	  printf("PLAY requested\r\n");
-	    	  printf("Track: %s\r\n", playlist[currentTrack]);
+	          printf("PLAY requested\r\n");
+	          printf("Track: %s\r\n", playlist[currentTrack]);
 
 	          if (WavPlayer_Start(playlist[currentTrack]))
 	          {
@@ -238,12 +237,7 @@ void StartDefaultTask(void const * argument)
 	              printf("WavPlayer_Start FAILED\r\n");
 	          }
 	      }
-	  }
-	  if (AudioPauseRequested)
-	  {
-	      AudioPauseRequested = 0;
-
-	      if (PlayerState == PLAYER_PLAYING)
+	      else if (PlayerState == PLAYER_PLAYING)
 	      {
 	          BSP_AUDIO_OUT_Pause();
 
@@ -258,6 +252,31 @@ void StartDefaultTask(void const * argument)
 	          PlayerState = PLAYER_PLAYING;
 
 	          printf("Player state = PLAYING\r\n");
+	      }
+	  }
+
+	  if (AudioTrackFinished)
+	  {
+	      AudioTrackFinished = 0;
+
+	      PlayerState = PLAYER_STOPPED;
+
+	      currentTrack++;
+
+	      if (currentTrack >= TRACK_COUNT)
+	      {
+	          currentTrack = 0;
+	      }
+
+	      printf("AUTO NEXT -> %s\r\n", playlist[currentTrack]);
+
+	      if (WavPlayer_Start(playlist[currentTrack]))
+	      {
+	          PlayerState = PLAYER_PLAYING;
+	      }
+	      else
+	      {
+	          printf("Auto next playback failed\r\n");
 	      }
 	  }
 
@@ -325,12 +344,12 @@ void StartDefaultTask(void const * argument)
 
 void AudioPlayer_RequestPlay(void)
 {
-    AudioPlayRequested = 1;
+    AudioPlayPauseRequested = 1;
 }
 
 void AudioPlayer_RequestPause(void)
 {
-    AudioPauseRequested = 1;
+    AudioPlayPauseRequested = 1;
 }
 
 void AudioPlayer_RequestNext(void)

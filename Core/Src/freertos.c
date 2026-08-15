@@ -29,7 +29,8 @@
 #include "fatfs.h"
 #include <stdio.h>
 #include "sdmmc.h"
-
+#include "arm_math.h"
+#include <math.h>
 
 extern uint8_t WavPlayer_Start(const char *filename);
 extern void WavPlayer_FillHalf(uint8_t *half);
@@ -43,6 +44,8 @@ extern volatile uint8_t AudioTrackFinished;
 extern uint8_t AudioBuffer[];
 
 #define AUDIO_HALF_BUFFER 4096
+#define FFT_SIZE      1024
+#define SAMPLE_RATE   48000.0f
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -88,13 +91,19 @@ volatile int currentTrack = 0;
 volatile uint8_t AudioNextRequested = 0;
 volatile uint8_t AudioPreviousRequested = 0;
 
+arm_rfft_fast_instance_f32 FFT_Instance;
+
+float FFT_Input[FFT_SIZE];
+float FFT_Output[FFT_SIZE];
+float FFT_Magnitude[FFT_SIZE / 2];
+
 /* USER CODE END Variables */
 osThreadId defaultTaskHandle;
 osThreadId TouchGFXTaskHandle;
 
 /* Private function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN FunctionPrototypes */
-
+void FFT_Test(void);
 /* USER CODE END FunctionPrototypes */
 
 void StartDefaultTask(void const * argument);
@@ -207,6 +216,7 @@ void StartDefaultTask(void const * argument)
       Error_Handler();
     }
   printf("SD card mounted OK\r\n");
+  FFT_Test();
 
 //  if (!WavPlayer_Start("one.wav"))
 //  {
@@ -362,5 +372,84 @@ void AudioPlayer_RequestPrevious(void)
     AudioPreviousRequested = 1;
 }
 
+void FFT_Test(void)
+{
+    arm_status status;
+
+    status = arm_rfft_fast_init_1024_f32(&FFT_Instance);
+
+    if (status != ARM_MATH_SUCCESS)
+    {
+        printf("FFT init failed\r\n");
+        return;
+    }
+
+    const float testFrequency = 1000.0f;
+
+    for (uint32_t n = 0; n < FFT_SIZE; n++)
+    {
+    	float sample =
+    	    sinf(
+    	        2.0f *
+    	        PI *
+    	        testFrequency *
+    	        (float)n /
+    	        SAMPLE_RATE
+    	    );
+
+    	float window =
+    	    0.5f *
+    	    (1.0f -
+    	     cosf(
+    	         2.0f *
+    	         PI *
+    	         (float)n /
+    	         (float)(FFT_SIZE - 1)
+    	     ));
+
+    	FFT_Input[n] = sample * window;
+    }
+
+    arm_rfft_fast_f32(
+        &FFT_Instance,
+        FFT_Input,
+        FFT_Output,
+        0   // 0 for fft and 1 for ifft
+    );
+
+    float maxMagnitude = 0.0f;
+    uint32_t maxBin = 0;
+
+    for (uint32_t k = 1; k < FFT_SIZE / 2; k++)
+    {
+        float real = FFT_Output[2 * k];
+        float imag = FFT_Output[2 * k + 1];
+
+        float magnitude =
+            sqrtf(real * real + imag * imag);
+
+        FFT_Magnitude[k] = magnitude;
+
+        if (magnitude > maxMagnitude)
+        {
+            maxMagnitude = magnitude;
+            maxBin = k;
+        }
+    }
+    for (uint32_t k = 18; k <= 24; k++)
+    {
+        printf("Bin %lu: %.3f\r\n",
+               (unsigned long)k,
+               FFT_Magnitude[k]);
+    }
+
+    float peakFrequency =
+        ((float)maxBin * SAMPLE_RATE) /
+        (float)FFT_SIZE;
+
+    printf("FFT TEST\r\n");
+    printf("Peak bin = %lu\r\n", (unsigned long)maxBin);
+    printf("Peak frequency = %.3f Hz\r\n", peakFrequency);
+}
 /* USER CODE END Application */
 

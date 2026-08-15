@@ -92,6 +92,11 @@ volatile int currentTrack = 0;
 volatile uint8_t AudioNextRequested = 0;
 volatile uint8_t AudioPreviousRequested = 0;
 
+volatile uint8_t AudioVolumeUpRequested = 0;
+volatile uint8_t AudioVolumeDownRequested = 0;
+
+volatile uint8_t AudioVolume = 70;
+
 arm_rfft_fast_instance_f32 FFT_Instance;
 
 float FFT_Input[FFT_SIZE];
@@ -333,6 +338,42 @@ void StartDefaultTask(void const * argument)
 	      }
 	  }
 
+	  if (AudioVolumeUpRequested)
+	  {
+	      AudioVolumeUpRequested = 0;
+
+	      if (AudioVolume <= 95)
+	      {
+	          AudioVolume += 5;
+	      }
+	      else
+	      {
+	          AudioVolume = 100;
+	      }
+
+	      BSP_AUDIO_OUT_SetVolume(AudioVolume);
+
+	      printf("Volume = %u\r\n", AudioVolume);
+	  }
+
+	  if (AudioVolumeDownRequested)
+	  {
+	      AudioVolumeDownRequested = 0;
+
+	      if (AudioVolume >= 5)
+	      {
+	          AudioVolume -= 5;
+	      }
+	      else
+	      {
+	          AudioVolume = 0;
+	      }
+
+	      BSP_AUDIO_OUT_SetVolume(AudioVolume);
+
+	      printf("Volume = %u\r\n", AudioVolume);
+	  }
+
 	  if (HalfBufferNeedsFill)
 	  {
 	      HalfBufferNeedsFill = 0;
@@ -365,12 +406,7 @@ void StartDefaultTask(void const * argument)
 /* Private application code --------------------------------------------------*/
 /* USER CODE BEGIN Application */
 
-void AudioPlayer_RequestPlay(void)
-{
-    AudioPlayPauseRequested = 1;
-}
-
-void AudioPlayer_RequestPause(void)
+void AudioPlayer_RequestPlayPause(void)
 {
     AudioPlayPauseRequested = 1;
 }
@@ -383,6 +419,16 @@ void AudioPlayer_RequestNext(void)
 void AudioPlayer_RequestPrevious(void)
 {
     AudioPreviousRequested = 1;
+}
+
+void AudioPlayer_RequestVolumeUp(void)
+{
+    AudioVolumeUpRequested = 1;
+}
+
+void AudioPlayer_RequestVolumeDown(void)
+{
+    AudioVolumeDownRequested = 1;
 }
 
 void FFT_Test(void)

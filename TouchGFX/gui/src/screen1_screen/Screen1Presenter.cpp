@@ -17,14 +17,9 @@ void Screen1Presenter::deactivate()
 
 }
 
-void Screen1Presenter::play()
+void Screen1Presenter::playPause()
 {
-    model->play();
-}
-
-void Screen1Presenter::pause()
-{
-    model->pause();
+    model->playPause();
 }
 
 void Screen1Presenter::next()
@@ -36,3 +31,14 @@ void Screen1Presenter::previous()
 {
     model->previous();
 }
+
+void Screen1Presenter::volumeUp()
+{
+    model->volumeUp();
+}
+
+void Screen1Presenter::volumeDown()
+{
+    model->volumeDown();
+}
+

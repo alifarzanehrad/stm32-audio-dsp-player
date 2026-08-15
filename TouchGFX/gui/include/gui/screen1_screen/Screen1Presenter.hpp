@@ -25,10 +25,12 @@ public:
      */
     virtual void deactivate();
 
-    void play();
-    void pause();
+    void playPause();
     void next();
     void previous();
+
+    void volumeUp();
+    void volumeDown();
 
     virtual ~Screen1Presenter() {}
 

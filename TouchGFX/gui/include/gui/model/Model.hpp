@@ -15,10 +15,12 @@ public:
 
     void tick();
 
-    void play();
-    void pause();
+    void playPause();
     void next();
     void previous();
+
+    void volumeUp();
+    void volumeDown();
 
 protected:
     ModelListener* modelListener;

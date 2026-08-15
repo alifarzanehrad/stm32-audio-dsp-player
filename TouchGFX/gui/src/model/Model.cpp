@@ -1,10 +1,11 @@
 #include <gui/model/Model.hpp>
 #include <gui/model/ModelListener.hpp>
 
-extern "C" void AudioPlayer_RequestPlay(void);
-extern "C" void AudioPlayer_RequestPause(void);
+extern "C" void AudioPlayer_RequestPlayPause(void);
 extern "C" void AudioPlayer_RequestNext(void);
 extern "C" void AudioPlayer_RequestPrevious(void);
+extern "C" void AudioPlayer_RequestVolumeUp(void);
+extern "C" void AudioPlayer_RequestVolumeDown(void);
 
 Model::Model() : modelListener(0)
 {
@@ -16,14 +17,9 @@ void Model::tick()
 
 }
 
-void Model::play()
+void Model::playPause()
 {
-    AudioPlayer_RequestPlay();
-}
-
-void Model::pause()
-{
-    AudioPlayer_RequestPause();
+    AudioPlayer_RequestPlayPause();
 }
 
 void Model::next()
@@ -34,4 +30,14 @@ void Model::next()
 void Model::previous()
 {
     AudioPlayer_RequestPrevious();
+}
+
+void Model::volumeUp()
+{
+    AudioPlayer_RequestVolumeUp();
+}
+
+void Model::volumeDown()
+{
+    AudioPlayer_RequestVolumeDown();
 }

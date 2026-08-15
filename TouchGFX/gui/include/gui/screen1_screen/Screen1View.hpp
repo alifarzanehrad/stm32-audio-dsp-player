@@ -16,15 +16,17 @@ public:
 
 protected:
 
-    touchgfx::Callback<Screen1View, const touchgfx::AbstractButton&> playButtonCallback;
-    touchgfx::Callback<Screen1View, const touchgfx::AbstractButton&> pauseButtonCallback;
+    touchgfx::Callback<Screen1View, const touchgfx::AbstractButton&> playPauseButtonCallback;
     touchgfx::Callback<Screen1View, const touchgfx::AbstractButton&> nextButtonCallback;
     touchgfx::Callback<Screen1View, const touchgfx::AbstractButton&> previousButtonCallback;
+    touchgfx::Callback<Screen1View, const touchgfx::AbstractButton&> volumeUpButtonCallback;
+    touchgfx::Callback<Screen1View, const touchgfx::AbstractButton&> volumeDownButtonCallback;
 
-    void playButtonClicked(const touchgfx::AbstractButton& source);
-    void pauseButtonClicked(const touchgfx::AbstractButton& source);
+    void playPauseButtonClicked(const touchgfx::AbstractButton& source);
     void nextButtonClicked(const touchgfx::AbstractButton& source);
     void previousButtonClicked(const touchgfx::AbstractButton& source);
+    void volumeUpButtonClicked(const touchgfx::AbstractButton& source);
+    void volumeDownButtonClicked(const touchgfx::AbstractButton& source);
 };
 
 #endif

@@ -4,6 +4,7 @@
 #include <gui_generated/screen1_screen/Screen1ViewBase.hpp>
 #include <gui/screen1_screen/Screen1Presenter.hpp>
 #include <touchgfx/Callback.hpp>
+#include <touchgfx/widgets/Box.hpp>
 
 class Screen1View : public Screen1ViewBase
 {
@@ -13,6 +14,7 @@ public:
 
     virtual void setupScreen();
     virtual void tearDownScreen();
+    virtual void handleTickEvent();
 
 protected:
 
@@ -27,6 +29,12 @@ protected:
     void previousButtonClicked(const touchgfx::AbstractButton& source);
     void volumeUpButtonClicked(const touchgfx::AbstractButton& source);
     void volumeDownButtonClicked(const touchgfx::AbstractButton& source);
+
+    static const uint8_t FFT_BAR_COUNT = 16;
+
+    touchgfx::Box fftBars[FFT_BAR_COUNT];
+
+    uint16_t fftTickCounter;
 };
 
 #endif

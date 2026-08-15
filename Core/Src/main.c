@@ -82,7 +82,10 @@ volatile uint8_t  FullBufferNeedsFill = 0;
 volatile uint8_t AudioTrackFinished = 0;
 
 #define FFT_SIZE 1024
+#define FFT_BANDS 16
 
+float32_t fftBands[FFT_BANDS];
+float32_t fftBandsSmoothed[FFT_BANDS];
 float32_t fftInput[FFT_SIZE];
 float32_t fftOutput[FFT_SIZE];
 float32_t fftMagnitude[FFT_SIZE / 2];
@@ -635,12 +638,75 @@ void AudioFFT_Process(uint8_t *audioData)
             maxBin = k;
         }
     }
+    static const uint16_t bandEdges[FFT_BANDS + 1] =
+    {
+        1,
+        2,
+        3,
+        4,
+        6,
+        9,
+        13,
+        19,
+        28,
+        41,
+        60,
+        88,
+        129,
+        189,
+        277,
+        405,
+        511
+    };
 
-    printf(
-        "FFT Peak: bin=%lu magnitude=%.2f\r\n",
-        (unsigned long)maxBin,
-        maxMagnitude
-    );
+    for (uint32_t band = 0; band < FFT_BANDS; band++)
+    {
+        float32_t sum = 0.0f;
+
+        uint32_t startBin = bandEdges[band];
+        uint32_t endBin   = bandEdges[band + 1];
+
+        for (uint32_t k = startBin; k < endBin; k++)
+        {
+            sum += fftMagnitude[k];
+        }
+
+        uint32_t count = endBin - startBin;
+
+        if (count > 0)
+        {
+            fftBands[band] = sum / (float32_t)count;
+        }
+        else
+        {
+            fftBands[band] = 0.0f;
+        }
+    }
+    float32_t maxBand = 1.0f;
+
+    for (uint32_t band = 0; band < FFT_BANDS; band++)
+    {
+        if (fftBands[band] > maxBand)
+        {
+            maxBand = fftBands[band];
+        }
+    }
+
+    for (uint32_t band = 0; band < FFT_BANDS; band++)
+    {
+        float32_t normalized =
+            (fftBands[band] / maxBand) * 100.0f;
+
+        if (normalized > 100.0f)
+        {
+            normalized = 100.0f;
+        }
+
+        fftBandsSmoothed[band] =
+            0.7f * fftBandsSmoothed[band] +
+            0.3f * normalized;
+    }
+
 }
 
 /* USER CODE END 4 */

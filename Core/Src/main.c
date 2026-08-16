@@ -89,6 +89,7 @@ float32_t fftBandsSmoothed[FFT_BANDS];
 float32_t fftInput[FFT_SIZE];
 float32_t fftOutput[FFT_SIZE];
 float32_t fftMagnitude[FFT_SIZE / 2];
+float32_t hannWindow[FFT_SIZE];
 
 arm_rfft_fast_instance_f32 fftInstance;
 /* USER CODE END PV */
@@ -184,6 +185,13 @@ int main(void)
   {
       printf("FFT init failed\r\n");
       Error_Handler();
+  }
+  for (uint32_t i = 0; i < FFT_SIZE; i++)
+  {
+      hannWindow[i] =
+          0.5f *
+          (1.0f -
+           cosf((2.0f * PI * i) / (FFT_SIZE - 1)));
   }
   /* USER CODE END 2 */
 
@@ -598,15 +606,7 @@ void AudioFFT_Process(uint8_t *audioData)
 
     for (uint32_t i = 0; i < FFT_SIZE; i++)
     {
-    	float32_t window =
-    	    0.5f *
-    	    (1.0f -
-    	     cosf(
-    	         (2.0f * PI * i) /
-    	         (FFT_SIZE - 1)
-    	     ));
-
-        fftInput[i] *= window;
+        fftInput[i] *= hannWindow[i];
     }
 
     arm_rfft_fast_f32(

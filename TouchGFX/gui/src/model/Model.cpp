@@ -9,7 +9,10 @@ extern "C" void AudioPlayer_RequestVolumeDown(void);
 
 Model::Model() : modelListener(0)
 {
-
+    for (uint8_t band = 0; band < EQ_BAND_COUNT; band++)
+    {
+        eqSliderValues[band] = 12;
+    }
 }
 
 void Model::tick()
@@ -40,4 +43,33 @@ void Model::volumeUp()
 void Model::volumeDown()
 {
     AudioPlayer_RequestVolumeDown();
+}
+
+void Model::setEQSliderValue(uint8_t band, int value)
+{
+    if (band >= EQ_BAND_COUNT)
+    {
+        return;
+    }
+
+    if (value < 0)
+    {
+        value = 0;
+    }
+    else if (value > 24)
+    {
+        value = 24;
+    }
+
+    eqSliderValues[band] = value;
+}
+
+int Model::getEQSliderValue(uint8_t band) const
+{
+    if (band >= EQ_BAND_COUNT)
+    {
+        return 12;
+    }
+
+    return eqSliderValues[band];
 }

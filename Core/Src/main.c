@@ -85,6 +85,9 @@ volatile uint8_t EQEnabled = 0;
 #define FFT_SIZE 1024
 #define FFT_BANDS 16
 #define EQ_BLOCK_SIZE 1024
+#define EQ_BAND_COUNT 5
+#define BIQUAD_COEFFS_PER_STAGE 5
+#define BIQUAD_STATE_PER_STAGE 4
 
 float32_t fftBands[FFT_BANDS];
 float32_t fftBandsSmoothed[FFT_BANDS];
@@ -92,11 +95,31 @@ float32_t fftInput[FFT_SIZE];
 float32_t fftOutput[FFT_SIZE];
 float32_t fftMagnitude[FFT_SIZE / 2];
 float32_t hannWindow[FFT_SIZE];
-float32_t eqCoeffs[5];       //baraye zarib haye filter IIR b0 b1 b2 a0 a1
-float32_t eqStateLeft[4];    // hafeze filter : x[n-1] , ...
-float32_t eqStateRight[4];   // hafeze filter : x[n-1] , ...
-float32_t eqLeftBuffer[EQ_BLOCK_SIZE];  // seda to ram stereo hast va inja seda left ro darim
-float32_t eqRightBuffer[EQ_BLOCK_SIZE];  // inja seda right ro
+
+static const float32_t eqBandFrequencies[EQ_BAND_COUNT] =
+{
+    100.0f,
+    300.0f,
+    1000.0f,
+    3000.0f,
+    8000.0f
+};
+
+/* Keep the 1 kHz cut from the single-band test; set it to 0 dB for a flat EQ. */
+float32_t eqBandGainsDB[EQ_BAND_COUNT] =
+{
+    0.0f,
+    0.0f,
+    -18.0f,
+    0.0f,
+    0.0f
+};
+
+float32_t eqCoeffs[EQ_BAND_COUNT * BIQUAD_COEFFS_PER_STAGE];
+float32_t eqStateLeft[EQ_BAND_COUNT * BIQUAD_STATE_PER_STAGE];
+float32_t eqStateRight[EQ_BAND_COUNT * BIQUAD_STATE_PER_STAGE];
+float32_t eqLeftBuffer[EQ_BLOCK_SIZE];
+float32_t eqRightBuffer[EQ_BLOCK_SIZE];
 
 arm_rfft_fast_instance_f32 fftInstance;
 arm_biquad_casd_df1_inst_f32 eqLeft;
@@ -601,62 +624,45 @@ uint8_t WavPlayer_Start(const char *filename)
 
 void AudioEQ_Init(float32_t sampleRate)
 {
-    const float32_t frequency = 1000.0f;
-    const float32_t gainDB = -18.0f;
-    const float32_t Q = 1.0f;  // q = filter width. Bigger q = wider filter. Smaller q = narrower filter.
+    const float32_t Q = 1.0f;
 
-    float32_t A =
-        powf(10.0f, gainDB / 40.0f);
+    for (uint32_t band = 0; band < EQ_BAND_COUNT; band++)
+    {
+        float32_t frequency = eqBandFrequencies[band];
+        float32_t gainDB = eqBandGainsDB[band];
+        float32_t A = powf(10.0f, gainDB / 40.0f);
+        float32_t omega = 2.0f * PI * frequency / sampleRate;
+        float32_t alpha = sinf(omega) / (2.0f * Q);
+        float32_t cosOmega = cosf(omega);
 
-    float32_t omega =
-        2.0f * PI * frequency / sampleRate;
+        float32_t b0 = 1.0f + alpha * A;
+        float32_t b1 = -2.0f * cosOmega;
+        float32_t b2 = 1.0f - alpha * A;
+        float32_t a0 = 1.0f + alpha / A;
+        float32_t a1 = -2.0f * cosOmega;
+        float32_t a2 = 1.0f - alpha / A;
 
-    float32_t alpha =
-        sinf(omega) / (2.0f * Q);
+        uint32_t coeffIndex = band * BIQUAD_COEFFS_PER_STAGE;
 
-    float32_t cosOmega =
-        cosf(omega);
+        eqCoeffs[coeffIndex] = b0 / a0;
+        eqCoeffs[coeffIndex + 1] = b1 / a0;
+        eqCoeffs[coeffIndex + 2] = b2 / a0;
 
-    float32_t b0 =
-        1.0f + alpha * A;
-
-    float32_t b1 =
-        -2.0f * cosOmega;
-
-    float32_t b2 =
-        1.0f - alpha * A;
-
-    float32_t a0 =
-        1.0f + alpha / A;
-
-    float32_t a1 =
-        -2.0f * cosOmega;
-
-    float32_t a2 =
-        1.0f - alpha / A;
-
-    b0 /= a0;
-    b1 /= a0;
-    b2 /= a0;
-    a1 /= a0;
-    a2 /= a0;
-
-    eqCoeffs[0] = b0;
-    eqCoeffs[1] = b1;
-    eqCoeffs[2] = b2;
-    eqCoeffs[3] = -a1;
-    eqCoeffs[4] = -a2;
+        /* CMSIS-DSP DF1 expects the feedback coefficients with inverted signs. */
+        eqCoeffs[coeffIndex + 3] = -(a1 / a0);
+        eqCoeffs[coeffIndex + 4] = -(a2 / a0);
+    }
 
     arm_biquad_cascade_df1_init_f32(
         &eqLeft,
-        1,
+        EQ_BAND_COUNT,
         eqCoeffs,
         eqStateLeft
     );
 
     arm_biquad_cascade_df1_init_f32(
         &eqRight,
-        1,
+        EQ_BAND_COUNT,
         eqCoeffs,
         eqStateRight
     );

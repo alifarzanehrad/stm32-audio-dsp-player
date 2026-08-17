@@ -3,6 +3,7 @@
 
 #include <gui/model/ModelListener.hpp>
 #include <mvp/Presenter.hpp>
+#include <stdint.h>
 
 using namespace touchgfx;
 
@@ -24,6 +25,9 @@ public:
      * (ie. made inactive). Teardown functionality can be placed here.
      */
     virtual void deactivate();
+
+    void setEQSliderValue(uint8_t band, int value);
+    int getEQSliderValue(uint8_t band) const;
 
     virtual ~EqualizerScreenPresenter() {}
 

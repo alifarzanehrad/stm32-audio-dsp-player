@@ -43,6 +43,7 @@ extern volatile uint8_t FullBufferNeedsFill;
 extern volatile uint8_t AudioTrackFinished;
 extern uint8_t AudioBuffer[];
 extern void AudioFFT_Process(uint8_t *audioData);
+extern void AudioEQ_Process(uint8_t *audioData);
 
 #define AUDIO_HALF_BUFFER 4096
 #define FFT_SIZE      1024
@@ -382,6 +383,8 @@ void StartDefaultTask(void const * argument)
 
 	      if (AudioPlaying)
 	      {
+	          AudioEQ_Process(&AudioBuffer[0]);
+
 	          AudioFFT_Process(&AudioBuffer[0]);
 	      }
 	  }
@@ -390,11 +393,19 @@ void StartDefaultTask(void const * argument)
 	  {
 	      FullBufferNeedsFill = 0;
 
-	      WavPlayer_FillHalf(&AudioBuffer[AUDIO_HALF_BUFFER]);
+	      WavPlayer_FillHalf(
+	          &AudioBuffer[AUDIO_HALF_BUFFER]
+	      );
 
 	      if (AudioPlaying)
 	      {
-	          AudioFFT_Process(&AudioBuffer[AUDIO_HALF_BUFFER]);
+	          AudioEQ_Process(
+	              &AudioBuffer[AUDIO_HALF_BUFFER]
+	          );
+
+	          AudioFFT_Process(
+	              &AudioBuffer[AUDIO_HALF_BUFFER]
+	          );
 	      }
 	  }
 

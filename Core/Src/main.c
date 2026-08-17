@@ -80,9 +80,11 @@ volatile uint8_t  AudioPlaying = 0;
 volatile uint8_t  HalfBufferNeedsFill = 0;
 volatile uint8_t  FullBufferNeedsFill = 0;
 volatile uint8_t AudioTrackFinished = 0;
+volatile uint8_t EQEnabled = 0;
 
 #define FFT_SIZE 1024
 #define FFT_BANDS 16
+#define EQ_BLOCK_SIZE 1024
 
 float32_t fftBands[FFT_BANDS];
 float32_t fftBandsSmoothed[FFT_BANDS];
@@ -90,8 +92,15 @@ float32_t fftInput[FFT_SIZE];
 float32_t fftOutput[FFT_SIZE];
 float32_t fftMagnitude[FFT_SIZE / 2];
 float32_t hannWindow[FFT_SIZE];
+float32_t eqCoeffs[5];       //baraye zarib haye filter IIR b0 b1 b2 a0 a1
+float32_t eqStateLeft[4];    // hafeze filter : x[n-1] , ...
+float32_t eqStateRight[4];   // hafeze filter : x[n-1] , ...
+float32_t eqLeftBuffer[EQ_BLOCK_SIZE];  // seda to ram stereo hast va inja seda left ro darim
+float32_t eqRightBuffer[EQ_BLOCK_SIZE];  // inja seda right ro
 
 arm_rfft_fast_instance_f32 fftInstance;
+arm_biquad_casd_df1_inst_f32 eqLeft;
+arm_biquad_casd_df1_inst_f32 eqRight;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -100,9 +109,14 @@ void PeriphCommonClock_Config(void);
 void MX_FREERTOS_Init(void);
 /* USER CODE BEGIN PFP */
 static void SDRAM_Initialization_Sequence(SDRAM_HandleTypeDef *hsdram);
+
 uint8_t WavPlayer_Start(const char *filename);
 void WavPlayer_FillHalf(uint8_t *half);
+
 void AudioFFT_Process(uint8_t *audioData);
+
+void AudioEQ_Init(float32_t sampleRate);
+void AudioEQ_Process(uint8_t *audioData);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -543,7 +557,7 @@ uint8_t WavPlayer_Start(const char *filename)
   }
 
   AudioRemainingBytes = dataSize;
-
+  AudioEQ_Init((float32_t)sampleRate);
   printf("Calling BSP_AUDIO_OUT_Init with sampleRate=%lu\r\n", (unsigned long)sampleRate);
   audio_status = BSP_AUDIO_OUT_Init(OUTPUT_DEVICE_HEADPHONE, 70, sampleRate);
   if (audio_status != AUDIO_OK)
@@ -561,6 +575,13 @@ uint8_t WavPlayer_Start(const char *filename)
     memset(&AudioBuffer[bytesread], 0, AUDIO_BUFFER_SIZE - bytesread);
   }
   AudioRemainingBytes -= bytesread;
+
+  AudioEQ_Process(&AudioBuffer[0]);
+
+  AudioEQ_Process(
+      &AudioBuffer[AUDIO_HALF_BUFFER]
+  );
+
   printf("Initial buffer filled, bytesread=%u\r\n", bytesread);
 
   AudioPlaying = 1;
@@ -576,6 +597,127 @@ uint8_t WavPlayer_Start(const char *filename)
   printf("Playback started!\r\n");
 
   return 1;
+}
+
+void AudioEQ_Init(float32_t sampleRate)
+{
+    const float32_t frequency = 1000.0f;
+    const float32_t gainDB = -18.0f;
+    const float32_t Q = 1.0f;  // q = filter width. Bigger q = wider filter. Smaller q = narrower filter.
+
+    float32_t A =
+        powf(10.0f, gainDB / 40.0f);
+
+    float32_t omega =
+        2.0f * PI * frequency / sampleRate;
+
+    float32_t alpha =
+        sinf(omega) / (2.0f * Q);
+
+    float32_t cosOmega =
+        cosf(omega);
+
+    float32_t b0 =
+        1.0f + alpha * A;
+
+    float32_t b1 =
+        -2.0f * cosOmega;
+
+    float32_t b2 =
+        1.0f - alpha * A;
+
+    float32_t a0 =
+        1.0f + alpha / A;
+
+    float32_t a1 =
+        -2.0f * cosOmega;
+
+    float32_t a2 =
+        1.0f - alpha / A;
+
+    b0 /= a0;
+    b1 /= a0;
+    b2 /= a0;
+    a1 /= a0;
+    a2 /= a0;
+
+    eqCoeffs[0] = b0;
+    eqCoeffs[1] = b1;
+    eqCoeffs[2] = b2;
+    eqCoeffs[3] = -a1;
+    eqCoeffs[4] = -a2;
+
+    arm_biquad_cascade_df1_init_f32(
+        &eqLeft,
+        1,
+        eqCoeffs,
+        eqStateLeft
+    );
+
+    arm_biquad_cascade_df1_init_f32(
+        &eqRight,
+        1,
+        eqCoeffs,
+        eqStateRight
+    );
+}
+
+void AudioEQ_Process(uint8_t *audioData)
+{
+    if (!EQEnabled)
+    {
+        return;
+    }
+
+    int16_t *samples =
+        (int16_t *)audioData;
+
+    for (uint32_t i = 0; i < EQ_BLOCK_SIZE; i++)
+    {
+        eqLeftBuffer[i] =
+            (float32_t)samples[2 * i];
+
+        eqRightBuffer[i] =
+            (float32_t)samples[2 * i + 1];
+    }
+
+    arm_biquad_cascade_df1_f32(
+        &eqLeft,
+        eqLeftBuffer,
+        eqLeftBuffer,
+        EQ_BLOCK_SIZE
+    );
+
+    arm_biquad_cascade_df1_f32(
+        &eqRight,
+        eqRightBuffer,
+        eqRightBuffer,
+        EQ_BLOCK_SIZE
+    );
+
+    for (uint32_t i = 0; i < EQ_BLOCK_SIZE; i++)
+    {
+        float32_t left = eqLeftBuffer[i];
+        float32_t right = eqRightBuffer[i];
+
+        if (left > 32767.0f)
+            left = 32767.0f;
+
+        if (left < -32768.0f)
+            left = -32768.0f;
+
+        if (right > 32767.0f)
+            right = 32767.0f;
+
+        if (right < -32768.0f)
+            right = -32768.0f;
+
+        samples[2 * i] =
+            (int16_t)left;
+
+        samples[2 * i + 1] =
+            (int16_t)right;
+    }
 }
 
 void AudioFFT_Process(uint8_t *audioData)

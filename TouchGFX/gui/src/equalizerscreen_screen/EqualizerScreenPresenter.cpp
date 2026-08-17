@@ -16,3 +16,13 @@ void EqualizerScreenPresenter::deactivate()
 {
 
 }
+
+void EqualizerScreenPresenter::setEQSliderValue(uint8_t band, int value)
+{
+    model->setEQSliderValue(band, value);
+}
+
+int EqualizerScreenPresenter::getEQSliderValue(uint8_t band) const
+{
+    return model->getEQSliderValue(band);
+}

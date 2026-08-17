@@ -120,4 +120,10 @@ void EqualizerScreenView::flatButtonClicked()
     Slider_1kHz.setValue(12);
     Slider_3kHz.setValue(12);
     Slider_8kHz.setValue(12);
+
+    slider100HzChanged(12);
+    slider300HzChanged(12);
+    slider1kHzChanged(12);
+    slider3kHzChanged(12);
+    slider8kHzChanged(12);
 }

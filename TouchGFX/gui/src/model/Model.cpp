@@ -6,6 +6,7 @@ extern "C" void AudioPlayer_RequestNext(void);
 extern "C" void AudioPlayer_RequestPrevious(void);
 extern "C" void AudioPlayer_RequestVolumeUp(void);
 extern "C" void AudioPlayer_RequestVolumeDown(void);
+extern "C" void AudioEQ_SetBandGain(uint8_t band, float gainDB);
 
 Model::Model() : modelListener(0)
 {
@@ -62,6 +63,7 @@ void Model::setEQSliderValue(uint8_t band, int value)
     }
 
     eqSliderValues[band] = value;
+    AudioEQ_SetBandGain(band, (float)value - 12.0f);
 }
 
 int Model::getEQSliderValue(uint8_t band) const

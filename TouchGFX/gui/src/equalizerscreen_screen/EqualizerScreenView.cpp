@@ -9,6 +9,12 @@ void EqualizerScreenView::setupScreen()
 {
     EqualizerScreenViewBase::setupScreen();
 
+    Slider_100Hz.setValue(presenter->getEQSliderValue(Model::EQ_BAND_100HZ));
+    Slider_300Hz.setValue(presenter->getEQSliderValue(Model::EQ_BAND_300HZ));
+    Slider_1kHz.setValue(presenter->getEQSliderValue(Model::EQ_BAND_1KHZ));
+    Slider_3kHz.setValue(presenter->getEQSliderValue(Model::EQ_BAND_3KHZ));
+    Slider_8kHz.setValue(presenter->getEQSliderValue(Model::EQ_BAND_8KHZ));
+
     slider100HzChanged(Slider_100Hz.getValue());
     slider300HzChanged(Slider_300Hz.getValue());
     slider1kHzChanged(Slider_1kHz.getValue());
@@ -60,6 +66,7 @@ void EqualizerScreenView::slider100HzChanged(int value)
         GAINVALUE_100HZ_SIZE,
         value
     );
+    presenter->setEQSliderValue(Model::EQ_BAND_100HZ, value);
 }
 
 void EqualizerScreenView::slider300HzChanged(int value)
@@ -70,6 +77,7 @@ void EqualizerScreenView::slider300HzChanged(int value)
         GAINVALUE_300HZ_SIZE,
         value
     );
+    presenter->setEQSliderValue(Model::EQ_BAND_300HZ, value);
 }
 
 void EqualizerScreenView::slider1kHzChanged(int value)
@@ -80,6 +88,7 @@ void EqualizerScreenView::slider1kHzChanged(int value)
         GAINVALUE_1KHZ_SIZE,
         value
     );
+    presenter->setEQSliderValue(Model::EQ_BAND_1KHZ, value);
 }
 
 void EqualizerScreenView::slider3kHzChanged(int value)
@@ -90,6 +99,7 @@ void EqualizerScreenView::slider3kHzChanged(int value)
         GAINVALUE_3KHZ_SIZE,
         value
     );
+    presenter->setEQSliderValue(Model::EQ_BAND_3KHZ, value);
 }
 
 void EqualizerScreenView::slider8kHzChanged(int value)
@@ -100,6 +110,7 @@ void EqualizerScreenView::slider8kHzChanged(int value)
         GAINVALUE_8KHZ_SIZE,
         value
     );
+    presenter->setEQSliderValue(Model::EQ_BAND_8KHZ, value);
 }
 
 void EqualizerScreenView::flatButtonClicked()

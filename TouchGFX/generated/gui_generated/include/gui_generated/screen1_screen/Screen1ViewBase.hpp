@@ -19,6 +19,15 @@ public:
     virtual ~Screen1ViewBase();
     virtual void setupScreen();
 
+    /*
+     * Custom Actions
+     */
+    virtual void action1()
+    {
+        // Override and implement this function in Screen1
+    }
+    
+
 protected:
     FrontendApplication& application() {
         return *static_cast<FrontendApplication*>(touchgfx::Application::getInstance());
@@ -36,8 +45,19 @@ protected:
     touchgfx::BoxWithBorder FFT_Background;
     touchgfx::ButtonWithLabel VolumeDown_button;
     touchgfx::ButtonWithLabel VolumeUp_button;
+    touchgfx::ButtonWithLabel Equalizer_button;
 
 private:
+
+    /*
+     * Callback Declarations
+     */
+    touchgfx::Callback<Screen1ViewBase, const touchgfx::AbstractButton&> buttonCallback;
+
+    /*
+     * Callback Handler Declarations
+     */
+    void buttonCallbackHandler(const touchgfx::AbstractButton& src);
 
 };
 

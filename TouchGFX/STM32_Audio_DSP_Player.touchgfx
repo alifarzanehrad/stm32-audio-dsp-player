@@ -118,8 +118,8 @@
           {
             "Type": "ButtonWithLabel",
             "Name": "VolumeDown_button",
-            "X": 62,
-            "Y": 169,
+            "X": 115,
+            "Y": 151,
             "Width": 36,
             "Height": 36,
             "Pressed": "__generated\\alternate_theme_images_widgets_button_icon_round_micro_fill_action.png",
@@ -140,8 +140,8 @@
           {
             "Type": "ButtonWithLabel",
             "Name": "VolumeUp_button",
-            "X": 380,
-            "Y": 169,
+            "X": 330,
+            "Y": 154,
             "Width": 36,
             "Height": 36,
             "Pressed": "__generated\\alternate_theme_images_widgets_button_icon_round_micro_fill_action.png",
@@ -158,9 +158,471 @@
               "Blue": 255
             },
             "TextRotation": "0"
+          },
+          {
+            "Type": "ButtonWithLabel",
+            "Name": "Equalizer_button",
+            "X": 25,
+            "Y": 154,
+            "Width": 36,
+            "Height": 36,
+            "Pressed": "__generated\\alternate_theme_images_widgets_button_icon_round_micro_fill_action.png",
+            "Released": "__generated\\alternate_theme_images_widgets_button_icon_round_micro_fill_action.png",
+            "TextId": "__SingleUse_G21M",
+            "ReleasedColor": {
+              "Red": 255,
+              "Green": 255,
+              "Blue": 255
+            },
+            "PressedColor": {
+              "Red": 255,
+              "Green": 255,
+              "Blue": 255
+            },
+            "TextRotation": "0"
           }
         ],
-        "Interactions": []
+        "Interactions": [
+          {
+            "InteractionName": "Interaction1",
+            "Trigger": {
+              "Type": "TriggerClicked",
+              "TriggerComponent": "Equalizer_button"
+            },
+            "Action": {
+              "Type": "ActionGotoScreen",
+              "ScreenTransitionType": "ScreenTransitionNone",
+              "ActionComponent": "EqualizerScreen"
+            }
+          }
+        ],
+        "CustomActions": [
+          {
+            "Name": "action1"
+          }
+        ]
+      },
+      {
+        "Name": "EqualizerScreen",
+        "Components": [
+          {
+            "Type": "Box",
+            "Name": "EQ_Background",
+            "Width": 480,
+            "Height": 272,
+            "Color": {
+              "Red": 16,
+              "Green": 18,
+              "Blue": 22
+            }
+          },
+          {
+            "Type": "TextArea",
+            "Name": "textArea3",
+            "X": 11,
+            "Y": 95,
+            "Width": 58,
+            "Height": 24,
+            "TextId": "__SingleUse_GF1H",
+            "TextRotation": "0",
+            "Color": {
+              "Red": 255,
+              "Green": 255,
+              "Blue": 255
+            },
+            "AutoSize": true
+          },
+          {
+            "Type": "TextArea",
+            "Name": "textArea4",
+            "X": 11,
+            "Y": 140,
+            "Width": 58,
+            "Height": 24,
+            "TextId": "__SingleUse_NTUH",
+            "TextRotation": "0",
+            "Color": {
+              "Red": 255,
+              "Green": 255,
+              "Blue": 255
+            },
+            "AutoSize": true
+          },
+          {
+            "Type": "TextArea",
+            "Name": "textArea5",
+            "X": 11,
+            "Y": 186,
+            "Width": 58,
+            "Height": 24,
+            "TextId": "__SingleUse_K4HJ",
+            "TextRotation": "0",
+            "Color": {
+              "Red": 255,
+              "Green": 255,
+              "Blue": 255
+            },
+            "AutoSize": true
+          },
+          {
+            "Type": "ButtonWithLabel",
+            "Name": "Flat_button",
+            "X": 285,
+            "Y": 227,
+            "Width": 100,
+            "Height": 36,
+            "Pressed": "__generated\\alternate_theme_images_widgets_button_regular_height_36_tiny_round_action.png",
+            "Released": "__generated\\alternate_theme_images_widgets_button_regular_height_36_tiny_round_action.png",
+            "TextId": "__SingleUse_HBQ8",
+            "ReleasedColor": {
+              "Red": 255,
+              "Green": 255,
+              "Blue": 255
+            },
+            "PressedColor": {
+              "Red": 255,
+              "Green": 255,
+              "Blue": 255
+            },
+            "TextRotation": "0"
+          },
+          {
+            "Type": "ButtonWithLabel",
+            "Name": "Back_button",
+            "X": 98,
+            "Y": 227,
+            "Width": 100,
+            "Height": 36,
+            "Pressed": "__generated\\alternate_theme_images_widgets_button_regular_height_36_tiny_round_action.png",
+            "Released": "__generated\\alternate_theme_images_widgets_button_regular_height_36_tiny_round_action.png",
+            "TextId": "__SingleUse_LCF1",
+            "ReleasedColor": {
+              "Red": 255,
+              "Green": 255,
+              "Blue": 255
+            },
+            "PressedColor": {
+              "Red": 255,
+              "Green": 255,
+              "Blue": 255
+            },
+            "TextRotation": "0"
+          },
+          {
+            "Type": "Slider",
+            "Name": "Slider_100Hz",
+            "X": 74,
+            "Y": 11,
+            "Width": 332,
+            "Height": 32,
+            "IsHorizontalSlider": true,
+            "BackgroundUnselected": "__generated\\alternate_theme_images_widgets_slider_horizontal_thick_track_medium.png",
+            "BackgroundSelected": "__generated\\alternate_theme_images_widgets_slider_horizontal_thick_filler_medium.png",
+            "Indicator": "__generated\\alternate_theme_images_widgets_slider_horizontal_thick_rounded_dark.png",
+            "BackgroundX": 16,
+            "BackgroundY": 11,
+            "IndicatorMax": 300,
+            "ValueMax": 24,
+            "InitValue": 12,
+            "Preset": "alternate_theme\\presets\\slider\\horizontal\\thick\\medium_rounded_dark.json"
+          },
+          {
+            "Type": "Slider",
+            "Name": "Slider_300Hz",
+            "X": 74,
+            "Y": 53,
+            "Width": 332,
+            "Height": 32,
+            "IsHorizontalSlider": true,
+            "BackgroundUnselected": "__generated\\alternate_theme_images_widgets_slider_horizontal_thick_track_medium.png",
+            "BackgroundSelected": "__generated\\alternate_theme_images_widgets_slider_horizontal_thick_filler_medium.png",
+            "Indicator": "__generated\\alternate_theme_images_widgets_slider_horizontal_thick_rounded_dark.png",
+            "BackgroundX": 16,
+            "BackgroundY": 11,
+            "IndicatorMax": 300,
+            "ValueMax": 24,
+            "InitValue": 12,
+            "Preset": "alternate_theme\\presets\\slider\\horizontal\\thick\\medium_rounded_dark.json"
+          },
+          {
+            "Type": "Slider",
+            "Name": "Slider_1kHz",
+            "X": 74,
+            "Y": 91,
+            "Width": 332,
+            "Height": 32,
+            "IsHorizontalSlider": true,
+            "BackgroundUnselected": "__generated\\alternate_theme_images_widgets_slider_horizontal_thick_track_medium.png",
+            "BackgroundSelected": "__generated\\alternate_theme_images_widgets_slider_horizontal_thick_filler_medium.png",
+            "Indicator": "__generated\\alternate_theme_images_widgets_slider_horizontal_thick_rounded_dark.png",
+            "BackgroundX": 16,
+            "BackgroundY": 11,
+            "IndicatorMax": 300,
+            "ValueMax": 24,
+            "InitValue": 12,
+            "Preset": "alternate_theme\\presets\\slider\\horizontal\\thick\\medium_rounded_dark.json"
+          },
+          {
+            "Type": "Slider",
+            "Name": "Slider_3kHz",
+            "X": 74,
+            "Y": 136,
+            "Width": 332,
+            "Height": 32,
+            "IsHorizontalSlider": true,
+            "BackgroundUnselected": "__generated\\alternate_theme_images_widgets_slider_horizontal_thick_track_medium.png",
+            "BackgroundSelected": "__generated\\alternate_theme_images_widgets_slider_horizontal_thick_filler_medium.png",
+            "Indicator": "__generated\\alternate_theme_images_widgets_slider_horizontal_thick_rounded_dark.png",
+            "BackgroundX": 16,
+            "BackgroundY": 11,
+            "IndicatorMax": 300,
+            "ValueMax": 24,
+            "InitValue": 12,
+            "Preset": "alternate_theme\\presets\\slider\\horizontal\\thick\\medium_rounded_dark.json"
+          },
+          {
+            "Type": "Slider",
+            "Name": "Slider_8kHz",
+            "X": 74,
+            "Y": 182,
+            "Width": 332,
+            "Height": 32,
+            "IsHorizontalSlider": true,
+            "BackgroundUnselected": "__generated\\alternate_theme_images_widgets_slider_horizontal_thick_track_medium.png",
+            "BackgroundSelected": "__generated\\alternate_theme_images_widgets_slider_horizontal_thick_filler_medium.png",
+            "Indicator": "__generated\\alternate_theme_images_widgets_slider_horizontal_thick_rounded_dark.png",
+            "BackgroundX": 16,
+            "BackgroundY": 11,
+            "IndicatorMax": 300,
+            "ValueMax": 24,
+            "InitValue": 12,
+            "Preset": "alternate_theme\\presets\\slider\\horizontal\\thick\\medium_rounded_dark.json"
+          },
+          {
+            "Type": "TextArea",
+            "Name": "textArea1",
+            "X": 11,
+            "Y": 15,
+            "Width": 72,
+            "Height": 24,
+            "TextId": "__SingleUse_9ES9",
+            "TextRotation": "0",
+            "Color": {
+              "Red": 255,
+              "Green": 255,
+              "Blue": 255
+            },
+            "AutoSize": true
+          },
+          {
+            "Type": "TextArea",
+            "Name": "textArea2",
+            "X": 11,
+            "Y": 57,
+            "Width": 72,
+            "Height": 24,
+            "TextId": "__SingleUse_D89E",
+            "TextRotation": "0",
+            "Color": {
+              "Red": 255,
+              "Green": 255,
+              "Blue": 255
+            },
+            "AutoSize": true
+          },
+          {
+            "Type": "TextArea",
+            "Name": "GainValue_100Hz",
+            "X": 400,
+            "Y": 12,
+            "Width": 75,
+            "Height": 30,
+            "TextId": "__SingleUse_2SG4",
+            "TextRotation": "0",
+            "Color": {
+              "Red": 255,
+              "Green": 255,
+              "Blue": 255
+            },
+            "Wildcard1": {
+              "TextId": "__SingleUse_VNV6",
+              "UseBuffer": true,
+              "BufferSize": 4
+            }
+          },
+          {
+            "Type": "TextArea",
+            "Name": "GainValue_3kHz",
+            "X": 400,
+            "Y": 136,
+            "Width": 75,
+            "Height": 30,
+            "TextId": "__SingleUse_KVXP",
+            "TextRotation": "0",
+            "Color": {
+              "Red": 255,
+              "Green": 255,
+              "Blue": 255
+            },
+            "Wildcard1": {
+              "TextId": "__SingleUse_DS1V",
+              "UseBuffer": true,
+              "BufferSize": 4
+            }
+          },
+          {
+            "Type": "TextArea",
+            "Name": "GainValue_8kHz",
+            "X": 400,
+            "Y": 183,
+            "Width": 75,
+            "Height": 30,
+            "TextId": "__SingleUse_J32N",
+            "TextRotation": "0",
+            "Color": {
+              "Red": 255,
+              "Green": 255,
+              "Blue": 255
+            },
+            "Wildcard1": {
+              "TextId": "__SingleUse_KWXD",
+              "UseBuffer": true,
+              "BufferSize": 4
+            }
+          },
+          {
+            "Type": "TextArea",
+            "Name": "GainValue_300Hz",
+            "X": 400,
+            "Y": 54,
+            "Width": 75,
+            "Height": 30,
+            "TextId": "__SingleUse_IU1N",
+            "TextRotation": "0",
+            "Color": {
+              "Red": 255,
+              "Green": 255,
+              "Blue": 255
+            },
+            "Wildcard1": {
+              "TextId": "__SingleUse_BXS1",
+              "UseBuffer": true,
+              "BufferSize": 4
+            }
+          },
+          {
+            "Type": "TextArea",
+            "Name": "GainValue_1kHz",
+            "X": 400,
+            "Y": 92,
+            "Width": 75,
+            "Height": 30,
+            "TextId": "__SingleUse_CNZO",
+            "TextRotation": "0",
+            "Color": {
+              "Red": 255,
+              "Green": 255,
+              "Blue": 255
+            },
+            "Wildcard1": {
+              "TextId": "__SingleUse_PRJN",
+              "UseBuffer": true,
+              "BufferSize": 4
+            }
+          },
+          {
+            "Type": "TextArea",
+            "Name": "FontGlyphKeeper",
+            "X": 1,
+            "Y": 213,
+            "Width": 155,
+            "Height": 24,
+            "Visible": false,
+            "TextId": "__SingleUse_PGFJ",
+            "TextRotation": "0",
+            "AutoSize": true
+          }
+        ],
+        "Interactions": [
+          {
+            "InteractionName": "Interaction1",
+            "Trigger": {
+              "Type": "TriggerClicked",
+              "TriggerComponent": "Back_button"
+            },
+            "Action": {
+              "Type": "ActionGotoScreen",
+              "ScreenTransitionType": "ScreenTransitionNone",
+              "ActionComponent": "Screen1"
+            }
+          },
+          {
+            "InteractionName": "Interaction2",
+            "Trigger": {
+              "Type": "TriggerSliderValueChanged",
+              "TriggerComponent": "Slider_100Hz"
+            },
+            "Action": {
+              "Type": "ActionCustom",
+              "FunctionName": "slider100HzChanged"
+            }
+          },
+          {
+            "InteractionName": "Interaction3",
+            "Trigger": {
+              "Type": "TriggerSliderValueChanged",
+              "TriggerComponent": "Slider_300Hz"
+            },
+            "Action": {
+              "Type": "ActionCustom",
+              "FunctionName": "slider300HzChanged"
+            }
+          },
+          {
+            "InteractionName": "Interaction4",
+            "Trigger": {
+              "Type": "TriggerSliderValueChanged",
+              "TriggerComponent": "Slider_1kHz"
+            },
+            "Action": {
+              "Type": "ActionCustom",
+              "FunctionName": "slider1kHzChanged"
+            }
+          },
+          {
+            "InteractionName": "Interaction5",
+            "Trigger": {
+              "Type": "TriggerSliderValueChanged",
+              "TriggerComponent": "Slider_3kHz"
+            },
+            "Action": {
+              "Type": "ActionCustom",
+              "FunctionName": "slider3kHzChanged"
+            }
+          },
+          {
+            "InteractionName": "Interaction6",
+            "Trigger": {
+              "Type": "TriggerSliderValueChanged",
+              "TriggerComponent": "Slider_8kHz"
+            },
+            "Action": {
+              "Type": "ActionCustom",
+              "FunctionName": "slider8kHzChanged"
+            }
+          },
+          {
+            "InteractionName": "Interaction7",
+            "Trigger": {
+              "Type": "TriggerClicked",
+              "TriggerComponent": "Flat_button"
+            },
+            "Action": {
+              "Type": "ActionCustom",
+              "FunctionName": "flatButtonClicked"
+            }
+          }
+        ]
       }
     ],
     "CustomContainerDefinitions": [],

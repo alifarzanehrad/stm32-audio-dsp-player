@@ -6,7 +6,8 @@
 #include <images/BitmapDatabase.hpp>
 #include <texts/TextKeysAndLanguages.hpp>
 
-Screen1ViewBase::Screen1ViewBase()
+Screen1ViewBase::Screen1ViewBase() :
+    buttonCallback(this, &Screen1ViewBase::buttonCallbackHandler)
 {
     __background.setPosition(0, 0, 480, 272);
     __background.setColor(touchgfx::Color::getColorFromRGB(0, 0, 0));
@@ -49,19 +50,27 @@ Screen1ViewBase::Screen1ViewBase()
     FFT_Background.setBorderSize(3);
     add(FFT_Background);
 
-    VolumeDown_button.setXY(62, 169);
+    VolumeDown_button.setXY(115, 151);
     VolumeDown_button.setBitmaps(touchgfx::Bitmap(BITMAP_ALTERNATE_THEME_IMAGES_WIDGETS_BUTTON_ICON_ROUND_MICRO_FILL_ACTION_ID), touchgfx::Bitmap(BITMAP_ALTERNATE_THEME_IMAGES_WIDGETS_BUTTON_ICON_ROUND_MICRO_FILL_ACTION_ID));
     VolumeDown_button.setLabelText(touchgfx::TypedText(T___SINGLEUSE_20I2));
     VolumeDown_button.setLabelColor(touchgfx::Color::getColorFromRGB(255, 255, 255));
     VolumeDown_button.setLabelColorPressed(touchgfx::Color::getColorFromRGB(255, 255, 255));
     add(VolumeDown_button);
 
-    VolumeUp_button.setXY(380, 169);
+    VolumeUp_button.setXY(330, 154);
     VolumeUp_button.setBitmaps(touchgfx::Bitmap(BITMAP_ALTERNATE_THEME_IMAGES_WIDGETS_BUTTON_ICON_ROUND_MICRO_FILL_ACTION_ID), touchgfx::Bitmap(BITMAP_ALTERNATE_THEME_IMAGES_WIDGETS_BUTTON_ICON_ROUND_MICRO_FILL_ACTION_ID));
     VolumeUp_button.setLabelText(touchgfx::TypedText(T___SINGLEUSE_AWN3));
     VolumeUp_button.setLabelColor(touchgfx::Color::getColorFromRGB(255, 255, 255));
     VolumeUp_button.setLabelColorPressed(touchgfx::Color::getColorFromRGB(255, 255, 255));
     add(VolumeUp_button);
+
+    Equalizer_button.setXY(25, 154);
+    Equalizer_button.setBitmaps(touchgfx::Bitmap(BITMAP_ALTERNATE_THEME_IMAGES_WIDGETS_BUTTON_ICON_ROUND_MICRO_FILL_ACTION_ID), touchgfx::Bitmap(BITMAP_ALTERNATE_THEME_IMAGES_WIDGETS_BUTTON_ICON_ROUND_MICRO_FILL_ACTION_ID));
+    Equalizer_button.setLabelText(touchgfx::TypedText(T___SINGLEUSE_G21M));
+    Equalizer_button.setLabelColor(touchgfx::Color::getColorFromRGB(255, 255, 255));
+    Equalizer_button.setLabelColorPressed(touchgfx::Color::getColorFromRGB(255, 255, 255));
+    Equalizer_button.setAction(buttonCallback);
+    add(Equalizer_button);
 }
 
 Screen1ViewBase::~Screen1ViewBase()
@@ -72,4 +81,15 @@ Screen1ViewBase::~Screen1ViewBase()
 void Screen1ViewBase::setupScreen()
 {
 
+}
+
+void Screen1ViewBase::buttonCallbackHandler(const touchgfx::AbstractButton& src)
+{
+    if (&src == &Equalizer_button)
+    {
+        //Interaction1
+        //When Equalizer_button clicked change screen to EqualizerScreen
+        //Go to EqualizerScreen with no screen transition
+        application().gotoEqualizerScreenScreenNoTransition();
+    }
 }

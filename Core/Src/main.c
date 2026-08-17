@@ -107,12 +107,23 @@ static const float32_t eqBandFrequencies[EQ_BAND_COUNT] =
 
 float32_t eqBandGainsDB[EQ_BAND_COUNT] =
 {
-	0.0f,    // 100 Hz
+    0.0f,   // 100 Hz
     0.0f,   // 300 Hz
-    0.0f,     // 1 kHz
-	0.0f,     // 3 kHz
-	0.0f      // 8 kHz
+    0.0f,   // 1 kHz
+    0.0f,   // 3 kHz
+    0.0f    // 8 kHz
 };
+
+volatile float32_t eqRequestedGainsDB[EQ_BAND_COUNT] =
+{
+    0.0f,
+    0.0f,
+    0.0f,
+    0.0f,
+    0.0f
+};
+volatile uint8_t eqUpdatePending = 0;
+float32_t eqSampleRate = 48000.0f;
 
 float32_t eqCoeffs[EQ_BAND_COUNT * BIQUAD_COEFFS_PER_STAGE];
 float32_t eqStateLeft[EQ_BAND_COUNT * BIQUAD_STATE_PER_STAGE];
@@ -139,6 +150,9 @@ void AudioFFT_Process(uint8_t *audioData);
 
 void AudioEQ_Init(float32_t sampleRate);
 void AudioEQ_Process(uint8_t *audioData);
+void AudioEQ_SetBandGain(uint8_t band, float32_t gainDB);
+static void AudioEQ_CalculateCoefficients(void);
+static void AudioEQ_ApplyPendingGains(void);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -621,7 +635,7 @@ uint8_t WavPlayer_Start(const char *filename)
   return 1;
 }
 
-void AudioEQ_Init(float32_t sampleRate)
+static void AudioEQ_CalculateCoefficients(void)
 {
     const float32_t Q = 1.0f;
 
@@ -630,7 +644,7 @@ void AudioEQ_Init(float32_t sampleRate)
         float32_t frequency = eqBandFrequencies[band];
         float32_t gainDB = eqBandGainsDB[band];
         float32_t A = powf(10.0f, gainDB / 40.0f);
-        float32_t omega = 2.0f * PI * frequency / sampleRate;
+        float32_t omega = 2.0f * PI * frequency / eqSampleRate;
         float32_t alpha = sinf(omega) / (2.0f * Q);
         float32_t cosOmega = cosf(omega);
 
@@ -651,6 +665,19 @@ void AudioEQ_Init(float32_t sampleRate)
         eqCoeffs[coeffIndex + 3] = -(a1 / a0);
         eqCoeffs[coeffIndex + 4] = -(a2 / a0);
     }
+}
+
+void AudioEQ_Init(float32_t sampleRate)
+{
+    eqSampleRate = sampleRate;
+
+    for (uint32_t band = 0; band < EQ_BAND_COUNT; band++)
+    {
+        eqBandGainsDB[band] = eqRequestedGainsDB[band];
+    }
+
+    eqUpdatePending = 0;
+    AudioEQ_CalculateCoefficients();
 
     arm_biquad_cascade_df1_init_f32(
         &eqLeft,
@@ -667,12 +694,51 @@ void AudioEQ_Init(float32_t sampleRate)
     );
 }
 
+void AudioEQ_SetBandGain(uint8_t band, float32_t gainDB)
+{
+    if (band >= EQ_BAND_COUNT)
+    {
+        return;
+    }
+
+    if (gainDB < -12.0f)
+    {
+        gainDB = -12.0f;
+    }
+    else if (gainDB > 12.0f)
+    {
+        gainDB = 12.0f;
+    }
+
+    eqRequestedGainsDB[band] = gainDB;
+    eqUpdatePending = 1;
+}
+
+static void AudioEQ_ApplyPendingGains(void)
+{
+    if (!eqUpdatePending)
+    {
+        return;
+    }
+
+    eqUpdatePending = 0;
+
+    for (uint32_t band = 0; band < EQ_BAND_COUNT; band++)
+    {
+        eqBandGainsDB[band] = eqRequestedGainsDB[band];
+    }
+
+    AudioEQ_CalculateCoefficients();
+}
+
 void AudioEQ_Process(uint8_t *audioData)
 {
     if (!EQEnabled)
     {
         return;
     }
+
+    AudioEQ_ApplyPendingGains();
 
     int16_t *samples =
         (int16_t *)audioData;

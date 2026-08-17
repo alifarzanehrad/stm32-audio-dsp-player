@@ -80,7 +80,7 @@ volatile uint8_t  AudioPlaying = 0;
 volatile uint8_t  HalfBufferNeedsFill = 0;
 volatile uint8_t  FullBufferNeedsFill = 0;
 volatile uint8_t AudioTrackFinished = 0;
-volatile uint8_t EQEnabled = 0;
+volatile uint8_t EQEnabled = 1;
 
 #define FFT_SIZE 1024
 #define FFT_BANDS 16
@@ -105,14 +105,13 @@ static const float32_t eqBandFrequencies[EQ_BAND_COUNT] =
     8000.0f
 };
 
-/* Keep the 1 kHz cut from the single-band test; set it to 0 dB for a flat EQ. */
 float32_t eqBandGainsDB[EQ_BAND_COUNT] =
 {
-    0.0f,
-    0.0f,
-    -18.0f,
-    0.0f,
-    0.0f
+	0.0f,    // 100 Hz
+    0.0f,   // 300 Hz
+    0.0f,     // 1 kHz
+	0.0f,     // 3 kHz
+	0.0f      // 8 kHz
 };
 
 float32_t eqCoeffs[EQ_BAND_COUNT * BIQUAD_COEFFS_PER_STAGE];

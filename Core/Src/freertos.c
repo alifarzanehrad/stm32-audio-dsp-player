@@ -44,7 +44,6 @@ extern volatile uint8_t AudioTrackFinished;
 extern uint8_t AudioBuffer[];
 extern void AudioFFT_Process(uint8_t *audioData);
 extern void AudioEQ_Process(uint8_t *audioData);
-extern uint32_t AudioEQ_GetAndResetClippingCount(void);
 
 #define AUDIO_HALF_BUFFER 4096
 #define FFT_SIZE      1024
@@ -232,8 +231,6 @@ void StartDefaultTask(void const * argument)
 //    Error_Handler();
 //  }
 
-  uint32_t lastClipReportTick = HAL_GetTick();
-
   /* Infinite loop */
   for(;;)
   {
@@ -411,24 +408,6 @@ void StartDefaultTask(void const * argument)
 	          );
 	      }
 	  }
-
-      uint32_t currentTick = HAL_GetTick();
-
-      if ((currentTick - lastClipReportTick) >= 1000U)
-      {
-          uint32_t clippingCount =
-              AudioEQ_GetAndResetClippingCount();
-
-          if (AudioPlaying)
-          {
-              printf(
-                  "EQ clipping samples/s = %lu\r\n",
-                  (unsigned long)clippingCount
-              );
-          }
-
-          lastClipReportTick = currentTick;
-      }
 
       osDelay(1);
   }

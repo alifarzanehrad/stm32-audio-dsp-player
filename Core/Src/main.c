@@ -123,6 +123,7 @@ volatile float32_t eqRequestedGainsDB[EQ_BAND_COUNT] =
     0.0f
 };
 volatile uint8_t eqUpdatePending = 0;
+volatile uint32_t eqClippingSampleCount = 0;
 float32_t eqSampleRate = 48000.0f;
 
 float32_t eqCoeffs[EQ_BAND_COUNT * BIQUAD_COEFFS_PER_STAGE];
@@ -151,6 +152,7 @@ void AudioFFT_Process(uint8_t *audioData);
 void AudioEQ_Init(float32_t sampleRate);
 void AudioEQ_Process(uint8_t *audioData);
 void AudioEQ_SetBandGain(uint8_t band, float32_t gainDB);
+uint32_t AudioEQ_GetAndResetClippingCount(void);
 static void AudioEQ_CalculateCoefficients(void);
 static void AudioEQ_ApplyPendingGains(void);
 /* USER CODE END PFP */
@@ -714,6 +716,13 @@ void AudioEQ_SetBandGain(uint8_t band, float32_t gainDB)
     eqUpdatePending = 1;
 }
 
+uint32_t AudioEQ_GetAndResetClippingCount(void)
+{
+    uint32_t clippingCount = eqClippingSampleCount;
+    eqClippingSampleCount = 0;
+    return clippingCount;
+}
+
 static void AudioEQ_ApplyPendingGains(void)
 {
     if (!eqUpdatePending)
@@ -770,6 +779,16 @@ void AudioEQ_Process(uint8_t *audioData)
     {
         float32_t left = eqLeftBuffer[i];
         float32_t right = eqRightBuffer[i];
+
+        if ((left > 32767.0f) || (left < -32768.0f))
+        {
+            eqClippingSampleCount++;
+        }
+
+        if ((right > 32767.0f) || (right < -32768.0f))
+        {
+            eqClippingSampleCount++;
+        }
 
         if (left > 32767.0f)
             left = 32767.0f;

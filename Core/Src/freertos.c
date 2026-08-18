@@ -82,7 +82,7 @@ volatile uint8_t AudioPlayPauseRequested = 0;
 const char *playlist[] =
 {
     "one.wav",
-    "two.wav",
+    "two_48k.wav",
     "three.wav"
 };
 

@@ -11,6 +11,8 @@ public:
     virtual ~EffectsScreenView() {}
     virtual void setupScreen();
     virtual void tearDownScreen();
+    virtual void echoToggled();
+
 protected:
 };
 

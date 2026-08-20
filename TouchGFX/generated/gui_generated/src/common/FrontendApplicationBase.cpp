@@ -10,6 +10,10 @@
 #include <touchgfx/hal/HAL.hpp>
 #include <gui/screen1_screen/Screen1View.hpp>
 #include <gui/screen1_screen/Screen1Presenter.hpp>
+#include <gui/equalizerscreen_screen/EqualizerScreenView.hpp>
+#include <gui/equalizerscreen_screen/EqualizerScreenPresenter.hpp>
+#include <gui/effectsscreen_screen/EffectsScreenView.hpp>
+#include <gui/effectsscreen_screen/EffectsScreenPresenter.hpp>
 
 using namespace touchgfx;
 
@@ -38,4 +42,30 @@ void FrontendApplicationBase::gotoScreen1ScreenNoTransition()
 void FrontendApplicationBase::gotoScreen1ScreenNoTransitionImpl()
 {
     touchgfx::makeTransition<Screen1View, Screen1Presenter, touchgfx::NoTransition, Model >(&currentScreen, &currentPresenter, frontendHeap, &currentTransition, &model);
+}
+
+// EqualizerScreen
+
+void FrontendApplicationBase::gotoEqualizerScreenScreenNoTransition()
+{
+    transitionCallback = touchgfx::Callback<FrontendApplicationBase>(this, &FrontendApplicationBase::gotoEqualizerScreenScreenNoTransitionImpl);
+    pendingScreenTransitionCallback = &transitionCallback;
+}
+
+void FrontendApplicationBase::gotoEqualizerScreenScreenNoTransitionImpl()
+{
+    touchgfx::makeTransition<EqualizerScreenView, EqualizerScreenPresenter, touchgfx::NoTransition, Model >(&currentScreen, &currentPresenter, frontendHeap, &currentTransition, &model);
+}
+
+// EffectsScreen
+
+void FrontendApplicationBase::gotoEffectsScreenScreenNoTransition()
+{
+    transitionCallback = touchgfx::Callback<FrontendApplicationBase>(this, &FrontendApplicationBase::gotoEffectsScreenScreenNoTransitionImpl);
+    pendingScreenTransitionCallback = &transitionCallback;
+}
+
+void FrontendApplicationBase::gotoEffectsScreenScreenNoTransitionImpl()
+{
+    touchgfx::makeTransition<EffectsScreenView, EffectsScreenPresenter, touchgfx::NoTransition, Model >(&currentScreen, &currentPresenter, frontendHeap, &currentTransition, &model);
 }

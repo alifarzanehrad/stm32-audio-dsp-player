@@ -1,18 +1,29 @@
 #include <gui/screen1_screen/Screen1View.hpp>
 #include <touchgfx/Color.hpp>
 
+#ifdef SIMULATOR
+
+static float fftBandsSmoothed[16] =
+{
+    0.0f
+};
+
+#else
+
 extern "C"
 {
     extern float fftBandsSmoothed[16];
 }
 
+#endif
+
 Screen1View::Screen1View()
-    : fftTickCounter(0),
-      playPauseButtonCallback(this, &Screen1View::playPauseButtonClicked),
+    : playPauseButtonCallback(this, &Screen1View::playPauseButtonClicked),
       nextButtonCallback(this, &Screen1View::nextButtonClicked),
       previousButtonCallback(this, &Screen1View::previousButtonClicked),
       volumeUpButtonCallback(this, &Screen1View::volumeUpButtonClicked),
-      volumeDownButtonCallback(this, &Screen1View::volumeDownButtonClicked)
+      volumeDownButtonCallback(this, &Screen1View::volumeDownButtonClicked),
+      fftTickCounter(0)
 {
 }
 

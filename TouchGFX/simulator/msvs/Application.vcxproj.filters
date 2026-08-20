@@ -184,6 +184,30 @@
     <Filter Include="Header Files\generated\simulator\include\simulator\video">
       <UniqueIdentifier>97336B79-5EFA-998C-EE19-C48560945221</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\gui\equalizerscreen_screen">
+      <UniqueIdentifier>640377BE-9DED-CA46-8868-823FCA9CCC07</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\gui\equalizerscreen_screen">
+      <UniqueIdentifier>4CA276E3-7551-9ED9-85DF-331D5EBAB799</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\generated\gui_generated\equalizerscreen_screen">
+      <UniqueIdentifier>C891C87B-7228-B50F-71C7-AB238FC3B36B</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\generated\gui_generated\equalizerscreen_screen">
+      <UniqueIdentifier>550ADDE8-E1C3-0E24-B239-F9F5817550F4</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\gui\effectsscreen_screen">
+      <UniqueIdentifier>38F8EB9C-579F-393E-DBF1-EBBB7138B1A1</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\gui\effectsscreen_screen">
+      <UniqueIdentifier>FF0DD986-F089-C012-4A47-D549564B3311</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\generated\gui_generated\effectsscreen_screen">
+      <UniqueIdentifier>A4407EF1-9AE5-DB7B-CBF2-FBBE3FC987BF</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\generated\gui_generated\effectsscreen_screen">
+      <UniqueIdentifier>85CEEB5F-388C-E98E-6EDF-5644123C7FC1</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="$(TouchGFXReleasePath)\framework\source\platform\driver\touch\SDL2TouchController.cpp">
@@ -224,6 +248,24 @@
     </ClCompile>
     <ClCompile Include="..\..\generated\simulator\src\video\SoftwareMJPEGDecoder.cpp">
       <Filter>Source Files\generated\simulator\video</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\gui\src\equalizerscreen_screen\EqualizerScreenPresenter.cpp">
+      <Filter>Source Files\gui\equalizerscreen_screen</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\gui\src\equalizerscreen_screen\EqualizerScreenView.cpp">
+      <Filter>Source Files\gui\equalizerscreen_screen</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\generated\gui_generated\src\equalizerscreen_screen\EqualizerScreenViewBase.cpp">
+      <Filter>Source Files\generated\gui_generated\equalizerscreen_screen</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\gui\src\effectsscreen_screen\EffectsScreenPresenter.cpp">
+      <Filter>Source Files\gui\effectsscreen_screen</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\gui\src\effectsscreen_screen\EffectsScreenView.cpp">
+      <Filter>Source Files\gui\effectsscreen_screen</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\generated\gui_generated\src\effectsscreen_screen\EffectsScreenViewBase.cpp">
+      <Filter>Source Files\generated\gui_generated\effectsscreen_screen</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -675,6 +717,24 @@
     </ClInclude>
     <ClInclude Include="..\..\generated\simulator\include\simulator\video\SoftwareMJPEGDecoder.hpp">
       <Filter>Header Files\generated\simulator\include\simulator\video</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\gui\include\gui\equalizerscreen_screen\EqualizerScreenPresenter.hpp">
+      <Filter>Header Files\gui\equalizerscreen_screen</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\gui\include\gui\equalizerscreen_screen\EqualizerScreenView.hpp">
+      <Filter>Header Files\gui\equalizerscreen_screen</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\generated\gui_generated\include\gui_generated\equalizerscreen_screen\EqualizerScreenViewBase.hpp">
+      <Filter>Header Files\generated\gui_generated\equalizerscreen_screen</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\gui\include\gui\effectsscreen_screen\EffectsScreenPresenter.hpp">
+      <Filter>Header Files\gui\effectsscreen_screen</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\gui\include\gui\effectsscreen_screen\EffectsScreenView.hpp">
+      <Filter>Header Files\gui\effectsscreen_screen</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\generated\gui_generated\include\gui_generated\effectsscreen_screen\EffectsScreenViewBase.hpp">
+      <Filter>Header Files\generated\gui_generated\effectsscreen_screen</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

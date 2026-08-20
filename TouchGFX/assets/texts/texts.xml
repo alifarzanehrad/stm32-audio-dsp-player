@@ -6,6 +6,81 @@
   <Texts>
     <TextGroup Id="Group1" />
     <TextGroup Id="Unsorted">
+      <Text Id="__SingleUse_PPEW" Alignment="Center" TypographyId="Default">
+        <Translation Language="GB">Back</Translation>
+      </Text>
+      <Text Id="__SingleUse_WS5S" Alignment="Left" TypographyId="Default">
+        <Translation Language="GB">Noise Reduction</Translation>
+      </Text>
+      <Text Id="__SingleUse_AOL6" Alignment="Left" TypographyId="Default">
+        <Translation Language="GB">Reverb</Translation>
+      </Text>
+      <Text Id="__SingleUse_3VMN" Alignment="Left" TypographyId="Default">
+        <Translation Language="GB">Echo</Translation>
+      </Text>
+      <Text Id="__SingleUse_42GX" Alignment="Center" TypographyId="Default">
+        <Translation Language="GB">Audio Effects</Translation>
+      </Text>
+      <Text Id="__SingleUse_6XK3" Alignment="Center" TypographyId="Default">
+        <Translation Language="GB">EF</Translation>
+      </Text>
+      <Text Id="__SingleUse_PGFJ" Alignment="Left" TypographyId="Default">
+        <Translation Language="GB">+-0123456789</Translation>
+      </Text>
+      <Text Id="__SingleUse_KWXD" Alignment="Left" TypographyId="Default">
+        <Translation Language="GB">0</Translation>
+      </Text>
+      <Text Id="__SingleUse_J32N" Alignment="Center" TypographyId="Default">
+        <Translation Language="GB">&lt;value&gt; dB</Translation>
+      </Text>
+      <Text Id="__SingleUse_DS1V" Alignment="Left" TypographyId="Default">
+        <Translation Language="GB">0</Translation>
+      </Text>
+      <Text Id="__SingleUse_KVXP" Alignment="Center" TypographyId="Default">
+        <Translation Language="GB">&lt;value&gt; dB</Translation>
+      </Text>
+      <Text Id="__SingleUse_PRJN" Alignment="Left" TypographyId="Default">
+        <Translation Language="GB">0</Translation>
+      </Text>
+      <Text Id="__SingleUse_CNZO" Alignment="Center" TypographyId="Default">
+        <Translation Language="GB">&lt;value&gt; dB</Translation>
+      </Text>
+      <Text Id="__SingleUse_BXS1" Alignment="Left" TypographyId="Default">
+        <Translation Language="GB">0</Translation>
+      </Text>
+      <Text Id="__SingleUse_IU1N" Alignment="Center" TypographyId="Default">
+        <Translation Language="GB">&lt;value&gt; dB</Translation>
+      </Text>
+      <Text Id="__SingleUse_VNV6" Alignment="Left" TypographyId="Default">
+        <Translation Language="GB">0</Translation>
+      </Text>
+      <Text Id="__SingleUse_2SG4" Alignment="Center" TypographyId="Default">
+        <Translation Language="GB">&lt;value&gt; dB</Translation>
+      </Text>
+      <Text Id="__SingleUse_G21M" Alignment="Center" TypographyId="Default">
+        <Translation Language="GB">EQ</Translation>
+      </Text>
+      <Text Id="__SingleUse_K4HJ" Alignment="Center" TypographyId="Default">
+        <Translation Language="GB">8 kHz</Translation>
+      </Text>
+      <Text Id="__SingleUse_NTUH" Alignment="Center" TypographyId="Default">
+        <Translation Language="GB">3 kHz</Translation>
+      </Text>
+      <Text Id="__SingleUse_GF1H" Alignment="Center" TypographyId="Default">
+        <Translation Language="GB">1 kHz</Translation>
+      </Text>
+      <Text Id="__SingleUse_D89E" Alignment="Center" TypographyId="Default">
+        <Translation Language="GB">300 Hz</Translation>
+      </Text>
+      <Text Id="__SingleUse_9ES9" Alignment="Center" TypographyId="Default">
+        <Translation Language="GB">100 Hz</Translation>
+      </Text>
+      <Text Id="__SingleUse_HBQ8" Alignment="Center" TypographyId="Default">
+        <Translation Language="GB">Flat</Translation>
+      </Text>
+      <Text Id="__SingleUse_LCF1" Alignment="Center" TypographyId="Default">
+        <Translation Language="GB">Back</Translation>
+      </Text>
       <Text Id="__SingleUse_AWN3" Alignment="Center" TypographyId="Default">
         <Translation Language="GB">+</Translation>
       </Text>
@@ -30,5 +105,6 @@
     <Typography Id="Default" Font="verdana.ttf" Size="20" Bpp="4" IsVector="no" Direction="LTR" FallbackCharacter="?" />
     <Typography Id="Large" Font="verdana.ttf" Size="40" Bpp="4" IsVector="no" Direction="LTR" FallbackCharacter="?" />
     <Typography Id="Small" Font="verdana.ttf" Size="10" Bpp="4" IsVector="no" Direction="LTR" FallbackCharacter="?" />
+    <Typography Id="Typography1" Font="WINGDNG3.TTF" Size="20" Bpp="4" IsVector="no" Direction="LTR" FallbackCharacter="?" />
   </Typographies>
 </TextDatabase>

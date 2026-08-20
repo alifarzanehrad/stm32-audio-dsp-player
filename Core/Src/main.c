@@ -84,6 +84,8 @@ volatile uint8_t EQEnabled = 1;
 volatile uint8_t EchoEnabled = 1;
 volatile uint8_t echoResetPending = 0;
 
+extern volatile uint8_t AudioVolume;
+
 #define FFT_SIZE 1024
 #define FFT_BANDS 16
 #define EQ_BLOCK_SIZE 1024
@@ -530,6 +532,11 @@ uint8_t WavPlayer_Start(const char *filename)
   char chunkId[4];
   uint32_t chunkSize;
 
+  AudioPlaying = 0;
+  HalfBufferNeedsFill = 0;
+  FullBufferNeedsFill = 0;
+  AudioTrackFinished = 0;
+
   printf("Opening file %s...\r\n", filename);
   res = f_open(&WavFile, filename, FA_READ);
   if (res != FR_OK)
@@ -626,7 +633,11 @@ uint8_t WavPlayer_Start(const char *filename)
   AudioRemainingBytes = dataSize;
   AudioEQ_Init((float32_t)sampleRate);
   printf("Calling BSP_AUDIO_OUT_Init with sampleRate=%lu\r\n", (unsigned long)sampleRate);
-  audio_status = BSP_AUDIO_OUT_Init(OUTPUT_DEVICE_HEADPHONE, 70, sampleRate);
+  audio_status = BSP_AUDIO_OUT_Init(
+      OUTPUT_DEVICE_HEADPHONE,
+      AudioVolume,
+      sampleRate
+  );
   if (audio_status != AUDIO_OK)
   {
     printf("BSP_AUDIO_OUT_Init failed, status=%u\r\n", audio_status);
@@ -657,6 +668,7 @@ uint8_t WavPlayer_Start(const char *filename)
   if (audio_status != AUDIO_OK)
   {
     printf("BSP_AUDIO_OUT_Play failed, status=%u\r\n", audio_status);
+    BSP_AUDIO_OUT_Stop(CODEC_PDWN_SW);
     AudioPlaying = 0;
     f_close(&WavFile);
     return 0;

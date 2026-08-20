@@ -9,6 +9,8 @@ extern "C"
     void AudioPlayer_RequestVolumeUp(void);
     void AudioPlayer_RequestVolumeDown(void);
     void AudioEQ_SetBandGain(uint8_t band, float gainDB);
+    void AudioEcho_SetEnabled(uint8_t enabled);
+    uint8_t AudioEcho_IsEnabled(void);
 }
 
 #ifdef SIMULATOR
@@ -39,9 +41,21 @@ extern "C" void AudioEQ_SetBandGain(uint8_t band, float gainDB)
     (void)gainDB;
 }
 
+extern "C" void AudioEcho_SetEnabled(uint8_t enabled)
+{
+    (void)enabled;
+}
+
+extern "C" uint8_t AudioEcho_IsEnabled(void)
+{
+    return 1U;
+}
+
 #endif
 
-Model::Model() : modelListener(0)
+Model::Model()
+    : modelListener(0),
+      echoEnabled(AudioEcho_IsEnabled() != 0U)
 {
     for (uint8_t band = 0; band < EQ_BAND_COUNT; band++)
     {
@@ -107,4 +121,15 @@ int Model::getEQSliderValue(uint8_t band) const
     }
 
     return eqSliderValues[band];
+}
+
+void Model::setEchoEnabled(bool enabled)
+{
+    echoEnabled = enabled;
+    AudioEcho_SetEnabled(enabled ? 1U : 0U);
+}
+
+bool Model::getEchoEnabled() const
+{
+    return echoEnabled;
 }

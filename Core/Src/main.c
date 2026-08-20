@@ -81,7 +81,7 @@ volatile uint8_t  HalfBufferNeedsFill = 0;
 volatile uint8_t  FullBufferNeedsFill = 0;
 volatile uint8_t AudioTrackFinished = 0;
 volatile uint8_t EQEnabled = 1;
-volatile uint8_t EchoEnabled = 1;
+volatile uint8_t EchoEnabled = 0;
 volatile uint8_t echoResetPending = 0;
 
 extern volatile uint8_t AudioVolume;

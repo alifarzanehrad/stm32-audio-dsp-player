@@ -27,6 +27,9 @@
     <ClCompile Include="..\..\gui\src\equalizerscreen_screen\EqualizerScreenPresenter.cpp"/>
     <ClCompile Include="..\..\gui\src\equalizerscreen_screen\EqualizerScreenView.cpp"/>
     <ClCompile Include="..\..\generated\gui_generated\src\equalizerscreen_screen\EqualizerScreenViewBase.cpp"/>
+    <ClCompile Include="..\..\gui\src\effectsscreen_screen\EffectsScreenPresenter.cpp"/>
+    <ClCompile Include="..\..\gui\src\effectsscreen_screen\EffectsScreenView.cpp"/>
+    <ClCompile Include="..\..\generated\gui_generated\src\effectsscreen_screen\EffectsScreenViewBase.cpp"/>
   </ItemGroup>
   <ItemGroup>
     <None Include="$(ApplicationRoot)\assets\texts\texts.xml"/>
@@ -183,6 +186,9 @@
     <ClInclude Include="..\..\gui\include\gui\equalizerscreen_screen\EqualizerScreenPresenter.hpp"/>
     <ClInclude Include="..\..\gui\include\gui\equalizerscreen_screen\EqualizerScreenView.hpp"/>
     <ClInclude Include="..\..\generated\gui_generated\include\gui_generated\equalizerscreen_screen\EqualizerScreenViewBase.hpp"/>
+    <ClInclude Include="..\..\gui\include\gui\effectsscreen_screen\EffectsScreenPresenter.hpp"/>
+    <ClInclude Include="..\..\gui\include\gui\effectsscreen_screen\EffectsScreenView.hpp"/>
+    <ClInclude Include="..\..\generated\gui_generated\include\gui_generated\effectsscreen_screen\EffectsScreenViewBase.hpp"/>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="$(ApplicationRoot)\generated\simulator\touchgfx.rc"/>

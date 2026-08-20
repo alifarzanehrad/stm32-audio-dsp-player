@@ -12,6 +12,8 @@
 #include <gui/screen1_screen/Screen1Presenter.hpp>
 #include <gui/equalizerscreen_screen/EqualizerScreenView.hpp>
 #include <gui/equalizerscreen_screen/EqualizerScreenPresenter.hpp>
+#include <gui/effectsscreen_screen/EffectsScreenView.hpp>
+#include <gui/effectsscreen_screen/EffectsScreenPresenter.hpp>
 
 using namespace touchgfx;
 
@@ -53,4 +55,17 @@ void FrontendApplicationBase::gotoEqualizerScreenScreenNoTransition()
 void FrontendApplicationBase::gotoEqualizerScreenScreenNoTransitionImpl()
 {
     touchgfx::makeTransition<EqualizerScreenView, EqualizerScreenPresenter, touchgfx::NoTransition, Model >(&currentScreen, &currentPresenter, frontendHeap, &currentTransition, &model);
+}
+
+// EffectsScreen
+
+void FrontendApplicationBase::gotoEffectsScreenScreenNoTransition()
+{
+    transitionCallback = touchgfx::Callback<FrontendApplicationBase>(this, &FrontendApplicationBase::gotoEffectsScreenScreenNoTransitionImpl);
+    pendingScreenTransitionCallback = &transitionCallback;
+}
+
+void FrontendApplicationBase::gotoEffectsScreenScreenNoTransitionImpl()
+{
+    touchgfx::makeTransition<EffectsScreenView, EffectsScreenPresenter, touchgfx::NoTransition, Model >(&currentScreen, &currentPresenter, frontendHeap, &currentTransition, &model);
 }

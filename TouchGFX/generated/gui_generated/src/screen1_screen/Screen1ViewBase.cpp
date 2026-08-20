@@ -18,24 +18,24 @@ Screen1ViewBase::Screen1ViewBase() :
     add(box1);
 
     Previous_button.setXY(33, 210);
-    Previous_button.setBitmaps(touchgfx::Bitmap(BITMAP_ALTERNATE_THEME_IMAGES_WIDGETS_BUTTON_REGULAR_HEIGHT_36_TINY_ROUND_ACTION_ID), touchgfx::Bitmap(BITMAP_ALTERNATE_THEME_IMAGES_WIDGETS_BUTTON_REGULAR_HEIGHT_36_TINY_ROUND_ACTION_ID));
+    Previous_button.setBitmaps(touchgfx::Bitmap(BITMAP_ALTERNATE_THEME_IMAGES_WIDGETS_BUTTON_REGULAR_HEIGHT_36_TINY_ROUND_ACTIVE_ID), touchgfx::Bitmap(BITMAP_ALTERNATE_THEME_IMAGES_WIDGETS_BUTTON_REGULAR_HEIGHT_36_TINY_ROUND_ACTIVE_ID));
     Previous_button.setLabelText(touchgfx::TypedText(T___SINGLEUSE_V7EU));
-    Previous_button.setLabelColor(touchgfx::Color::getColorFromRGB(255, 255, 255));
-    Previous_button.setLabelColorPressed(touchgfx::Color::getColorFromRGB(255, 255, 255));
+    Previous_button.setLabelColor(touchgfx::Color::getColorFromRGB(0, 0, 0));
+    Previous_button.setLabelColorPressed(touchgfx::Color::getColorFromRGB(0, 0, 0));
     add(Previous_button);
 
     Next_button.setXY(348, 210);
-    Next_button.setBitmaps(touchgfx::Bitmap(BITMAP_ALTERNATE_THEME_IMAGES_WIDGETS_BUTTON_REGULAR_HEIGHT_36_TINY_ROUND_ACTION_ID), touchgfx::Bitmap(BITMAP_ALTERNATE_THEME_IMAGES_WIDGETS_BUTTON_REGULAR_HEIGHT_36_TINY_ROUND_ACTION_ID));
+    Next_button.setBitmaps(touchgfx::Bitmap(BITMAP_ALTERNATE_THEME_IMAGES_WIDGETS_BUTTON_REGULAR_HEIGHT_36_TINY_ROUND_ACTIVE_ID), touchgfx::Bitmap(BITMAP_ALTERNATE_THEME_IMAGES_WIDGETS_BUTTON_REGULAR_HEIGHT_36_TINY_ROUND_ACTIVE_ID));
     Next_button.setLabelText(touchgfx::TypedText(T___SINGLEUSE_YANH));
-    Next_button.setLabelColor(touchgfx::Color::getColorFromRGB(255, 255, 255));
-    Next_button.setLabelColorPressed(touchgfx::Color::getColorFromRGB(255, 255, 255));
+    Next_button.setLabelColor(touchgfx::Color::getColorFromRGB(0, 0, 0));
+    Next_button.setLabelColorPressed(touchgfx::Color::getColorFromRGB(0, 0, 0));
     add(Next_button);
 
     Stop_button.setXY(155, 203);
-    Stop_button.setBitmaps(touchgfx::Bitmap(BITMAP_ALTERNATE_THEME_IMAGES_WIDGETS_BUTTON_REGULAR_HEIGHT_50_SMALL_ROUND_ACTION_ID), touchgfx::Bitmap(BITMAP_ALTERNATE_THEME_IMAGES_WIDGETS_BUTTON_REGULAR_HEIGHT_50_SMALL_ROUND_ACTION_ID));
+    Stop_button.setBitmaps(touchgfx::Bitmap(BITMAP_ALTERNATE_THEME_IMAGES_WIDGETS_BUTTON_REGULAR_HEIGHT_50_SMALL_ROUND_ACTIVE_ID), touchgfx::Bitmap(BITMAP_ALTERNATE_THEME_IMAGES_WIDGETS_BUTTON_REGULAR_HEIGHT_50_SMALL_ROUND_ACTIVE_ID));
     Stop_button.setLabelText(touchgfx::TypedText(T___SINGLEUSE_NYEE));
-    Stop_button.setLabelColor(touchgfx::Color::getColorFromRGB(255, 255, 255));
-    Stop_button.setLabelColorPressed(touchgfx::Color::getColorFromRGB(255, 255, 255));
+    Stop_button.setLabelColor(touchgfx::Color::getColorFromRGB(0, 0, 0));
+    Stop_button.setLabelColorPressed(touchgfx::Color::getColorFromRGB(0, 0, 0));
     add(Stop_button);
 
     textArea1.setPosition(98, 154, 300, 30);
@@ -51,26 +51,34 @@ Screen1ViewBase::Screen1ViewBase() :
     add(FFT_Background);
 
     VolumeDown_button.setXY(115, 151);
-    VolumeDown_button.setBitmaps(touchgfx::Bitmap(BITMAP_ALTERNATE_THEME_IMAGES_WIDGETS_BUTTON_ICON_ROUND_MICRO_FILL_ACTION_ID), touchgfx::Bitmap(BITMAP_ALTERNATE_THEME_IMAGES_WIDGETS_BUTTON_ICON_ROUND_MICRO_FILL_ACTION_ID));
+    VolumeDown_button.setBitmaps(touchgfx::Bitmap(BITMAP_ALTERNATE_THEME_IMAGES_WIDGETS_BUTTON_ICON_ROUND_MICRO_FILL_ACTIVE_ID), touchgfx::Bitmap(BITMAP_ALTERNATE_THEME_IMAGES_WIDGETS_BUTTON_ICON_ROUND_MICRO_FILL_ACTIVE_ID));
     VolumeDown_button.setLabelText(touchgfx::TypedText(T___SINGLEUSE_20I2));
-    VolumeDown_button.setLabelColor(touchgfx::Color::getColorFromRGB(255, 255, 255));
-    VolumeDown_button.setLabelColorPressed(touchgfx::Color::getColorFromRGB(255, 255, 255));
+    VolumeDown_button.setLabelColor(touchgfx::Color::getColorFromRGB(0, 0, 0));
+    VolumeDown_button.setLabelColorPressed(touchgfx::Color::getColorFromRGB(0, 0, 0));
     add(VolumeDown_button);
 
     VolumeUp_button.setXY(330, 154);
-    VolumeUp_button.setBitmaps(touchgfx::Bitmap(BITMAP_ALTERNATE_THEME_IMAGES_WIDGETS_BUTTON_ICON_ROUND_MICRO_FILL_ACTION_ID), touchgfx::Bitmap(BITMAP_ALTERNATE_THEME_IMAGES_WIDGETS_BUTTON_ICON_ROUND_MICRO_FILL_ACTION_ID));
+    VolumeUp_button.setBitmaps(touchgfx::Bitmap(BITMAP_ALTERNATE_THEME_IMAGES_WIDGETS_BUTTON_ICON_ROUND_MICRO_FILL_ACTIVE_ID), touchgfx::Bitmap(BITMAP_ALTERNATE_THEME_IMAGES_WIDGETS_BUTTON_ICON_ROUND_MICRO_FILL_ACTIVE_ID));
     VolumeUp_button.setLabelText(touchgfx::TypedText(T___SINGLEUSE_AWN3));
-    VolumeUp_button.setLabelColor(touchgfx::Color::getColorFromRGB(255, 255, 255));
-    VolumeUp_button.setLabelColorPressed(touchgfx::Color::getColorFromRGB(255, 255, 255));
+    VolumeUp_button.setLabelColor(touchgfx::Color::getColorFromRGB(0, 0, 0));
+    VolumeUp_button.setLabelColorPressed(touchgfx::Color::getColorFromRGB(0, 0, 0));
     add(VolumeUp_button);
 
-    Equalizer_button.setXY(25, 154);
-    Equalizer_button.setBitmaps(touchgfx::Bitmap(BITMAP_ALTERNATE_THEME_IMAGES_WIDGETS_BUTTON_ICON_ROUND_MICRO_FILL_ACTION_ID), touchgfx::Bitmap(BITMAP_ALTERNATE_THEME_IMAGES_WIDGETS_BUTTON_ICON_ROUND_MICRO_FILL_ACTION_ID));
+    Equalizer_button.setXY(47, 154);
+    Equalizer_button.setBitmaps(touchgfx::Bitmap(BITMAP_ALTERNATE_THEME_IMAGES_WIDGETS_BUTTON_ICON_ROUND_MICRO_FILL_ACTIVE_ID), touchgfx::Bitmap(BITMAP_ALTERNATE_THEME_IMAGES_WIDGETS_BUTTON_ICON_ROUND_MICRO_FILL_ACTIVE_ID));
     Equalizer_button.setLabelText(touchgfx::TypedText(T___SINGLEUSE_G21M));
-    Equalizer_button.setLabelColor(touchgfx::Color::getColorFromRGB(255, 255, 255));
-    Equalizer_button.setLabelColorPressed(touchgfx::Color::getColorFromRGB(255, 255, 255));
+    Equalizer_button.setLabelColor(touchgfx::Color::getColorFromRGB(0, 0, 0));
+    Equalizer_button.setLabelColorPressed(touchgfx::Color::getColorFromRGB(0, 0, 0));
     Equalizer_button.setAction(buttonCallback);
     add(Equalizer_button);
+
+    Effects_button.setXY(398, 154);
+    Effects_button.setBitmaps(touchgfx::Bitmap(BITMAP_ALTERNATE_THEME_IMAGES_WIDGETS_BUTTON_ICON_ROUND_MICRO_FILL_ACTIVE_ID), touchgfx::Bitmap(BITMAP_ALTERNATE_THEME_IMAGES_WIDGETS_BUTTON_ICON_ROUND_MICRO_FILL_ACTIVE_ID));
+    Effects_button.setLabelText(touchgfx::TypedText(T___SINGLEUSE_6XK3));
+    Effects_button.setLabelColor(touchgfx::Color::getColorFromRGB(0, 0, 0));
+    Effects_button.setLabelColorPressed(touchgfx::Color::getColorFromRGB(0, 0, 0));
+    Effects_button.setAction(buttonCallback);
+    add(Effects_button);
 }
 
 Screen1ViewBase::~Screen1ViewBase()
@@ -91,5 +99,12 @@ void Screen1ViewBase::buttonCallbackHandler(const touchgfx::AbstractButton& src)
         //When Equalizer_button clicked change screen to EqualizerScreen
         //Go to EqualizerScreen with no screen transition
         application().gotoEqualizerScreenScreenNoTransition();
+    }
+    if (&src == &Effects_button)
+    {
+        //Interaction2
+        //When Effects_button clicked change screen to EffectsScreen
+        //Go to EffectsScreen with no screen transition
+        application().gotoEffectsScreenScreenNoTransition();
     }
 }

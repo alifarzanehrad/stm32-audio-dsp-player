@@ -26,6 +26,9 @@ public:
     // EqualizerScreen
     void gotoEqualizerScreenScreenNoTransition();
 
+    // EffectsScreen
+    void gotoEffectsScreenScreenNoTransition();
+
 protected:
     touchgfx::Callback<FrontendApplicationBase> transitionCallback;
     FrontendHeap& frontendHeap;
@@ -36,6 +39,9 @@ protected:
 
     // EqualizerScreen
     void gotoEqualizerScreenScreenNoTransitionImpl();
+
+    // EffectsScreen
+    void gotoEffectsScreenScreenNoTransitionImpl();
 };
 
 #endif // FRONTENDAPPLICATIONBASE_HPP

@@ -1,12 +1,45 @@
 #include <gui/model/Model.hpp>
 #include <gui/model/ModelListener.hpp>
 
-extern "C" void AudioPlayer_RequestPlayPause(void);
-extern "C" void AudioPlayer_RequestNext(void);
-extern "C" void AudioPlayer_RequestPrevious(void);
-extern "C" void AudioPlayer_RequestVolumeUp(void);
-extern "C" void AudioPlayer_RequestVolumeDown(void);
-extern "C" void AudioEQ_SetBandGain(uint8_t band, float gainDB);
+extern "C"
+{
+    void AudioPlayer_RequestPlayPause(void);
+    void AudioPlayer_RequestNext(void);
+    void AudioPlayer_RequestPrevious(void);
+    void AudioPlayer_RequestVolumeUp(void);
+    void AudioPlayer_RequestVolumeDown(void);
+    void AudioEQ_SetBandGain(uint8_t band, float gainDB);
+}
+
+#ifdef SIMULATOR
+
+extern "C" void AudioPlayer_RequestPlayPause(void)
+{
+}
+
+extern "C" void AudioPlayer_RequestNext(void)
+{
+}
+
+extern "C" void AudioPlayer_RequestPrevious(void)
+{
+}
+
+extern "C" void AudioPlayer_RequestVolumeUp(void)
+{
+}
+
+extern "C" void AudioPlayer_RequestVolumeDown(void)
+{
+}
+
+extern "C" void AudioEQ_SetBandGain(uint8_t band, float gainDB)
+{
+    (void)band;
+    (void)gainDB;
+}
+
+#endif
 
 Model::Model() : modelListener(0)
 {

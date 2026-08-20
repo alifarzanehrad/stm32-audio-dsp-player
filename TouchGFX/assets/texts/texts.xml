@@ -6,6 +6,24 @@
   <Texts>
     <TextGroup Id="Group1" />
     <TextGroup Id="Unsorted">
+      <Text Id="__SingleUse_PPEW" Alignment="Center" TypographyId="Default">
+        <Translation Language="GB">Back</Translation>
+      </Text>
+      <Text Id="__SingleUse_WS5S" Alignment="Left" TypographyId="Default">
+        <Translation Language="GB">Noise Reduction</Translation>
+      </Text>
+      <Text Id="__SingleUse_AOL6" Alignment="Left" TypographyId="Default">
+        <Translation Language="GB">Reverb</Translation>
+      </Text>
+      <Text Id="__SingleUse_3VMN" Alignment="Left" TypographyId="Default">
+        <Translation Language="GB">Echo</Translation>
+      </Text>
+      <Text Id="__SingleUse_42GX" Alignment="Center" TypographyId="Default">
+        <Translation Language="GB">Audio Effects</Translation>
+      </Text>
+      <Text Id="__SingleUse_6XK3" Alignment="Center" TypographyId="Default">
+        <Translation Language="GB">EF</Translation>
+      </Text>
       <Text Id="__SingleUse_PGFJ" Alignment="Left" TypographyId="Default">
         <Translation Language="GB">+-0123456789</Translation>
       </Text>

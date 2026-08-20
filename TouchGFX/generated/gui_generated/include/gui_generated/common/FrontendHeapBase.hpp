@@ -16,6 +16,8 @@
 #include <gui/screen1_screen/Screen1Presenter.hpp>
 #include <gui/equalizerscreen_screen/EqualizerScreenView.hpp>
 #include <gui/equalizerscreen_screen/EqualizerScreenPresenter.hpp>
+#include <gui/effectsscreen_screen/EffectsScreenView.hpp>
+#include <gui/effectsscreen_screen/EffectsScreenPresenter.hpp>
 
 
 /**
@@ -40,7 +42,8 @@ public:
      */
     typedef touchgfx::meta::TypeList< Screen1View,
             touchgfx::meta::TypeList< EqualizerScreenView,
-            touchgfx::meta::Nil >
+            touchgfx::meta::TypeList< EffectsScreenView,
+            touchgfx::meta::Nil > >
             > GeneratedViewTypes;
 
     /**
@@ -54,7 +57,8 @@ public:
      */
     typedef touchgfx::meta::TypeList< Screen1Presenter,
             touchgfx::meta::TypeList< EqualizerScreenPresenter,
-            touchgfx::meta::Nil >
+            touchgfx::meta::TypeList< EffectsScreenPresenter,
+            touchgfx::meta::Nil > >
             > GeneratedPresenterTypes;
 
     /**

@@ -46,6 +46,7 @@ protected:
     touchgfx::ButtonWithLabel VolumeDown_button;
     touchgfx::ButtonWithLabel VolumeUp_button;
     touchgfx::ButtonWithLabel Equalizer_button;
+    touchgfx::ButtonWithLabel Effects_button;
 
 private:
 

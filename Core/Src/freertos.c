@@ -90,11 +90,8 @@ const char *playlist[] =
 
 volatile int currentTrack = 0;
 
-volatile uint8_t AudioNextRequested = 0;
-volatile uint8_t AudioPreviousRequested = 0;
-
-volatile uint8_t AudioVolumeUpRequested = 0;
-volatile uint8_t AudioVolumeDownRequested = 0;
+volatile int8_t AudioTrackChangePending = 0;
+volatile int8_t AudioVolumeChangePending = 0;
 
 volatile uint8_t AudioVolume = 70;
 
@@ -111,6 +108,9 @@ osThreadId TouchGFXTaskHandle;
 /* Private function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN FunctionPrototypes */
 void FFT_Test(void);
+static void AudioPlayer_ClearTransferFlags(void);
+static uint8_t AudioPlayer_StartSelectedTrack(const char *reason);
+static uint8_t AudioPlayer_ChangeTrack(int8_t delta, const char *reason);
 /* USER CODE END FunctionPrototypes */
 
 void StartDefaultTask(void const * argument);
@@ -234,146 +234,73 @@ void StartDefaultTask(void const * argument)
   /* Infinite loop */
   for(;;)
   {
-	  if (AudioPlayPauseRequested)
-	  {
-	      AudioPlayPauseRequested = 0;
+      int8_t trackDelta;
+      int8_t volumeSteps;
 
-	      if (PlayerState == PLAYER_STOPPED)
-	      {
-	          printf("PLAY requested\r\n");
-	          printf("Track: %s\r\n", playlist[currentTrack]);
+      taskENTER_CRITICAL();
+      trackDelta = AudioTrackChangePending;
+      AudioTrackChangePending = 0;
+      volumeSteps = AudioVolumeChangePending;
+      AudioVolumeChangePending = 0;
+      taskEXIT_CRITICAL();
 
-	          if (WavPlayer_Start(playlist[currentTrack]))
-	          {
-	              PlayerState = PLAYER_PLAYING;
+      /* Manual track changes have priority over automatic next. */
+      if (trackDelta != 0)
+      {
+          AudioTrackFinished = 0;
+          AudioPlayer_ChangeTrack(trackDelta, "TRACK CHANGE");
+      }
+      else if (AudioTrackFinished)
+      {
+          AudioTrackFinished = 0;
+          AudioPlayer_ChangeTrack(1, "AUTO NEXT");
+      }
 
-	              printf("Player state = PLAYING\r\n");
-	          }
-	          else
-	          {
-	              printf("WavPlayer_Start FAILED\r\n");
-	          }
-	      }
-	      else if (PlayerState == PLAYER_PLAYING)
-	      {
-	          BSP_AUDIO_OUT_Pause();
+      if (AudioPlayPauseRequested)
+      {
+          AudioPlayPauseRequested = 0;
 
-	          PlayerState = PLAYER_PAUSED;
+          if (PlayerState == PLAYER_STOPPED)
+          {
+              AudioPlayer_StartSelectedTrack("PLAY");
+          }
+          else if (PlayerState == PLAYER_PLAYING)
+          {
+              BSP_AUDIO_OUT_Pause();
+              PlayerState = PLAYER_PAUSED;
+              printf("Player state = PAUSED\r\n");
+          }
+          else if (PlayerState == PLAYER_PAUSED)
+          {
+              BSP_AUDIO_OUT_Resume();
+              PlayerState = PLAYER_PLAYING;
+              printf("Player state = PLAYING\r\n");
+          }
+      }
 
-	          printf("Player state = PAUSED\r\n");
-	      }
-	      else if (PlayerState == PLAYER_PAUSED)
-	      {
-	          BSP_AUDIO_OUT_Resume();
+      if (volumeSteps != 0)
+      {
+          int newVolume =
+              (int)AudioVolume + ((int)volumeSteps * 5);
 
-	          PlayerState = PLAYER_PLAYING;
+          if (newVolume < 0)
+          {
+              newVolume = 0;
+          }
+          else if (newVolume > 100)
+          {
+              newVolume = 100;
+          }
 
-	          printf("Player state = PLAYING\r\n");
-	      }
-	  }
+          AudioVolume = (uint8_t)newVolume;
 
-	  if (AudioTrackFinished)
-	  {
-	      AudioTrackFinished = 0;
+          if (PlayerState != PLAYER_STOPPED)
+          {
+              BSP_AUDIO_OUT_SetVolume(AudioVolume);
+          }
 
-	      PlayerState = PLAYER_STOPPED;
-
-	      currentTrack++;
-
-	      if (currentTrack >= TRACK_COUNT)
-	      {
-	          currentTrack = 0;
-	      }
-
-	      printf("AUTO NEXT -> %s\r\n", playlist[currentTrack]);
-
-	      if (WavPlayer_Start(playlist[currentTrack]))
-	      {
-	          PlayerState = PLAYER_PLAYING;
-	      }
-	      else
-	      {
-	          printf("Auto next playback failed\r\n");
-	      }
-	  }
-
-	  if (AudioNextRequested)
-	  {
-	      AudioNextRequested = 0;
-
-	      WavPlayer_Stop();
-
-	      currentTrack++;
-
-	      if (currentTrack >= TRACK_COUNT)
-	      {
-	          currentTrack = 0;
-	      }
-
-	      printf("NEXT -> %s\r\n", playlist[currentTrack]);
-
-	      if (WavPlayer_Start(playlist[currentTrack]))
-	      {
-	          PlayerState = PLAYER_PLAYING;
-	      }
-	  }
-
-	  if (AudioPreviousRequested)
-	  {
-	      AudioPreviousRequested = 0;
-
-	      WavPlayer_Stop();
-
-	      currentTrack--;
-
-	      if (currentTrack < 0)
-	      {
-	          currentTrack = TRACK_COUNT - 1;
-	      }
-
-	      printf("PREVIOUS -> %s\r\n", playlist[currentTrack]);
-
-	      if (WavPlayer_Start(playlist[currentTrack]))
-	      {
-	          PlayerState = PLAYER_PLAYING;
-	      }
-	  }
-
-	  if (AudioVolumeUpRequested)
-	  {
-	      AudioVolumeUpRequested = 0;
-
-	      if (AudioVolume <= 95)
-	      {
-	          AudioVolume += 5;
-	      }
-	      else
-	      {
-	          AudioVolume = 100;
-	      }
-
-	      BSP_AUDIO_OUT_SetVolume(AudioVolume);
-
-	      printf("Volume = %u\r\n", AudioVolume);
-	  }
-
-	  if (AudioVolumeDownRequested)
-	  {
-	      AudioVolumeDownRequested = 0;
-
-	      if (AudioVolume >= 5)
-	      {
-	          AudioVolume -= 5;
-	      }
-	      else
-	      {
-	          AudioVolume = 0;
-	      }
-
-	      BSP_AUDIO_OUT_SetVolume(AudioVolume);
-
-	      printf("Volume = %u\r\n", AudioVolume);
-	  }
+          printf("Volume = %u\r\n", AudioVolume);
+      }
 
 	  if (HalfBufferNeedsFill)
 	  {
@@ -417,6 +344,67 @@ void StartDefaultTask(void const * argument)
 /* Private application code --------------------------------------------------*/
 /* USER CODE BEGIN Application */
 
+static void AudioPlayer_ClearTransferFlags(void)
+{
+    HalfBufferNeedsFill = 0;
+    FullBufferNeedsFill = 0;
+    AudioTrackFinished = 0;
+}
+
+static uint8_t AudioPlayer_StartSelectedTrack(const char *reason)
+{
+    AudioPlayer_ClearTransferFlags();
+
+    printf("%s -> %s\r\n", reason, playlist[currentTrack]);
+
+    if (WavPlayer_Start(playlist[currentTrack]))
+    {
+        PlayerState = PLAYER_PLAYING;
+        return 1;
+    }
+
+    PlayerState = PLAYER_STOPPED;
+    printf("Playback start failed: %s\r\n", playlist[currentTrack]);
+    return 0;
+}
+
+static uint8_t AudioPlayer_ChangeTrack(int8_t delta, const char *reason)
+{
+    PlayerState = PLAYER_STOPPED;
+
+    if (AudioPlaying)
+    {
+        WavPlayer_Stop();
+    }
+
+    /* Let DMA and codec stop before starting the next track. */
+    osDelay(15);
+    AudioPlayer_ClearTransferFlags();
+
+    int nextTrack = currentTrack + (int)delta;
+    int trackCount = (int)TRACK_COUNT;
+
+    nextTrack %= trackCount;
+
+    if (nextTrack < 0)
+    {
+        nextTrack += trackCount;
+    }
+
+    currentTrack = nextTrack;
+
+    if (AudioPlayer_StartSelectedTrack(reason))
+    {
+        return 1;
+    }
+
+    /* Retry once after a transient SD or codec failure. */
+    osDelay(30);
+    AudioPlayer_ClearTransferFlags();
+
+    return AudioPlayer_StartSelectedTrack("RETRY");
+}
+
 void AudioPlayer_RequestPlayPause(void)
 {
     AudioPlayPauseRequested = 1;
@@ -424,22 +412,50 @@ void AudioPlayer_RequestPlayPause(void)
 
 void AudioPlayer_RequestNext(void)
 {
-    AudioNextRequested = 1;
+    taskENTER_CRITICAL();
+
+    if (AudioTrackChangePending < (int8_t)TRACK_COUNT)
+    {
+        AudioTrackChangePending++;
+    }
+
+    taskEXIT_CRITICAL();
 }
 
 void AudioPlayer_RequestPrevious(void)
 {
-    AudioPreviousRequested = 1;
+    taskENTER_CRITICAL();
+
+    if (AudioTrackChangePending > -(int8_t)TRACK_COUNT)
+    {
+        AudioTrackChangePending--;
+    }
+
+    taskEXIT_CRITICAL();
 }
 
 void AudioPlayer_RequestVolumeUp(void)
 {
-    AudioVolumeUpRequested = 1;
+    taskENTER_CRITICAL();
+
+    if (AudioVolumeChangePending < 20)
+    {
+        AudioVolumeChangePending++;
+    }
+
+    taskEXIT_CRITICAL();
 }
 
 void AudioPlayer_RequestVolumeDown(void)
 {
-    AudioVolumeDownRequested = 1;
+    taskENTER_CRITICAL();
+
+    if (AudioVolumeChangePending > -20)
+    {
+        AudioVolumeChangePending--;
+    }
+
+    taskEXIT_CRITICAL();
 }
 
 void FFT_Test(void)

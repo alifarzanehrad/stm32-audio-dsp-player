@@ -81,6 +81,7 @@ volatile uint8_t  HalfBufferNeedsFill = 0;
 volatile uint8_t  FullBufferNeedsFill = 0;
 volatile uint8_t AudioTrackFinished = 0;
 volatile uint8_t EQEnabled = 1;
+volatile uint8_t EchoEnabled = 1;
 
 #define FFT_SIZE 1024
 #define FFT_BANDS 16
@@ -91,6 +92,18 @@ volatile uint8_t EQEnabled = 1;
 #define EQ_MAX_HEADROOM_DB 6.0f
 #define EQ_LIMITER_THRESHOLD 32000.0f
 #define EQ_LIMITER_RELEASE 0.05f
+
+#define ECHO_BUFFER_ADDRESS 0xC0100000U
+#define ECHO_MAX_SAMPLE_RATE 48000U
+#define ECHO_MAX_DELAY_MS 500U
+#define ECHO_DELAY_MS 250U
+#define ECHO_CHANNEL_COUNT 2U
+#define ECHO_MIX 0.25f
+#define ECHO_FEEDBACK 0.35f
+#define ECHO_MAX_DELAY_SAMPLES \
+    ((ECHO_MAX_SAMPLE_RATE * ECHO_MAX_DELAY_MS) / 1000U)
+#define ECHO_BUFFER_FLOAT_COUNT \
+    (ECHO_MAX_DELAY_SAMPLES * ECHO_CHANNEL_COUNT)
 
 float32_t fftBands[FFT_BANDS];
 float32_t fftBandsSmoothed[FFT_BANDS];
@@ -136,6 +149,11 @@ float32_t eqStateRight[EQ_BAND_COUNT * BIQUAD_STATE_PER_STAGE];
 float32_t eqLeftBuffer[EQ_BLOCK_SIZE];
 float32_t eqRightBuffer[EQ_BLOCK_SIZE];
 
+static float32_t *const echoBuffer =
+    (float32_t *)ECHO_BUFFER_ADDRESS;
+static uint32_t echoIndex = 0;
+static uint32_t echoDelaySamples = 1;
+
 arm_rfft_fast_instance_f32 fftInstance;
 arm_biquad_casd_df1_inst_f32 eqLeft;
 arm_biquad_casd_df1_inst_f32 eqRight;
@@ -160,6 +178,8 @@ static void AudioEQ_CalculateCoefficients(void);
 static void AudioEQ_UpdatePreampGain(void);
 static void AudioEQ_ApplyPendingGains(void);
 static void AudioEQ_ApplyLimiter(void);
+static void AudioEcho_Init(float32_t sampleRate);
+static void AudioEcho_Process(void);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -699,6 +719,7 @@ static void AudioEQ_UpdatePreampGain(void)
 void AudioEQ_Init(float32_t sampleRate)
 {
     eqSampleRate = sampleRate;
+    AudioEcho_Init(sampleRate);
 
     for (uint32_t band = 0; band < EQ_BAND_COUNT; band++)
     {
@@ -807,9 +828,67 @@ static void AudioEQ_ApplyLimiter(void)
     }
 }
 
+static void AudioEcho_Init(float32_t sampleRate)
+{
+    uint32_t requestedSamples =
+        (uint32_t)((sampleRate * ECHO_DELAY_MS) / 1000.0f);
+
+    if (requestedSamples < 1U)
+    {
+        requestedSamples = 1U;
+    }
+    else if (requestedSamples > ECHO_MAX_DELAY_SAMPLES)
+    {
+        requestedSamples = ECHO_MAX_DELAY_SAMPLES;
+    }
+
+    echoDelaySamples = requestedSamples;
+    echoIndex = 0U;
+
+    memset(
+        echoBuffer,
+        0,
+        ECHO_BUFFER_FLOAT_COUNT * sizeof(float32_t)
+    );
+}
+
+static void AudioEcho_Process(void)
+{
+    const float32_t dryMix = 1.0f - ECHO_MIX;
+
+    for (uint32_t i = 0; i < EQ_BLOCK_SIZE; i++)
+    {
+        uint32_t bufferIndex = echoIndex * ECHO_CHANNEL_COUNT;
+
+        float32_t dryLeft = eqLeftBuffer[i];
+        float32_t dryRight = eqRightBuffer[i];
+        float32_t delayedLeft = echoBuffer[bufferIndex];
+        float32_t delayedRight = echoBuffer[bufferIndex + 1U];
+
+        /* y[n] = (1-M)x[n] + M d[n] */
+        eqLeftBuffer[i] =
+            dryMix * dryLeft + ECHO_MIX * delayedLeft;
+        eqRightBuffer[i] =
+            dryMix * dryRight + ECHO_MIX * delayedRight;
+
+        /* b[n] = x[n] + F d[n] */
+        echoBuffer[bufferIndex] =
+            dryLeft + ECHO_FEEDBACK * delayedLeft;
+        echoBuffer[bufferIndex + 1U] =
+            dryRight + ECHO_FEEDBACK * delayedRight;
+
+        echoIndex++;
+
+        if (echoIndex >= echoDelaySamples)
+        {
+            echoIndex = 0U;
+        }
+    }
+}
+
 void AudioEQ_Process(uint8_t *audioData)
 {
-    if (!EQEnabled)
+    if (!EQEnabled && !EchoEnabled)
     {
         return;
     }
@@ -818,29 +897,39 @@ void AudioEQ_Process(uint8_t *audioData)
 
     int16_t *samples =
         (int16_t *)audioData;
+    float32_t inputGain =
+        EQEnabled ? eqPreampGain : 1.0f;
 
     for (uint32_t i = 0; i < EQ_BLOCK_SIZE; i++)
     {
         eqLeftBuffer[i] =
-            (float32_t)samples[2 * i] * eqPreampGain;
+            (float32_t)samples[2 * i] * inputGain;
 
         eqRightBuffer[i] =
-            (float32_t)samples[2 * i + 1] * eqPreampGain;
+            (float32_t)samples[2 * i + 1] * inputGain;
     }
 
-    arm_biquad_cascade_df1_f32(
-        &eqLeft,
-        eqLeftBuffer,
-        eqLeftBuffer,
-        EQ_BLOCK_SIZE
-    );
+    if (EQEnabled)
+    {
+        arm_biquad_cascade_df1_f32(
+            &eqLeft,
+            eqLeftBuffer,
+            eqLeftBuffer,
+            EQ_BLOCK_SIZE
+        );
 
-    arm_biquad_cascade_df1_f32(
-        &eqRight,
-        eqRightBuffer,
-        eqRightBuffer,
-        EQ_BLOCK_SIZE
-    );
+        arm_biquad_cascade_df1_f32(
+            &eqRight,
+            eqRightBuffer,
+            eqRightBuffer,
+            EQ_BLOCK_SIZE
+        );
+    }
+
+    if (EchoEnabled)
+    {
+        AudioEcho_Process();
+    }
 
     AudioEQ_ApplyLimiter();
 

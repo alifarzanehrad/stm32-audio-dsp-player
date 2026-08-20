@@ -25,6 +25,9 @@ public:
      */
     virtual void deactivate();
 
+    void setEchoEnabled(bool enabled);
+    bool getEchoEnabled() const;
+
     virtual ~EffectsScreenPresenter() {}
 
 private:

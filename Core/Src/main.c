@@ -82,6 +82,7 @@ volatile uint8_t  FullBufferNeedsFill = 0;
 volatile uint8_t AudioTrackFinished = 0;
 volatile uint8_t EQEnabled = 1;
 volatile uint8_t EchoEnabled = 1;
+volatile uint8_t echoResetPending = 0;
 
 #define FFT_SIZE 1024
 #define FFT_BANDS 16
@@ -174,11 +175,14 @@ void AudioFFT_Process(uint8_t *audioData);
 void AudioEQ_Init(float32_t sampleRate);
 void AudioEQ_Process(uint8_t *audioData);
 void AudioEQ_SetBandGain(uint8_t band, float32_t gainDB);
+void AudioEcho_SetEnabled(uint8_t enabled);
+uint8_t AudioEcho_IsEnabled(void);
 static void AudioEQ_CalculateCoefficients(void);
 static void AudioEQ_UpdatePreampGain(void);
 static void AudioEQ_ApplyPendingGains(void);
 static void AudioEQ_ApplyLimiter(void);
 static void AudioEcho_Init(float32_t sampleRate);
+static void AudioEcho_Reset(void);
 static void AudioEcho_Process(void);
 /* USER CODE END PFP */
 
@@ -828,6 +832,33 @@ static void AudioEQ_ApplyLimiter(void)
     }
 }
 
+void AudioEcho_SetEnabled(uint8_t enabled)
+{
+    uint8_t newState = enabled ? 1U : 0U;
+
+    if (EchoEnabled != newState)
+    {
+        EchoEnabled = newState;
+        echoResetPending = 1U;
+    }
+}
+
+uint8_t AudioEcho_IsEnabled(void)
+{
+    return EchoEnabled;
+}
+
+static void AudioEcho_Reset(void)
+{
+    echoIndex = 0U;
+
+    memset(
+        echoBuffer,
+        0,
+        ECHO_BUFFER_FLOAT_COUNT * sizeof(float32_t)
+    );
+}
+
 static void AudioEcho_Init(float32_t sampleRate)
 {
     uint32_t requestedSamples =
@@ -843,13 +874,7 @@ static void AudioEcho_Init(float32_t sampleRate)
     }
 
     echoDelaySamples = requestedSamples;
-    echoIndex = 0U;
-
-    memset(
-        echoBuffer,
-        0,
-        ECHO_BUFFER_FLOAT_COUNT * sizeof(float32_t)
-    );
+    AudioEcho_Reset();
 }
 
 static void AudioEcho_Process(void)
@@ -888,6 +913,12 @@ static void AudioEcho_Process(void)
 
 void AudioEQ_Process(uint8_t *audioData)
 {
+    if (echoResetPending)
+    {
+        echoResetPending = 0U;
+        AudioEcho_Reset();
+    }
+
     if (!EQEnabled && !EchoEnabled)
     {
         return;

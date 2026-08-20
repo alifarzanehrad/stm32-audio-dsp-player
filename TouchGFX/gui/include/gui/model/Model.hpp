@@ -37,11 +37,15 @@ public:
     void setEQSliderValue(uint8_t band, int value);
     int getEQSliderValue(uint8_t band) const;
 
+    void setEchoEnabled(bool enabled);
+    bool getEchoEnabled() const;
+
 protected:
     ModelListener* modelListener;
 
 private:
     int eqSliderValues[EQ_BAND_COUNT];
+    bool echoEnabled;
 };
 
 #endif // MODEL_HPP

@@ -48,7 +48,7 @@ extern "C" void AudioEcho_SetEnabled(uint8_t enabled)
 
 extern "C" uint8_t AudioEcho_IsEnabled(void)
 {
-    return 1U;
+    return 0U;
 }
 
 #endif

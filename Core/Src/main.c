@@ -121,8 +121,8 @@ extern volatile uint8_t AudioVolume;
     ((REVERB_MAX_SAMPLE_RATE * REVERB_COMB_MAX_DELAY_MS) / 1000U)
 #define REVERB_ALLPASS_MAX_SAMPLES \
     ((REVERB_MAX_SAMPLE_RATE * REVERB_ALLPASS_MAX_DELAY_MS) / 1000U)
-#define REVERB_MIX 0.18f
-#define REVERB_FEEDBACK 0.68f
+#define REVERB_MIX 0.22f
+#define REVERB_FEEDBACK 0.72f
 #define REVERB_DAMPING 0.25f
 #define REVERB_ALLPASS_GAIN 0.50f
 
@@ -1157,8 +1157,6 @@ static float32_t AudioReverb_ProcessAllpass(
 
 static void AudioReverb_Process(void)
 {
-    const float32_t dryMix = 1.0f - REVERB_MIX;
-
     for (uint32_t i = 0U; i < EQ_BLOCK_SIZE; i++)
     {
         float32_t dry[REVERB_CHANNEL_COUNT] =
@@ -1195,11 +1193,11 @@ static void AudioReverb_Process(void)
             }
         }
 
-        /* output[n] = (1-M)dry[n] + M wet[n] */
+        /* output[n] = dry[n] + M wet[n] */
         eqLeftBuffer[i] =
-            dryMix * dry[0] + REVERB_MIX * wet[0];
+            dry[0] + REVERB_MIX * wet[0];
         eqRightBuffer[i] =
-            dryMix * dry[1] + REVERB_MIX * wet[1];
+            dry[1] + REVERB_MIX * wet[1];
     }
 }
 

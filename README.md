@@ -32,7 +32,7 @@ A real-time audio player and DSP platform built on the **STM32F746G-DISCO**. The
 | Storage | SD card with FATFS |
 | Audio test format | Stereo PCM, 16-bit, 48 kHz |
 | Build environment | STM32CubeIDE |
-| Flash tool | pyOCD |
+| Flash tools | STM32CubeIDE integrated ST-LINK support or pyOCD |
 
 ## Audio processing pipeline
 
@@ -202,8 +202,22 @@ Tracks 4, 5, and 6 are used for noise-reduction tests at 5 dB, 10 dB, and 15 dB 
 
 1. Generate TouchGFX assets on Windows when the UI is modified.
 2. Open the project in STM32CubeIDE.
-3. Clean and build the Debug configuration.
-4. Flash the generated ELF file:
+3. Select the Debug configuration, then clean and build the project.
+4. Connect the STM32F746G-DISCO through its ST-LINK USB connector.
+5. Program the board using either method below.
+
+### STM32CubeIDE
+
+Use the integrated ST-LINK programmer:
+
+- To program and run: **Run → Run As → STM32 C/C++ Application**, or click the green Run button.
+- To program and debug: **Run → Debug As → STM32 C/C++ Application**, or click the Debug button.
+
+STM32CubeIDE loads the generated `Debug/V1.elf` file and starts the application automatically.
+
+### pyOCD
+
+From a terminal in the project directory:
 
 ```bash
 cd ~/Developer/stm32/V1
@@ -269,4 +283,6 @@ The latest stable tag is [v1.0.1](https://github.com/alifarzanehrad/stm32-audio-
 
 ## License
 
-A project license has not been selected yet.
+Original application code and documentation are available under the [MIT License](LICENSE).
+
+Generated code and third-party components, including STM32 HAL/BSP, CMSIS-DSP, FreeRTOS, FatFS, TouchGFX, and ST audio middleware, remain under their respective upstream licenses. See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) for details.

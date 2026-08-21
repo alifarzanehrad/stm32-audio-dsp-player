@@ -265,7 +265,7 @@ Potential future improvements:
 
 ## Release
 
-The latest stable tag is [v1.0.1](https://github.com/alifarzanehrad/STM32-V1/tree/v1.0.1).
+The latest stable tag is [v1.0.1](https://github.com/alifarzanehrad/stm32-audio-dsp-player/tree/v1.0.1).
 
 ## License
 

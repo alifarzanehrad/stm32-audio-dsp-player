@@ -40,12 +40,16 @@ public:
     void setEchoEnabled(bool enabled);
     bool getEchoEnabled() const;
 
+    void setReverbEnabled(bool enabled);
+    bool getReverbEnabled() const;
+
 protected:
     ModelListener* modelListener;
 
 private:
     int eqSliderValues[EQ_BAND_COUNT];
     bool echoEnabled;
+    bool reverbEnabled;
 };
 
 #endif // MODEL_HPP

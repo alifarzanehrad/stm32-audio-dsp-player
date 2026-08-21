@@ -132,11 +132,11 @@ extern volatile uint8_t AudioVolume;
 #define NR_HOP_SIZE (NR_FRAME_SIZE / 2U)
 #define NR_BIN_COUNT (NR_FRAME_SIZE / 2U + 1U)
 #define NR_INIT_FRAMES 12U
-#define NR_OVERSUBTRACTION 1.0f
-#define NR_MIN_GAIN 0.25f
-#define NR_NOISE_SMOOTHING 0.98f
-#define NR_GAIN_SMOOTHING 0.80f
-#define NR_NOISE_UPDATE_RATIO 1.5f
+#define NR_OVERSUBTRACTION 2.5f
+#define NR_MIN_GAIN 0.08f
+#define NR_NOISE_SMOOTHING 0.97f
+#define NR_GAIN_SMOOTHING 0.60f
+#define NR_NOISE_UPDATE_RATIO 2.5f
 #define NR_EPSILON 1.0e-12f
 
 float32_t fftBands[FFT_BANDS];

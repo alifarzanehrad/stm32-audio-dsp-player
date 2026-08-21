@@ -31,6 +31,9 @@ public:
     void setReverbEnabled(bool enabled);
     bool getReverbEnabled() const;
 
+    void setNoiseReductionEnabled(bool enabled);
+    bool getNoiseReductionEnabled() const;
+
     virtual ~EffectsScreenPresenter() {}
 
 private:

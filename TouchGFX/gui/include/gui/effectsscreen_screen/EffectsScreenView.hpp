@@ -13,6 +13,7 @@ public:
     virtual void tearDownScreen();
     virtual void echoToggled();
     virtual void reverbToggled();
+    virtual void noiseReductionToggled();
 
 protected:
 };

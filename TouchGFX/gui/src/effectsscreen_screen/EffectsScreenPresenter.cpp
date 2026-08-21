@@ -26,3 +26,13 @@ bool EffectsScreenPresenter::getEchoEnabled() const
 {
     return model->getEchoEnabled();
 }
+
+void EffectsScreenPresenter::setReverbEnabled(bool enabled)
+{
+    model->setReverbEnabled(enabled);
+}
+
+bool EffectsScreenPresenter::getReverbEnabled() const
+{
+    return model->getReverbEnabled();
+}

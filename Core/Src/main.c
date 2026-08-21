@@ -83,6 +83,8 @@ volatile uint8_t AudioTrackFinished = 0;
 volatile uint8_t EQEnabled = 1;
 volatile uint8_t EchoEnabled = 0;
 volatile uint8_t echoResetPending = 0;
+volatile uint8_t ReverbEnabled = 0;
+volatile uint8_t reverbResetPending = 0;
 
 extern volatile uint8_t AudioVolume;
 
@@ -107,6 +109,22 @@ extern volatile uint8_t AudioVolume;
     ((ECHO_MAX_SAMPLE_RATE * ECHO_MAX_DELAY_MS) / 1000U)
 #define ECHO_BUFFER_FLOAT_COUNT \
     (ECHO_MAX_DELAY_SAMPLES * ECHO_CHANNEL_COUNT)
+
+#define REVERB_BUFFER_ADDRESS 0xC0140000U
+#define REVERB_CHANNEL_COUNT 2U
+#define REVERB_COMB_COUNT 4U
+#define REVERB_ALLPASS_COUNT 2U
+#define REVERB_MAX_SAMPLE_RATE 48000U
+#define REVERB_COMB_MAX_DELAY_MS 50U
+#define REVERB_ALLPASS_MAX_DELAY_MS 8U
+#define REVERB_COMB_MAX_SAMPLES \
+    ((REVERB_MAX_SAMPLE_RATE * REVERB_COMB_MAX_DELAY_MS) / 1000U)
+#define REVERB_ALLPASS_MAX_SAMPLES \
+    ((REVERB_MAX_SAMPLE_RATE * REVERB_ALLPASS_MAX_DELAY_MS) / 1000U)
+#define REVERB_MIX 0.18f
+#define REVERB_FEEDBACK 0.68f
+#define REVERB_DAMPING 0.25f
+#define REVERB_ALLPASS_GAIN 0.50f
 
 float32_t fftBands[FFT_BANDS];
 float32_t fftBandsSmoothed[FFT_BANDS];
@@ -157,6 +175,21 @@ static float32_t *const echoBuffer =
 static uint32_t echoIndex = 0;
 static uint32_t echoDelaySamples = 1;
 
+typedef struct
+{
+    float32_t *buffer;
+    uint32_t length;
+    uint32_t index;
+    float32_t dampingState;
+} ReverbDelayLine;
+
+static float32_t *const reverbBuffer =
+    (float32_t *)REVERB_BUFFER_ADDRESS;
+static ReverbDelayLine
+    reverbComb[REVERB_CHANNEL_COUNT][REVERB_COMB_COUNT];
+static ReverbDelayLine
+    reverbAllpass[REVERB_CHANNEL_COUNT][REVERB_ALLPASS_COUNT];
+
 arm_rfft_fast_instance_f32 fftInstance;
 arm_biquad_casd_df1_inst_f32 eqLeft;
 arm_biquad_casd_df1_inst_f32 eqRight;
@@ -179,6 +212,8 @@ void AudioEQ_Process(uint8_t *audioData);
 void AudioEQ_SetBandGain(uint8_t band, float32_t gainDB);
 void AudioEcho_SetEnabled(uint8_t enabled);
 uint8_t AudioEcho_IsEnabled(void);
+void AudioReverb_SetEnabled(uint8_t enabled);
+uint8_t AudioReverb_IsEnabled(void);
 static void AudioEQ_CalculateCoefficients(void);
 static void AudioEQ_UpdatePreampGain(void);
 static void AudioEQ_ApplyPendingGains(void);
@@ -186,6 +221,17 @@ static void AudioEQ_ApplyLimiter(void);
 static void AudioEcho_Init(float32_t sampleRate);
 static void AudioEcho_Reset(void);
 static void AudioEcho_Process(void);
+static void AudioReverb_Init(float32_t sampleRate);
+static void AudioReverb_Reset(void);
+static void AudioReverb_Process(void);
+static float32_t AudioReverb_ProcessComb(
+    ReverbDelayLine *line,
+    float32_t input
+);
+static float32_t AudioReverb_ProcessAllpass(
+    ReverbDelayLine *line,
+    float32_t input
+);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -736,6 +782,7 @@ void AudioEQ_Init(float32_t sampleRate)
 {
     eqSampleRate = sampleRate;
     AudioEcho_Init(sampleRate);
+    AudioReverb_Init(sampleRate);
 
     for (uint32_t band = 0; band < EQ_BAND_COUNT; band++)
     {
@@ -923,6 +970,239 @@ static void AudioEcho_Process(void)
     }
 }
 
+void AudioReverb_SetEnabled(uint8_t enabled)
+{
+    uint8_t newState = enabled ? 1U : 0U;
+
+    if (ReverbEnabled != newState)
+    {
+        ReverbEnabled = newState;
+        reverbResetPending = 1U;
+    }
+}
+
+uint8_t AudioReverb_IsEnabled(void)
+{
+    return ReverbEnabled;
+}
+
+static void AudioReverb_Reset(void)
+{
+    const uint32_t combFloatCount =
+        REVERB_CHANNEL_COUNT *
+        REVERB_COMB_COUNT *
+        REVERB_COMB_MAX_SAMPLES;
+    const uint32_t allpassFloatCount =
+        REVERB_CHANNEL_COUNT *
+        REVERB_ALLPASS_COUNT *
+        REVERB_ALLPASS_MAX_SAMPLES;
+
+    memset(
+        reverbBuffer,
+        0,
+        (combFloatCount + allpassFloatCount) * sizeof(float32_t)
+    );
+
+    for (uint32_t channel = 0U;
+         channel < REVERB_CHANNEL_COUNT;
+         channel++)
+    {
+        for (uint32_t stage = 0U;
+             stage < REVERB_COMB_COUNT;
+             stage++)
+        {
+            reverbComb[channel][stage].index = 0U;
+            reverbComb[channel][stage].dampingState = 0.0f;
+        }
+
+        for (uint32_t stage = 0U;
+             stage < REVERB_ALLPASS_COUNT;
+             stage++)
+        {
+            reverbAllpass[channel][stage].index = 0U;
+            reverbAllpass[channel][stage].dampingState = 0.0f;
+        }
+    }
+}
+
+static void AudioReverb_Init(float32_t sampleRate)
+{
+    static const float32_t combDelayMs
+        [REVERB_CHANNEL_COUNT][REVERB_COMB_COUNT] =
+    {
+        {29.7f, 37.1f, 41.1f, 43.7f},
+        {30.9f, 38.3f, 42.3f, 44.9f}
+    };
+    static const float32_t allpassDelayMs
+        [REVERB_CHANNEL_COUNT][REVERB_ALLPASS_COUNT] =
+    {
+        {5.0f, 1.7f},
+        {5.5f, 2.1f}
+    };
+
+    uint32_t allpassBase =
+        REVERB_CHANNEL_COUNT *
+        REVERB_COMB_COUNT *
+        REVERB_COMB_MAX_SAMPLES;
+
+    for (uint32_t channel = 0U;
+         channel < REVERB_CHANNEL_COUNT;
+         channel++)
+    {
+        for (uint32_t stage = 0U;
+             stage < REVERB_COMB_COUNT;
+             stage++)
+        {
+            uint32_t slot =
+                channel * REVERB_COMB_COUNT + stage;
+            uint32_t length = (uint32_t)(
+                sampleRate * combDelayMs[channel][stage] / 1000.0f
+            );
+
+            if (length < 1U)
+            {
+                length = 1U;
+            }
+            else if (length > REVERB_COMB_MAX_SAMPLES)
+            {
+                length = REVERB_COMB_MAX_SAMPLES;
+            }
+
+            reverbComb[channel][stage].buffer =
+                &reverbBuffer[slot * REVERB_COMB_MAX_SAMPLES];
+            reverbComb[channel][stage].length = length;
+        }
+
+        for (uint32_t stage = 0U;
+             stage < REVERB_ALLPASS_COUNT;
+             stage++)
+        {
+            uint32_t slot =
+                channel * REVERB_ALLPASS_COUNT + stage;
+            uint32_t length = (uint32_t)(
+                sampleRate * allpassDelayMs[channel][stage] / 1000.0f
+            );
+
+            if (length < 1U)
+            {
+                length = 1U;
+            }
+            else if (length > REVERB_ALLPASS_MAX_SAMPLES)
+            {
+                length = REVERB_ALLPASS_MAX_SAMPLES;
+            }
+
+            reverbAllpass[channel][stage].buffer =
+                &reverbBuffer[
+                    allpassBase +
+                    slot * REVERB_ALLPASS_MAX_SAMPLES
+                ];
+            reverbAllpass[channel][stage].length = length;
+        }
+    }
+
+    AudioReverb_Reset();
+}
+
+static float32_t AudioReverb_ProcessComb(
+    ReverbDelayLine *line,
+    float32_t input
+)
+{
+    float32_t delayed = line->buffer[line->index];
+
+    /* f[n] = (1-D)d[n] + D f[n-1] */
+    line->dampingState =
+        (1.0f - REVERB_DAMPING) * delayed +
+        REVERB_DAMPING * line->dampingState;
+
+    /* b[n] = x[n] + G f[n] */
+    line->buffer[line->index] =
+        input + REVERB_FEEDBACK * line->dampingState;
+
+    line->index++;
+
+    if (line->index >= line->length)
+    {
+        line->index = 0U;
+    }
+
+    return delayed;
+}
+
+static float32_t AudioReverb_ProcessAllpass(
+    ReverbDelayLine *line,
+    float32_t input
+)
+{
+    float32_t delayed = line->buffer[line->index];
+
+    /* y[n] = -G x[n] + d[n] */
+    float32_t output =
+        -REVERB_ALLPASS_GAIN * input + delayed;
+
+    /* b[n] = x[n] + G y[n] */
+    line->buffer[line->index] =
+        input + REVERB_ALLPASS_GAIN * output;
+
+    line->index++;
+
+    if (line->index >= line->length)
+    {
+        line->index = 0U;
+    }
+
+    return output;
+}
+
+static void AudioReverb_Process(void)
+{
+    const float32_t dryMix = 1.0f - REVERB_MIX;
+
+    for (uint32_t i = 0U; i < EQ_BLOCK_SIZE; i++)
+    {
+        float32_t dry[REVERB_CHANNEL_COUNT] =
+        {
+            eqLeftBuffer[i],
+            eqRightBuffer[i]
+        };
+        float32_t wet[REVERB_CHANNEL_COUNT] = {0.0f, 0.0f};
+
+        for (uint32_t channel = 0U;
+             channel < REVERB_CHANNEL_COUNT;
+             channel++)
+        {
+            for (uint32_t stage = 0U;
+                 stage < REVERB_COMB_COUNT;
+                 stage++)
+            {
+                wet[channel] += AudioReverb_ProcessComb(
+                    &reverbComb[channel][stage],
+                    dry[channel]
+                );
+            }
+
+            wet[channel] /= (float32_t)REVERB_COMB_COUNT;
+
+            for (uint32_t stage = 0U;
+                 stage < REVERB_ALLPASS_COUNT;
+                 stage++)
+            {
+                wet[channel] = AudioReverb_ProcessAllpass(
+                    &reverbAllpass[channel][stage],
+                    wet[channel]
+                );
+            }
+        }
+
+        /* output[n] = (1-M)dry[n] + M wet[n] */
+        eqLeftBuffer[i] =
+            dryMix * dry[0] + REVERB_MIX * wet[0];
+        eqRightBuffer[i] =
+            dryMix * dry[1] + REVERB_MIX * wet[1];
+    }
+}
+
 void AudioEQ_Process(uint8_t *audioData)
 {
     if (echoResetPending)
@@ -931,7 +1211,13 @@ void AudioEQ_Process(uint8_t *audioData)
         AudioEcho_Reset();
     }
 
-    if (!EQEnabled && !EchoEnabled)
+    if (reverbResetPending)
+    {
+        reverbResetPending = 0U;
+        AudioReverb_Reset();
+    }
+
+    if (!EQEnabled && !EchoEnabled && !ReverbEnabled)
     {
         return;
     }
@@ -972,6 +1258,11 @@ void AudioEQ_Process(uint8_t *audioData)
     if (EchoEnabled)
     {
         AudioEcho_Process();
+    }
+
+    if (ReverbEnabled)
+    {
+        AudioReverb_Process();
     }
 
     AudioEQ_ApplyLimiter();

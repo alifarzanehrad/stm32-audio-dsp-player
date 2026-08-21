@@ -11,6 +11,8 @@ extern "C"
     void AudioEQ_SetBandGain(uint8_t band, float gainDB);
     void AudioEcho_SetEnabled(uint8_t enabled);
     uint8_t AudioEcho_IsEnabled(void);
+    void AudioReverb_SetEnabled(uint8_t enabled);
+    uint8_t AudioReverb_IsEnabled(void);
 }
 
 #ifdef SIMULATOR
@@ -51,11 +53,22 @@ extern "C" uint8_t AudioEcho_IsEnabled(void)
     return 0U;
 }
 
+extern "C" void AudioReverb_SetEnabled(uint8_t enabled)
+{
+    (void)enabled;
+}
+
+extern "C" uint8_t AudioReverb_IsEnabled(void)
+{
+    return 0U;
+}
+
 #endif
 
 Model::Model()
     : modelListener(0),
-      echoEnabled(AudioEcho_IsEnabled() != 0U)
+      echoEnabled(AudioEcho_IsEnabled() != 0U),
+      reverbEnabled(AudioReverb_IsEnabled() != 0U)
 {
     for (uint8_t band = 0; band < EQ_BAND_COUNT; band++)
     {
@@ -132,4 +145,15 @@ void Model::setEchoEnabled(bool enabled)
 bool Model::getEchoEnabled() const
 {
     return echoEnabled;
+}
+
+void Model::setReverbEnabled(bool enabled)
+{
+    reverbEnabled = enabled;
+    AudioReverb_SetEnabled(enabled ? 1U : 0U);
+}
+
+bool Model::getReverbEnabled() const
+{
+    return reverbEnabled;
 }

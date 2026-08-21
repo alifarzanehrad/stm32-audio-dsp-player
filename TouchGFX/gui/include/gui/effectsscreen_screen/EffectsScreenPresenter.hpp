@@ -28,6 +28,9 @@ public:
     void setEchoEnabled(bool enabled);
     bool getEchoEnabled() const;
 
+    void setReverbEnabled(bool enabled);
+    bool getReverbEnabled() const;
+
     virtual ~EffectsScreenPresenter() {}
 
 private:

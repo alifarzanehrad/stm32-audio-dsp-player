@@ -83,7 +83,8 @@ const char *playlist[] =
 {
     "one.wav",
     "two_48k.wav",
-    "three.wav"
+    "three.wav",
+    "four.wav"
 };
 
 #define TRACK_COUNT (sizeof(playlist) / sizeof(playlist[0]))

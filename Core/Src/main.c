@@ -85,6 +85,8 @@ volatile uint8_t EchoEnabled = 0;
 volatile uint8_t echoResetPending = 0;
 volatile uint8_t ReverbEnabled = 0;
 volatile uint8_t reverbResetPending = 0;
+volatile uint8_t NoiseReductionEnabled = 0;
+volatile uint8_t noiseReductionResetPending = 0;
 
 extern volatile uint8_t AudioVolume;
 
@@ -126,12 +128,39 @@ extern volatile uint8_t AudioVolume;
 #define REVERB_DAMPING 0.25f
 #define REVERB_ALLPASS_GAIN 0.50f
 
+#define NR_FRAME_SIZE 512U
+#define NR_HOP_SIZE (NR_FRAME_SIZE / 2U)
+#define NR_BIN_COUNT (NR_FRAME_SIZE / 2U + 1U)
+#define NR_INIT_FRAMES 12U
+#define NR_OVERSUBTRACTION 1.0f
+#define NR_MIN_GAIN 0.25f
+#define NR_NOISE_SMOOTHING 0.98f
+#define NR_GAIN_SMOOTHING 0.80f
+#define NR_NOISE_UPDATE_RATIO 1.5f
+#define NR_EPSILON 1.0e-12f
+
 float32_t fftBands[FFT_BANDS];
 float32_t fftBandsSmoothed[FFT_BANDS];
 float32_t fftInput[FFT_SIZE];
 float32_t fftOutput[FFT_SIZE];
 float32_t fftMagnitude[FFT_SIZE / 2];
 float32_t hannWindow[FFT_SIZE];
+
+typedef struct
+{
+    float32_t inputFrame[NR_FRAME_SIZE];
+    float32_t outputOverlap[NR_FRAME_SIZE];
+    float32_t noisePower[NR_BIN_COUNT];
+    float32_t previousGain[NR_BIN_COUNT];
+    uint32_t initFrameCount;
+} NoiseReductionChannel;
+
+static NoiseReductionChannel nrLeft;
+static NoiseReductionChannel nrRight;
+static float32_t nrWindow[NR_FRAME_SIZE];
+static float32_t nrFftInput[NR_FRAME_SIZE];
+static float32_t nrFftOutput[NR_FRAME_SIZE];
+static float32_t nrCurrentGain[NR_BIN_COUNT];
 
 static const float32_t eqBandFrequencies[EQ_BAND_COUNT] =
 {
@@ -191,6 +220,7 @@ static ReverbDelayLine
     reverbAllpass[REVERB_CHANNEL_COUNT][REVERB_ALLPASS_COUNT];
 
 arm_rfft_fast_instance_f32 fftInstance;
+arm_rfft_fast_instance_f32 nrFftInstance;
 arm_biquad_casd_df1_inst_f32 eqLeft;
 arm_biquad_casd_df1_inst_f32 eqRight;
 /* USER CODE END PV */
@@ -214,6 +244,8 @@ void AudioEcho_SetEnabled(uint8_t enabled);
 uint8_t AudioEcho_IsEnabled(void);
 void AudioReverb_SetEnabled(uint8_t enabled);
 uint8_t AudioReverb_IsEnabled(void);
+void AudioNoiseReduction_SetEnabled(uint8_t enabled);
+uint8_t AudioNoiseReduction_IsEnabled(void);
 static void AudioEQ_CalculateCoefficients(void);
 static void AudioEQ_UpdatePreampGain(void);
 static void AudioEQ_ApplyPendingGains(void);
@@ -224,6 +256,13 @@ static void AudioEcho_Process(void);
 static void AudioReverb_Init(float32_t sampleRate);
 static void AudioReverb_Reset(void);
 static void AudioReverb_Process(void);
+static void AudioNoiseReduction_Init(void);
+static void AudioNoiseReduction_Reset(void);
+static void AudioNoiseReduction_Process(void);
+static void AudioNoiseReduction_ProcessChannel(
+    NoiseReductionChannel *channel,
+    float32_t *samples
+);
 static float32_t AudioReverb_ProcessComb(
     ReverbDelayLine *line,
     float32_t input
@@ -783,6 +822,7 @@ void AudioEQ_Init(float32_t sampleRate)
     eqSampleRate = sampleRate;
     AudioEcho_Init(sampleRate);
     AudioReverb_Init(sampleRate);
+    AudioNoiseReduction_Init();
 
     for (uint32_t band = 0; band < EQ_BAND_COUNT; band++)
     {
@@ -1201,6 +1241,241 @@ static void AudioReverb_Process(void)
     }
 }
 
+void AudioNoiseReduction_SetEnabled(uint8_t enabled)
+{
+    uint8_t newState = enabled ? 1U : 0U;
+
+    if (NoiseReductionEnabled != newState)
+    {
+        NoiseReductionEnabled = newState;
+        noiseReductionResetPending = 1U;
+    }
+}
+
+uint8_t AudioNoiseReduction_IsEnabled(void)
+{
+    return NoiseReductionEnabled;
+}
+
+static void AudioNoiseReduction_Reset(void)
+{
+    memset(&nrLeft, 0, sizeof(nrLeft));
+    memset(&nrRight, 0, sizeof(nrRight));
+
+    for (uint32_t k = 0U; k < NR_BIN_COUNT; k++)
+    {
+        nrLeft.previousGain[k] = 1.0f;
+        nrRight.previousGain[k] = 1.0f;
+    }
+}
+
+static void AudioNoiseReduction_Init(void)
+{
+    if (arm_rfft_fast_init_f32(
+            &nrFftInstance,
+            NR_FRAME_SIZE
+        ) != ARM_MATH_SUCCESS)
+    {
+        Error_Handler();
+    }
+
+    for (uint32_t i = 0U; i < NR_FRAME_SIZE; i++)
+    {
+        /* Square-root Hann gives perfect 50% overlap reconstruction. */
+        float32_t hann =
+            0.5f -
+            0.5f * cosf((2.0f * PI * i) / NR_FRAME_SIZE);
+        nrWindow[i] = sqrtf(hann);
+    }
+
+    AudioNoiseReduction_Reset();
+}
+
+static void AudioNoiseReduction_ProcessChannel(
+    NoiseReductionChannel *channel,
+    float32_t *samples
+)
+{
+    for (uint32_t offset = 0U;
+         offset < EQ_BLOCK_SIZE;
+         offset += NR_HOP_SIZE)
+    {
+        memmove(
+            channel->inputFrame,
+            &channel->inputFrame[NR_HOP_SIZE],
+            NR_HOP_SIZE * sizeof(float32_t)
+        );
+
+        memcpy(
+            &channel->inputFrame[NR_HOP_SIZE],
+            &samples[offset],
+            NR_HOP_SIZE * sizeof(float32_t)
+        );
+
+        for (uint32_t i = 0U; i < NR_FRAME_SIZE; i++)
+        {
+            nrFftInput[i] =
+                channel->inputFrame[i] * nrWindow[i];
+        }
+
+        arm_rfft_fast_f32(
+            &nrFftInstance,
+            nrFftInput,
+            nrFftOutput,
+            0
+        );
+
+        /*
+         * P[k] = Re(X[k])^2 + Im(X[k])^2
+         * N[k] = beta*N[k] + (1-beta)*P[k]
+         * G[k] = max(Gmin, 1 - alpha*N[k]/(P[k] + epsilon))
+         * Y[k] = G[k] * X[k]
+         */
+        for (uint32_t k = 0U; k < NR_BIN_COUNT; k++)
+        {
+            float32_t real;
+            float32_t imag = 0.0f;
+
+            if (k == 0U)
+            {
+                real = nrFftOutput[0];
+            }
+            else if (k == NR_FRAME_SIZE / 2U)
+            {
+                real = nrFftOutput[1];
+            }
+            else
+            {
+                real = nrFftOutput[2U * k];
+                imag = nrFftOutput[2U * k + 1U];
+            }
+
+            float32_t power = real * real + imag * imag;
+
+            if (channel->initFrameCount < NR_INIT_FRAMES)
+            {
+                channel->noisePower[k] +=
+                    power / (float32_t)NR_INIT_FRAMES;
+                nrCurrentGain[k] = 1.0f;
+            }
+            else
+            {
+                float32_t noise = channel->noisePower[k];
+
+                if (power < NR_NOISE_UPDATE_RATIO * noise)
+                {
+                    noise =
+                        NR_NOISE_SMOOTHING * noise +
+                        (1.0f - NR_NOISE_SMOOTHING) * power;
+                    channel->noisePower[k] = noise;
+                }
+
+                float32_t gain =
+                    1.0f -
+                    NR_OVERSUBTRACTION * noise /
+                    (power + NR_EPSILON);
+
+                if (gain < NR_MIN_GAIN)
+                {
+                    gain = NR_MIN_GAIN;
+                }
+                else if (gain > 1.0f)
+                {
+                    gain = 1.0f;
+                }
+
+                nrCurrentGain[k] = gain;
+            }
+        }
+
+        if (channel->initFrameCount < NR_INIT_FRAMES)
+        {
+            channel->initFrameCount++;
+        }
+        else
+        {
+            for (uint32_t k = 0U; k < NR_BIN_COUNT; k++)
+            {
+                uint32_t previousBin = (k > 0U) ? k - 1U : k;
+                uint32_t nextBin =
+                    (k + 1U < NR_BIN_COUNT) ? k + 1U : k;
+
+                float32_t frequencySmoothedGain =
+                    (
+                        nrCurrentGain[previousBin] +
+                        2.0f * nrCurrentGain[k] +
+                        nrCurrentGain[nextBin]
+                    ) * 0.25f;
+
+                float32_t gain =
+                    NR_GAIN_SMOOTHING * channel->previousGain[k] +
+                    (1.0f - NR_GAIN_SMOOTHING) *
+                    frequencySmoothedGain;
+
+                channel->previousGain[k] = gain;
+
+                if (k == 0U)
+                {
+                    nrFftOutput[0] *= gain;
+                }
+                else if (k == NR_FRAME_SIZE / 2U)
+                {
+                    nrFftOutput[1] *= gain;
+                }
+                else
+                {
+                    nrFftOutput[2U * k] *= gain;
+                    nrFftOutput[2U * k + 1U] *= gain;
+                }
+            }
+        }
+
+        arm_rfft_fast_f32(
+            &nrFftInstance,
+            nrFftOutput,
+            nrFftInput,
+            1
+        );
+
+        for (uint32_t i = 0U; i < NR_FRAME_SIZE; i++)
+        {
+            channel->outputOverlap[i] +=
+                nrFftInput[i] * nrWindow[i];
+        }
+
+        memcpy(
+            &samples[offset],
+            channel->outputOverlap,
+            NR_HOP_SIZE * sizeof(float32_t)
+        );
+
+        memmove(
+            channel->outputOverlap,
+            &channel->outputOverlap[NR_HOP_SIZE],
+            NR_HOP_SIZE * sizeof(float32_t)
+        );
+
+        memset(
+            &channel->outputOverlap[NR_HOP_SIZE],
+            0,
+            NR_HOP_SIZE * sizeof(float32_t)
+        );
+    }
+}
+
+static void AudioNoiseReduction_Process(void)
+{
+    AudioNoiseReduction_ProcessChannel(
+        &nrLeft,
+        eqLeftBuffer
+    );
+
+    AudioNoiseReduction_ProcessChannel(
+        &nrRight,
+        eqRightBuffer
+    );
+}
+
 void AudioEQ_Process(uint8_t *audioData)
 {
     if (echoResetPending)
@@ -1215,7 +1490,16 @@ void AudioEQ_Process(uint8_t *audioData)
         AudioReverb_Reset();
     }
 
-    if (!EQEnabled && !EchoEnabled && !ReverbEnabled)
+    if (noiseReductionResetPending)
+    {
+        noiseReductionResetPending = 0U;
+        AudioNoiseReduction_Reset();
+    }
+
+    if (!EQEnabled &&
+        !EchoEnabled &&
+        !ReverbEnabled &&
+        !NoiseReductionEnabled)
     {
         return;
     }
@@ -1224,19 +1508,28 @@ void AudioEQ_Process(uint8_t *audioData)
 
     int16_t *samples =
         (int16_t *)audioData;
-    float32_t inputGain =
-        EQEnabled ? eqPreampGain : 1.0f;
-
     for (uint32_t i = 0; i < EQ_BLOCK_SIZE; i++)
     {
         eqLeftBuffer[i] =
-            (float32_t)samples[2 * i] * inputGain;
+            (float32_t)samples[2 * i];
 
         eqRightBuffer[i] =
-            (float32_t)samples[2 * i + 1] * inputGain;
+            (float32_t)samples[2 * i + 1];
+    }
+
+    if (NoiseReductionEnabled)
+    {
+        AudioNoiseReduction_Process();
     }
 
     if (EQEnabled)
+    {
+        for (uint32_t i = 0; i < EQ_BLOCK_SIZE; i++)
+        {
+            eqLeftBuffer[i] *= eqPreampGain;
+            eqRightBuffer[i] *= eqPreampGain;
+        }
+
     {
         arm_biquad_cascade_df1_f32(
             &eqLeft,

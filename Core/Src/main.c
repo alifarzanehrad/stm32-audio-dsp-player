@@ -1530,7 +1530,6 @@ void AudioEQ_Process(uint8_t *audioData)
             eqRightBuffer[i] *= eqPreampGain;
         }
 
-    {
         arm_biquad_cascade_df1_f32(
             &eqLeft,
             eqLeftBuffer,

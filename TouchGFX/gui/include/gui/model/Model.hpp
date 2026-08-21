@@ -43,6 +43,9 @@ public:
     void setReverbEnabled(bool enabled);
     bool getReverbEnabled() const;
 
+    void setNoiseReductionEnabled(bool enabled);
+    bool getNoiseReductionEnabled() const;
+
 protected:
     ModelListener* modelListener;
 
@@ -50,6 +53,7 @@ private:
     int eqSliderValues[EQ_BAND_COUNT];
     bool echoEnabled;
     bool reverbEnabled;
+    bool noiseReductionEnabled;
 };
 
 #endif // MODEL_HPP

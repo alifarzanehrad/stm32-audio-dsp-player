@@ -36,3 +36,13 @@ bool EffectsScreenPresenter::getReverbEnabled() const
 {
     return model->getReverbEnabled();
 }
+
+void EffectsScreenPresenter::setNoiseReductionEnabled(bool enabled)
+{
+    model->setNoiseReductionEnabled(enabled);
+}
+
+bool EffectsScreenPresenter::getNoiseReductionEnabled() const
+{
+    return model->getNoiseReductionEnabled();
+}

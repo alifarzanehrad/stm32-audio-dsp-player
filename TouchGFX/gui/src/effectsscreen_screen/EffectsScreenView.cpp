@@ -10,6 +10,9 @@ void EffectsScreenView::setupScreen()
     EffectsScreenViewBase::setupScreen();
     Echo_toggle.forceState(presenter->getEchoEnabled());
     Reverb_toggle.forceState(presenter->getReverbEnabled());
+    NoiseReduction_toggle.forceState(
+        presenter->getNoiseReductionEnabled()
+    );
 }
 
 void EffectsScreenView::tearDownScreen()
@@ -25,4 +28,11 @@ void EffectsScreenView::echoToggled()
 void EffectsScreenView::reverbToggled()
 {
     presenter->setReverbEnabled(Reverb_toggle.getState());
+}
+
+void EffectsScreenView::noiseReductionToggled()
+{
+    presenter->setNoiseReductionEnabled(
+        NoiseReduction_toggle.getState()
+    );
 }

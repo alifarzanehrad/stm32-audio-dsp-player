@@ -4,6 +4,7 @@
 #include "stm32746g_discovery_audio.h"
 
 #include <stdio.h>
+#include <stddef.h>
 #include <string.h>
 
 FATFS SDFatFs;

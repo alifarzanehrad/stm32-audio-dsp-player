@@ -279,6 +279,7 @@ pyocd flash -t stm32f746nghx Debug/V1.elf
 Core/Src/main.c                         Hardware setup, WAV player, and DSP pipeline
 Core/Src/audio_equalizer.c              Five-band biquad equalizer
 Core/Src/audio_echo.c                   Stereo delay and feedback echo
+Core/Src/audio_reverb.c                 Schroeder comb and all-pass reverb
 Core/Src/freertos.c                     Player task, playlist, and DMA refill flow
 TouchGFX/gui/src/model/                 UI-to-firmware interface
 TouchGFX/gui/src/screen1_screen/        Player screen logic

@@ -281,6 +281,7 @@ Core/Src/audio_equalizer.c              Five-band biquad equalizer
 Core/Src/audio_echo.c                   Stereo delay and feedback echo
 Core/Src/audio_reverb.c                 Schroeder comb and all-pass reverb
 Core/Src/noise_reduction.c               Adaptive STFT spectral subtraction
+Core/Src/audio_spectrum.c                Display FFT and 16 smoothed bands
 Core/Src/freertos.c                     Player task, playlist, and DMA refill flow
 TouchGFX/gui/src/model/                 UI-to-firmware interface
 TouchGFX/gui/src/screen1_screen/        Player screen logic

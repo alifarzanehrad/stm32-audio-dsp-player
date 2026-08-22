@@ -20,7 +20,6 @@
 #include "main.h"
 #include "cmsis_os.h"
 #include "crc.h"
-#include "dcmi.h"
 #include "dma.h"
 #include "dma2d.h"
 #include "eth.h"
@@ -114,7 +113,6 @@ int main(void)
   MX_GPIO_Init();
   MX_DMA_Init();
   MX_CRC_Init();
-  MX_DCMI_Init();
   MX_DMA2D_Init();
   MX_ETH_Init();
   MX_FMC_Init();

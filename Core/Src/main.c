@@ -19,7 +19,6 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "cmsis_os.h"
-#include "adc.h"
 #include "crc.h"
 #include "dcmi.h"
 #include "dma.h"
@@ -114,7 +113,6 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_DMA_Init();
-  MX_ADC3_Init();
   MX_CRC_Init();
   MX_DCMI_Init();
   MX_DMA2D_Init();

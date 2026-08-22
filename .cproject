@@ -24,7 +24,7 @@
               <option id="com.st.stm32cube.ide.mcu.gnu.managedbuild.option.fpu.1279140718" name="Floating-point unit" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.option.fpu" useByScannerDiscovery="true" value="com.st.stm32cube.ide.mcu.gnu.managedbuild.option.fpu.value.fpv5-sp-d16" valueType="enumerated"/>
               <option id="com.st.stm32cube.ide.mcu.gnu.managedbuild.option.floatabi.510979456" name="Floating-point ABI" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.option.floatabi" useByScannerDiscovery="true" value="com.st.stm32cube.ide.mcu.gnu.managedbuild.option.floatabi.value.hard" valueType="enumerated"/>
               <option id="com.st.stm32cube.ide.mcu.gnu.managedbuild.option.target_board.127661242" name="Board" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.option.target_board" useByScannerDiscovery="false" value="STM32F746G-DISCO" valueType="string"/>
-              <option id="com.st.stm32cube.ide.mcu.gnu.managedbuild.option.defaults.983681083" name="Defaults" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.option.defaults" useByScannerDiscovery="false" value="com.st.stm32cube.ide.common.services.build.inputs.revA.1.0.6 || Debug || true || Executable || com.st.stm32cube.ide.mcu.gnu.managedbuild.option.toolchain.value.workspace || STM32F746G-DISCO || 0 || 0 || arm-none-eabi- || ${gnu_tools_for_stm32_compiler_path} || ../Core/Inc | ../FATFS/Target | ../FATFS/App | ../USB_HOST/App | ../USB_HOST/Target | ../Drivers/STM32F7xx_HAL_Driver/Inc | ../Drivers/STM32F7xx_HAL_Driver/Inc/Legacy | ../Middlewares/Third_Party/FreeRTOS/Source/include | ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS | ../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM7/r0p1 | ../Middlewares/Third_Party/FatFs/src | ../Middlewares/ST/STM32_USB_Host_Library/Core/Inc | ../Middlewares/ST/STM32_USB_Host_Library/Class/CDC/Inc | ../Drivers/CMSIS/Device/ST/STM32F7xx/Include | ../Drivers/CMSIS/Include | ../TouchGFX/App | ../TouchGFX/target/generated | ../TouchGFX/target || ../Core/Inc | ../FATFS/Target | ../FATFS/App | ../TouchGFX/App | ../TouchGFX/target/generated | ../TouchGFX/target | ../USB_HOST/App | ../USB_HOST/Target | ../Drivers/STM32F7xx_HAL_Driver/Inc | ../Drivers/STM32F7xx_HAL_Driver/Inc/Legacy | ../Middlewares/Third_Party/FreeRTOS/Source/include | ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS | ../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM7/r0p1 | ../Middlewares/Third_Party/FatFs/src | ../Middlewares/ST/STM32_USB_Host_Library/Core/Inc | ../Middlewares/ST/STM32_USB_Host_Library/Class/CDC/Inc | ../Drivers/CMSIS/Device/ST/STM32F7xx/Include | ../Drivers/CMSIS/Include ||  || USE_HAL_DRIVER | STM32F746xx ||  || Drivers | USB_HOST | TouchGFX | Core/Startup | Middlewares | Core | FATFS ||  ||  || ${workspace_loc:/${ProjName}/STM32F746NGHX_FLASH.ld} || true || NonSecure ||  || secure_nsclib.o ||  || None ||  ||  ||  || ::" valueType="string"/>
+              <option id="com.st.stm32cube.ide.mcu.gnu.managedbuild.option.defaults.983681083" name="Defaults" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.option.defaults" useByScannerDiscovery="false" value="com.st.stm32cube.ide.common.services.build.inputs.revA.1.0.6 || Debug || true || Executable || com.st.stm32cube.ide.mcu.gnu.managedbuild.option.toolchain.value.workspace || STM32F746G-DISCO || 0 || 0 || arm-none-eabi- || ${gnu_tools_for_stm32_compiler_path} || ../Core/Inc | ../FATFS/Target | ../FATFS/App | ../Drivers/STM32F7xx_HAL_Driver/Inc | ../Drivers/STM32F7xx_HAL_Driver/Inc/Legacy | ../Middlewares/Third_Party/FreeRTOS/Source/include | ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS | ../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM7/r0p1 | ../Middlewares/Third_Party/FatFs/src | ../Drivers/CMSIS/Device/ST/STM32F7xx/Include | ../Drivers/CMSIS/Include | ../TouchGFX/App | ../TouchGFX/target/generated | ../TouchGFX/target || ../Core/Inc | ../FATFS/Target | ../FATFS/App | ../TouchGFX/App | ../TouchGFX/target/generated | ../TouchGFX/target | ../Drivers/STM32F7xx_HAL_Driver/Inc | ../Drivers/STM32F7xx_HAL_Driver/Inc/Legacy | ../Middlewares/Third_Party/FreeRTOS/Source/include | ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS | ../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM7/r0p1 | ../Middlewares/Third_Party/FatFs/src | ../Drivers/CMSIS/Device/ST/STM32F7xx/Include | ../Drivers/CMSIS/Include ||  || USE_HAL_DRIVER | STM32F746xx ||  || Drivers | TouchGFX | Core/Startup | Middlewares | Core | FATFS ||  ||  || ${workspace_loc:/${ProjName}/STM32F746NGHX_FLASH.ld} || true || NonSecure ||  || secure_nsclib.o ||  || None ||  ||  ||  || ::" valueType="string"/>
               <option id="com.st.stm32cube.ide.mcu.debug.option.cpuclock.458949062" name="Cpu clock frequence" superClass="com.st.stm32cube.ide.mcu.debug.option.cpuclock" useByScannerDiscovery="false" value="200" valueType="string"/>
               <option id="com.st.stm32cube.ide.mcu.gnu.managedbuild.option.nanoprintffloat.930239222" name="Use float with printf from newlib-nano (-u _printf_float)" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.option.nanoprintffloat" useByScannerDiscovery="false" value="true" valueType="boolean"/>
               <targetPlatform archList="all" binaryParser="org.eclipse.cdt.core.ELF" id="com.st.stm32cube.ide.mcu.gnu.managedbuild.targetplatform.1473892220" isAbstract="false" osList="all" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.targetplatform"/>
@@ -41,16 +41,12 @@
                   <listOptionValue builtIn="false" value="../TouchGFX/App"/>
                   <listOptionValue builtIn="false" value="../TouchGFX/target/generated"/>
                   <listOptionValue builtIn="false" value="../TouchGFX/target"/>
-                  <listOptionValue builtIn="false" value="../USB_HOST/App"/>
-                  <listOptionValue builtIn="false" value="../USB_HOST/Target"/>
                   <listOptionValue builtIn="false" value="../Drivers/STM32F7xx_HAL_Driver/Inc"/>
                   <listOptionValue builtIn="false" value="../Drivers/STM32F7xx_HAL_Driver/Inc/Legacy"/>
                   <listOptionValue builtIn="false" value="../Middlewares/Third_Party/FreeRTOS/Source/include"/>
                   <listOptionValue builtIn="false" value="../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS"/>
                   <listOptionValue builtIn="false" value="../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM7/r0p1"/>
                   <listOptionValue builtIn="false" value="../Middlewares/Third_Party/FatFs/src"/>
-                  <listOptionValue builtIn="false" value="../Middlewares/ST/STM32_USB_Host_Library/Core/Inc"/>
-                  <listOptionValue builtIn="false" value="../Middlewares/ST/STM32_USB_Host_Library/Class/CDC/Inc"/>
                   <listOptionValue builtIn="false" value="../Drivers/CMSIS/Device/ST/STM32F7xx/Include"/>
                   <listOptionValue builtIn="false" value="../Drivers/CMSIS/Include"/>
                   <listOptionValue builtIn="false" value="../Middlewares/ST/touchgfx/framework/include"/>
@@ -77,16 +73,12 @@
                   <listOptionValue builtIn="false" value="../Middlewares/Third_Party/CMSIS-DSP/PrivateInclude"/>
                   <listOptionValue builtIn="false" value="../FATFS/Target"/>
                   <listOptionValue builtIn="false" value="../FATFS/App"/>
-                  <listOptionValue builtIn="false" value="../USB_HOST/App"/>
-                  <listOptionValue builtIn="false" value="../USB_HOST/Target"/>
                   <listOptionValue builtIn="false" value="../Drivers/STM32F7xx_HAL_Driver/Inc"/>
                   <listOptionValue builtIn="false" value="../Drivers/STM32F7xx_HAL_Driver/Inc/Legacy"/>
                   <listOptionValue builtIn="false" value="../Middlewares/Third_Party/FreeRTOS/Source/include"/>
                   <listOptionValue builtIn="false" value="../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS"/>
                   <listOptionValue builtIn="false" value="../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM7/r0p1"/>
                   <listOptionValue builtIn="false" value="../Middlewares/Third_Party/FatFs/src"/>
-                  <listOptionValue builtIn="false" value="../Middlewares/ST/STM32_USB_Host_Library/Core/Inc"/>
-                  <listOptionValue builtIn="false" value="../Middlewares/ST/STM32_USB_Host_Library/Class/CDC/Inc"/>
                   <listOptionValue builtIn="false" value="../Drivers/CMSIS/Device/ST/STM32F7xx/Include"/>
                   <listOptionValue builtIn="false" value="../Drivers/CMSIS/Include"/>
                   <listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/Drivers/BSP/Components/Common}&quot;"/>
@@ -112,16 +104,12 @@
                   <listOptionValue builtIn="false" value="../Core/Inc"/>
                   <listOptionValue builtIn="false" value="../FATFS/Target"/>
                   <listOptionValue builtIn="false" value="../FATFS/App"/>
-                  <listOptionValue builtIn="false" value="../USB_HOST/App"/>
-                  <listOptionValue builtIn="false" value="../USB_HOST/Target"/>
                   <listOptionValue builtIn="false" value="../Drivers/STM32F7xx_HAL_Driver/Inc"/>
                   <listOptionValue builtIn="false" value="../Drivers/STM32F7xx_HAL_Driver/Inc/Legacy"/>
                   <listOptionValue builtIn="false" value="../Middlewares/Third_Party/FreeRTOS/Source/include"/>
                   <listOptionValue builtIn="false" value="../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS"/>
                   <listOptionValue builtIn="false" value="../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM7/r0p1"/>
                   <listOptionValue builtIn="false" value="../Middlewares/Third_Party/FatFs/src"/>
-                  <listOptionValue builtIn="false" value="../Middlewares/ST/STM32_USB_Host_Library/Core/Inc"/>
-                  <listOptionValue builtIn="false" value="../Middlewares/ST/STM32_USB_Host_Library/Class/CDC/Inc"/>
                   <listOptionValue builtIn="false" value="../Drivers/CMSIS/Device/ST/STM32F7xx/Include"/>
                   <listOptionValue builtIn="false" value="../Drivers/CMSIS/Include"/>
                   <listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/Drivers/BSP/Components/Common}&quot;"/>
@@ -183,9 +171,8 @@
             <entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Core"/>
             <entry excluding="BSP/Adafruit_Shield/stm32_adafruit_sd.c|BSP/STM32746G-Discovery/stm32746g_discovery_sd.c|BSP/Adafruit_Shield/stm32_adafruit_lcd.c|BSP/STM32746G-Discovery/stm32746g_discovery_lcd.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Drivers"/>
             <entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="FATFS"/>
-            <entry excluding="Third_Party/CMSIS-DSP/Source/FilteringFunctions/FilteringFunctionsF16.c|Third_Party/CMSIS-DSP/Source/FilteringFunctions/FilteringFunctions.c|Third_Party/CMSIS-DSP/Source/CommonTables/CommonTables.c|Third_Party/CMSIS-DSP/Source/TransformFunctions/TransformFunctionsF16.c|Third_Party/CMSIS-DSP/Source/TransformFunctions/TransformFunctions.c|Third_Party/CMSIS-DSP/ComputeLibrary|Third_Party/CMSIS-DSP/Examples|Third_Party/CMSIS-DSP/Scripts|Third_Party/CMSIS-DSP/Ne10|Third_Party/CMSIS-DSP/Source/WindowFunctions|Third_Party/CMSIS-DSP/Source/SupportFunctions|Third_Party/CMSIS-DSP/Source/StatisticsFunctions|Third_Party/CMSIS-DSP/Source/SVMFunctions|Third_Party/CMSIS-DSP/Source/QuaternionMathFunctions|Third_Party/CMSIS-DSP/Source/MatrixFunctions|Third_Party/CMSIS-DSP/Source/InterpolationFunctions|Third_Party/CMSIS-DSP/Source/FastMathFunctions|Third_Party/CMSIS-DSP/Source/DistanceFunctions|Third_Party/CMSIS-DSP/Source/ControllerFunctions|Third_Party/CMSIS-DSP/Source/BayesFunctions|Third_Party/CMSIS-DSP/Source/ComplexMathFunctions|Third_Party/CMSIS-DSP/Source/BasicMathFunctions|Third_Party/CMSIS-DSP/PythonWrapper|Third_Party/CMSIS-DSP/Testing|Third_Party/CMSIS-DSP/dsppp|ST/touchgfx/framework/source/platform/hal/simulator/sdl2/HALSDL2.cpp|ST/touchgfx/framework/source/platform/hal/simulator/sdl2/HALSDL2_icon.cpp|ST/touchgfx/framework/source/platform/hal/simulator/sdl2/OSWrappers.cpp|ST/touchgfx/os/OSWrappers_cmsis.cpp|ST/touchgfx/os/OSWrappers.cpp|ST/touchgfx/framework/source/platform/driver/touch/SDL2TouchController.cpp|ST/touchgfx/framework/source/touchgfx/widgets|ST/touchgfx/framework/source/touchgfx/containers" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Middlewares"/>
+            <entry excluding="ST/STM32_USB_Host_Library|Third_Party/CMSIS-DSP/Source/FilteringFunctions/FilteringFunctionsF16.c|Third_Party/CMSIS-DSP/Source/FilteringFunctions/FilteringFunctions.c|Third_Party/CMSIS-DSP/Source/CommonTables/CommonTables.c|Third_Party/CMSIS-DSP/Source/TransformFunctions/TransformFunctionsF16.c|Third_Party/CMSIS-DSP/Source/TransformFunctions/TransformFunctions.c|Third_Party/CMSIS-DSP/ComputeLibrary|Third_Party/CMSIS-DSP/Examples|Third_Party/CMSIS-DSP/Scripts|Third_Party/CMSIS-DSP/Ne10|Third_Party/CMSIS-DSP/Source/WindowFunctions|Third_Party/CMSIS-DSP/Source/SupportFunctions|Third_Party/CMSIS-DSP/Source/StatisticsFunctions|Third_Party/CMSIS-DSP/Source/SVMFunctions|Third_Party/CMSIS-DSP/Source/QuaternionMathFunctions|Third_Party/CMSIS-DSP/Source/MatrixFunctions|Third_Party/CMSIS-DSP/Source/InterpolationFunctions|Third_Party/CMSIS-DSP/Source/FastMathFunctions|Third_Party/CMSIS-DSP/Source/DistanceFunctions|Third_Party/CMSIS-DSP/Source/ControllerFunctions|Third_Party/CMSIS-DSP/Source/BayesFunctions|Third_Party/CMSIS-DSP/Source/ComplexMathFunctions|Third_Party/CMSIS-DSP/Source/BasicMathFunctions|Third_Party/CMSIS-DSP/PythonWrapper|Third_Party/CMSIS-DSP/Testing|Third_Party/CMSIS-DSP/dsppp|ST/touchgfx/framework/source/platform/hal/simulator/sdl2/HALSDL2.cpp|ST/touchgfx/framework/source/platform/hal/simulator/sdl2/HALSDL2_icon.cpp|ST/touchgfx/framework/source/platform/hal/simulator/sdl2/OSWrappers.cpp|ST/touchgfx/os/OSWrappers_cmsis.cpp|ST/touchgfx/os/OSWrappers.cpp|ST/touchgfx/framework/source/platform/driver/touch/SDL2TouchController.cpp|ST/touchgfx/framework/source/touchgfx/widgets|ST/touchgfx/framework/source/touchgfx/containers" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Middlewares"/>
             <entry excluding="generated/simulator/src/mainBase.cpp|generated/simulator/src/video/SoftwareMJPEGDecoder.cpp|simulator/main.cpp" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="TouchGFX"/>
-            <entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="USB_HOST"/>
           </sourceEntries>
         </configuration>
       </storageModule>
@@ -213,7 +200,7 @@
               <option id="com.st.stm32cube.ide.mcu.gnu.managedbuild.option.fpu.1480567631" name="Floating-point unit" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.option.fpu" useByScannerDiscovery="true" value="com.st.stm32cube.ide.mcu.gnu.managedbuild.option.fpu.value.fpv5-sp-d16" valueType="enumerated"/>
               <option id="com.st.stm32cube.ide.mcu.gnu.managedbuild.option.floatabi.760245953" name="Floating-point ABI" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.option.floatabi" useByScannerDiscovery="true" value="com.st.stm32cube.ide.mcu.gnu.managedbuild.option.floatabi.value.hard" valueType="enumerated"/>
               <option id="com.st.stm32cube.ide.mcu.gnu.managedbuild.option.target_board.1010360566" name="Board" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.option.target_board" useByScannerDiscovery="false" value="STM32F746G-DISCO" valueType="string"/>
-              <option id="com.st.stm32cube.ide.mcu.gnu.managedbuild.option.defaults.1924259670" name="Defaults" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.option.defaults" useByScannerDiscovery="false" value="com.st.stm32cube.ide.common.services.build.inputs.revA.1.0.6 || Release || false || Executable || com.st.stm32cube.ide.mcu.gnu.managedbuild.option.toolchain.value.workspace || STM32F746G-DISCO || 0 || 0 || arm-none-eabi- || ${gnu_tools_for_stm32_compiler_path} || ../Core/Inc | ../FATFS/Target | ../FATFS/App | ../USB_HOST/App | ../USB_HOST/Target | ../Drivers/STM32F7xx_HAL_Driver/Inc | ../Drivers/STM32F7xx_HAL_Driver/Inc/Legacy | ../Middlewares/Third_Party/FreeRTOS/Source/include | ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS | ../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM7/r0p1 | ../Middlewares/Third_Party/FatFs/src | ../Middlewares/ST/STM32_USB_Host_Library/Core/Inc | ../Middlewares/ST/STM32_USB_Host_Library/Class/CDC/Inc | ../Drivers/CMSIS/Device/ST/STM32F7xx/Include | ../Drivers/CMSIS/Include | ../TouchGFX/App | ../TouchGFX/target/generated | ../TouchGFX/target || ../Core/Inc | ../FATFS/Target | ../FATFS/App | ../TouchGFX/App | ../TouchGFX/target/generated | ../TouchGFX/target | ../USB_HOST/App | ../USB_HOST/Target | ../Drivers/STM32F7xx_HAL_Driver/Inc | ../Drivers/STM32F7xx_HAL_Driver/Inc/Legacy | ../Middlewares/Third_Party/FreeRTOS/Source/include | ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS | ../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM7/r0p1 | ../Middlewares/Third_Party/FatFs/src | ../Middlewares/ST/STM32_USB_Host_Library/Core/Inc | ../Middlewares/ST/STM32_USB_Host_Library/Class/CDC/Inc | ../Drivers/CMSIS/Device/ST/STM32F7xx/Include | ../Drivers/CMSIS/Include ||  || USE_HAL_DRIVER | STM32F746xx ||  || Drivers | USB_HOST | TouchGFX | Core/Startup | Middlewares | Core | FATFS ||  ||  || ${workspace_loc:/${ProjName}/STM32F746NGHX_FLASH.ld} || true || NonSecure ||  || secure_nsclib.o ||  || None ||  ||  ||  || ::" valueType="string"/>
+              <option id="com.st.stm32cube.ide.mcu.gnu.managedbuild.option.defaults.1924259670" name="Defaults" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.option.defaults" useByScannerDiscovery="false" value="com.st.stm32cube.ide.common.services.build.inputs.revA.1.0.6 || Release || false || Executable || com.st.stm32cube.ide.mcu.gnu.managedbuild.option.toolchain.value.workspace || STM32F746G-DISCO || 0 || 0 || arm-none-eabi- || ${gnu_tools_for_stm32_compiler_path} || ../Core/Inc | ../FATFS/Target | ../FATFS/App | ../Drivers/STM32F7xx_HAL_Driver/Inc | ../Drivers/STM32F7xx_HAL_Driver/Inc/Legacy | ../Middlewares/Third_Party/FreeRTOS/Source/include | ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS | ../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM7/r0p1 | ../Middlewares/Third_Party/FatFs/src | ../Drivers/CMSIS/Device/ST/STM32F7xx/Include | ../Drivers/CMSIS/Include | ../TouchGFX/App | ../TouchGFX/target/generated | ../TouchGFX/target || ../Core/Inc | ../FATFS/Target | ../FATFS/App | ../TouchGFX/App | ../TouchGFX/target/generated | ../TouchGFX/target | ../Drivers/STM32F7xx_HAL_Driver/Inc | ../Drivers/STM32F7xx_HAL_Driver/Inc/Legacy | ../Middlewares/Third_Party/FreeRTOS/Source/include | ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS | ../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM7/r0p1 | ../Middlewares/Third_Party/FatFs/src | ../Drivers/CMSIS/Device/ST/STM32F7xx/Include | ../Drivers/CMSIS/Include ||  || USE_HAL_DRIVER | STM32F746xx ||  || Drivers | TouchGFX | Core/Startup | Middlewares | Core | FATFS ||  ||  || ${workspace_loc:/${ProjName}/STM32F746NGHX_FLASH.ld} || true || NonSecure ||  || secure_nsclib.o ||  || None ||  ||  ||  || ::" valueType="string"/>
               <option id="com.st.stm32cube.ide.mcu.debug.option.cpuclock.945177805" name="Cpu clock frequence" superClass="com.st.stm32cube.ide.mcu.debug.option.cpuclock" useByScannerDiscovery="false" value="200" valueType="string"/>
               <targetPlatform archList="all" binaryParser="org.eclipse.cdt.core.ELF" id="com.st.stm32cube.ide.mcu.gnu.managedbuild.targetplatform.30858866" isAbstract="false" osList="all" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.targetplatform"/>
               <builder buildPath="${workspace_loc:/${ProjName}}/Release" id="com.st.stm32cube.ide.mcu.gnu.managedbuild.builder.968965291" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="Gnu Make Builder" parallelBuildOn="true" parallelizationNumber="optimal" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.builder"/>
@@ -226,16 +213,12 @@
                   <listOptionValue builtIn="false" value="../TouchGFX/App"/>
                   <listOptionValue builtIn="false" value="../TouchGFX/target/generated"/>
                   <listOptionValue builtIn="false" value="../TouchGFX/target"/>
-                  <listOptionValue builtIn="false" value="../USB_HOST/App"/>
-                  <listOptionValue builtIn="false" value="../USB_HOST/Target"/>
                   <listOptionValue builtIn="false" value="../Drivers/STM32F7xx_HAL_Driver/Inc"/>
                   <listOptionValue builtIn="false" value="../Drivers/STM32F7xx_HAL_Driver/Inc/Legacy"/>
                   <listOptionValue builtIn="false" value="../Middlewares/Third_Party/FreeRTOS/Source/include"/>
                   <listOptionValue builtIn="false" value="../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS"/>
                   <listOptionValue builtIn="false" value="../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM7/r0p1"/>
                   <listOptionValue builtIn="false" value="../Middlewares/Third_Party/FatFs/src"/>
-                  <listOptionValue builtIn="false" value="../Middlewares/ST/STM32_USB_Host_Library/Core/Inc"/>
-                  <listOptionValue builtIn="false" value="../Middlewares/ST/STM32_USB_Host_Library/Class/CDC/Inc"/>
                   <listOptionValue builtIn="false" value="../Drivers/CMSIS/Device/ST/STM32F7xx/Include"/>
                   <listOptionValue builtIn="false" value="../Drivers/CMSIS/Include"/>
                   <listOptionValue builtIn="false" value="../Middlewares/ST/touchgfx/framework/include"/>
@@ -259,16 +242,12 @@
                   <listOptionValue builtIn="false" value="../Core/Inc"/>
                   <listOptionValue builtIn="false" value="../FATFS/Target"/>
                   <listOptionValue builtIn="false" value="../FATFS/App"/>
-                  <listOptionValue builtIn="false" value="../USB_HOST/App"/>
-                  <listOptionValue builtIn="false" value="../USB_HOST/Target"/>
                   <listOptionValue builtIn="false" value="../Drivers/STM32F7xx_HAL_Driver/Inc"/>
                   <listOptionValue builtIn="false" value="../Drivers/STM32F7xx_HAL_Driver/Inc/Legacy"/>
                   <listOptionValue builtIn="false" value="../Middlewares/Third_Party/FreeRTOS/Source/include"/>
                   <listOptionValue builtIn="false" value="../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS"/>
                   <listOptionValue builtIn="false" value="../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM7/r0p1"/>
                   <listOptionValue builtIn="false" value="../Middlewares/Third_Party/FatFs/src"/>
-                  <listOptionValue builtIn="false" value="../Middlewares/ST/STM32_USB_Host_Library/Core/Inc"/>
-                  <listOptionValue builtIn="false" value="../Middlewares/ST/STM32_USB_Host_Library/Class/CDC/Inc"/>
                   <listOptionValue builtIn="false" value="../Drivers/CMSIS/Device/ST/STM32F7xx/Include"/>
                   <listOptionValue builtIn="false" value="../Drivers/CMSIS/Include"/>
                   <listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/Drivers/BSP/Components/Common}&quot;"/>
@@ -294,16 +273,12 @@
                   <listOptionValue builtIn="false" value="../Core/Inc"/>
                   <listOptionValue builtIn="false" value="../FATFS/Target"/>
                   <listOptionValue builtIn="false" value="../FATFS/App"/>
-                  <listOptionValue builtIn="false" value="../USB_HOST/App"/>
-                  <listOptionValue builtIn="false" value="../USB_HOST/Target"/>
                   <listOptionValue builtIn="false" value="../Drivers/STM32F7xx_HAL_Driver/Inc"/>
                   <listOptionValue builtIn="false" value="../Drivers/STM32F7xx_HAL_Driver/Inc/Legacy"/>
                   <listOptionValue builtIn="false" value="../Middlewares/Third_Party/FreeRTOS/Source/include"/>
                   <listOptionValue builtIn="false" value="../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS"/>
                   <listOptionValue builtIn="false" value="../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM7/r0p1"/>
                   <listOptionValue builtIn="false" value="../Middlewares/Third_Party/FatFs/src"/>
-                  <listOptionValue builtIn="false" value="../Middlewares/ST/STM32_USB_Host_Library/Core/Inc"/>
-                  <listOptionValue builtIn="false" value="../Middlewares/ST/STM32_USB_Host_Library/Class/CDC/Inc"/>
                   <listOptionValue builtIn="false" value="../Drivers/CMSIS/Device/ST/STM32F7xx/Include"/>
                   <listOptionValue builtIn="false" value="../Drivers/CMSIS/Include"/>
                   <listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/Drivers/BSP/Components/Common}&quot;"/>
@@ -366,7 +341,6 @@
             <entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="FATFS"/>
             <entry excluding="ST/touchgfx/framework/source/platform/hal/simulator/sdl2/HALSDL2.cpp|ST/touchgfx/framework/source/platform/hal/simulator/sdl2/HALSDL2_icon.cpp|ST/touchgfx/framework/source/platform/hal/simulator/sdl2/OSWrappers.cpp|ST/touchgfx/os/OSWrappers_cmsis.cpp|ST/touchgfx/os/OSWrappers.cpp|ST/touchgfx/framework/source/platform/driver/touch/SDL2TouchController.cpp|ST/touchgfx/framework/source/touchgfx/widgets|ST/touchgfx/framework/source/touchgfx/containers" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Middlewares"/>
             <entry excluding="generated/simulator/src/mainBase.cpp|generated/simulator/src/video/SoftwareMJPEGDecoder.cpp|simulator/main.cpp" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="TouchGFX"/>
-            <entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="USB_HOST"/>
           </sourceEntries>
         </configuration>
       </storageModule>

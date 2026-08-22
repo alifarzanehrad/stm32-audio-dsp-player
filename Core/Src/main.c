@@ -49,11 +49,8 @@
 #include <math.h>
 #include "ff.h"
 #include "arm_math.h"
-#include "audio_equalizer.h"
-#include "audio_echo.h"
-#include "audio_reverb.h"
-#include "noise_reduction.h"
 #include "audio_spectrum.h"
+#include "audio_pipeline.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -85,16 +82,8 @@ volatile uint8_t  AudioPlaying = 0;
 volatile uint8_t  HalfBufferNeedsFill = 0;
 volatile uint8_t  FullBufferNeedsFill = 0;
 volatile uint8_t AudioTrackFinished = 0;
-volatile uint8_t EQEnabled = 1;
 
 extern volatile uint8_t AudioVolume;
-
-#define EQ_LIMITER_THRESHOLD 32000.0f
-#define EQ_LIMITER_RELEASE 0.05f
-
-float32_t eqLimiterGain = 1.0f;
-float32_t eqLeftBuffer[EQ_BLOCK_SIZE];
-float32_t eqRightBuffer[EQ_BLOCK_SIZE];
 
 /* USER CODE END PV */
 
@@ -108,8 +97,6 @@ static void SDRAM_Initialization_Sequence(SDRAM_HandleTypeDef *hsdram);
 uint8_t WavPlayer_Start(const char *filename);
 void WavPlayer_FillHalf(uint8_t *half);
 
-void AudioEQ_Process(uint8_t *audioData);
-static void AudioEQ_ApplyLimiter(void);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -544,11 +531,7 @@ uint8_t WavPlayer_Start(const char *filename)
   }
 
   AudioRemainingBytes = dataSize;
-  AudioEqualizer_Init((float32_t)sampleRate);
-  eqLimiterGain = 1.0f;
-  AudioEcho_Init((float32_t)sampleRate);
-  AudioReverb_Init((float32_t)sampleRate);
-  AudioNoiseReduction_Init();
+  AudioPipeline_Init((float32_t)sampleRate);
   printf("Calling BSP_AUDIO_OUT_Init with sampleRate=%lu\r\n", (unsigned long)sampleRate);
   audio_status = BSP_AUDIO_OUT_Init(
       OUTPUT_DEVICE_HEADPHONE,
@@ -571,9 +554,9 @@ uint8_t WavPlayer_Start(const char *filename)
   }
   AudioRemainingBytes -= bytesread;
 
-  AudioEQ_Process(&AudioBuffer[0]);
+  AudioPipeline_Process(&AudioBuffer[0]);
 
-  AudioEQ_Process(
+  AudioPipeline_Process(
       &AudioBuffer[AUDIO_HALF_BUFFER]
   );
 
@@ -593,134 +576,6 @@ uint8_t WavPlayer_Start(const char *filename)
   printf("Playback started!\r\n");
 
   return 1;
-}
-
-static void AudioEQ_ApplyLimiter(void)
-{
-    float32_t peak = 0.0f;
-
-    for (uint32_t i = 0; i < EQ_BLOCK_SIZE; i++)
-    {
-        float32_t leftPeak = fabsf(eqLeftBuffer[i]);
-        float32_t rightPeak = fabsf(eqRightBuffer[i]);
-
-        if (leftPeak > peak)
-        {
-            peak = leftPeak;
-        }
-
-        if (rightPeak > peak)
-        {
-            peak = rightPeak;
-        }
-    }
-
-    float32_t targetGain = 1.0f;
-
-    if (peak > EQ_LIMITER_THRESHOLD)
-    {
-        targetGain = EQ_LIMITER_THRESHOLD / peak;
-    }
-
-    if (targetGain < eqLimiterGain)
-    {
-        eqLimiterGain = targetGain;
-    }
-    else
-    {
-        eqLimiterGain +=
-            EQ_LIMITER_RELEASE * (targetGain - eqLimiterGain);
-    }
-
-    for (uint32_t i = 0; i < EQ_BLOCK_SIZE; i++)
-    {
-        eqLeftBuffer[i] *= eqLimiterGain;
-        eqRightBuffer[i] *= eqLimiterGain;
-    }
-}
-
-void AudioEQ_Process(uint8_t *audioData)
-{
-    if (!EQEnabled &&
-        !AudioEcho_IsEnabled() &&
-        !AudioReverb_IsEnabled() &&
-        !AudioNoiseReduction_IsEnabled())
-    {
-        return;
-    }
-
-    int16_t *samples =
-        (int16_t *)audioData;
-    for (uint32_t i = 0; i < EQ_BLOCK_SIZE; i++)
-    {
-        eqLeftBuffer[i] =
-            (float32_t)samples[2 * i];
-
-        eqRightBuffer[i] =
-            (float32_t)samples[2 * i + 1];
-    }
-
-    if (AudioNoiseReduction_IsEnabled())
-    {
-        AudioNoiseReduction_Process(
-            eqLeftBuffer,
-            eqRightBuffer,
-            EQ_BLOCK_SIZE
-        );
-    }
-
-    if (EQEnabled)
-    {
-        AudioEqualizer_Process(
-            eqLeftBuffer,
-            eqRightBuffer,
-            EQ_BLOCK_SIZE
-        );
-    }
-
-    if (AudioEcho_IsEnabled())
-    {
-        AudioEcho_Process(
-            eqLeftBuffer,
-            eqRightBuffer,
-            EQ_BLOCK_SIZE
-        );
-    }
-
-    if (AudioReverb_IsEnabled())
-    {
-        AudioReverb_Process(
-            eqLeftBuffer,
-            eqRightBuffer,
-            EQ_BLOCK_SIZE
-        );
-    }
-
-    AudioEQ_ApplyLimiter();
-
-    for (uint32_t i = 0; i < EQ_BLOCK_SIZE; i++)
-    {
-        float32_t left = eqLeftBuffer[i];
-        float32_t right = eqRightBuffer[i];
-
-        if (left > 32767.0f)
-            left = 32767.0f;
-
-        if (left < -32768.0f)
-            left = -32768.0f;
-
-        if (right > 32767.0f)
-            right = 32767.0f;
-
-        if (right < -32768.0f)
-            right = -32768.0f;
-
-        samples[2 * i] =
-            (int16_t)left;
-
-        samples[2 * i + 1] =
-            (int16_t)right;
-    }
 }
 
 /* USER CODE END 4 */

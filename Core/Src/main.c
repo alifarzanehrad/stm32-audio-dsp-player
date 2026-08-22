@@ -22,7 +22,6 @@
 #include "crc.h"
 #include "dma.h"
 #include "dma2d.h"
-#include "eth.h"
 #include "fatfs.h"
 #include "i2c.h"
 #include "ltdc.h"
@@ -114,7 +113,6 @@ int main(void)
   MX_DMA_Init();
   MX_CRC_Init();
   MX_DMA2D_Init();
-  MX_ETH_Init();
   MX_FMC_Init();
   MX_I2C1_Init();
   MX_I2C3_Init();

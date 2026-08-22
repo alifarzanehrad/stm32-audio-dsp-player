@@ -23,6 +23,60 @@
 
 /* USER CODE BEGIN 0 */
 
+static void SDRAM_Initialization_Sequence(SDRAM_HandleTypeDef *hsdram)
+{
+    FMC_SDRAM_CommandTypeDef command;
+    uint32_t modeRegister;
+
+    /* Enable the SDRAM clock. */
+    command.CommandMode = FMC_SDRAM_CMD_CLK_ENABLE;
+    command.CommandTarget = FMC_SDRAM_CMD_TARGET_BANK1;
+    command.AutoRefreshNumber = 1U;
+    command.ModeRegisterDefinition = 0U;
+
+    if (HAL_SDRAM_SendCommand(hsdram, &command, 0xFFFFU) != HAL_OK)
+    {
+        Error_Handler();
+    }
+
+    HAL_Delay(1U);
+
+    /* Precharge all SDRAM banks. */
+    command.CommandMode = FMC_SDRAM_CMD_PALL;
+
+    if (HAL_SDRAM_SendCommand(hsdram, &command, 0xFFFFU) != HAL_OK)
+    {
+        Error_Handler();
+    }
+
+    /* Run eight auto-refresh cycles. */
+    command.CommandMode = FMC_SDRAM_CMD_AUTOREFRESH_MODE;
+    command.AutoRefreshNumber = 8U;
+
+    if (HAL_SDRAM_SendCommand(hsdram, &command, 0xFFFFU) != HAL_OK)
+    {
+        Error_Handler();
+    }
+
+    /* Burst length 1, sequential, CAS latency 3, single write burst. */
+    modeRegister = 0x0000U | 0x0030U | 0x0200U;
+
+    command.CommandMode = FMC_SDRAM_CMD_LOAD_MODE;
+    command.AutoRefreshNumber = 1U;
+    command.ModeRegisterDefinition = modeRegister;
+
+    if (HAL_SDRAM_SendCommand(hsdram, &command, 0xFFFFU) != HAL_OK)
+    {
+        Error_Handler();
+    }
+
+    /* Refresh rate for the 100 MHz SDRAM clock. */
+    if (HAL_SDRAM_ProgramRefreshRate(hsdram, 0x0603U) != HAL_OK)
+    {
+        Error_Handler();
+    }
+}
+
 /* USER CODE END 0 */
 
 SDRAM_HandleTypeDef hsdram1;
@@ -69,7 +123,7 @@ void MX_FMC_Init(void)
   }
 
   /* USER CODE BEGIN FMC_Init 2 */
-
+  SDRAM_Initialization_Sequence(&hsdram1);
   /* USER CODE END FMC_Init 2 */
 }
 

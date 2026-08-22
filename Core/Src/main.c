@@ -126,15 +126,6 @@ int main(void)
   MX_I2C1_Init();
   MX_I2C3_Init();
   MX_LTDC_Init();
-  HAL_GPIO_WritePin(GPIOI, GPIO_PIN_12, GPIO_PIN_SET); // LCD_DISP
-  HAL_GPIO_WritePin(GPIOK, GPIO_PIN_3, GPIO_PIN_SET);  // Backlight
-
-  SCB_CleanDCache_by_Addr((uint32_t *)0xC0000000, 480 * 272 * 2);
-  __DSB();
-  __ISB();
-
-  HAL_LTDC_SetAddress(&hltdc, 0xC0000000, LTDC_LAYER_1);
-  HAL_LTDC_Reload(&hltdc, LTDC_RELOAD_IMMEDIATE);
   MX_QUADSPI_Init();
   MX_RTC_Init();
   MX_SAI2_Init();

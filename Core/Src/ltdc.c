@@ -79,7 +79,15 @@ void MX_LTDC_Init(void)
     Error_Handler();
   }
   /* USER CODE BEGIN LTDC_Init 2 */
+  HAL_GPIO_WritePin(GPIOI, GPIO_PIN_12, GPIO_PIN_SET); // LCD_DISP
+  HAL_GPIO_WritePin(GPIOK, GPIO_PIN_3, GPIO_PIN_SET);  // Backlight
 
+  SCB_CleanDCache_by_Addr((uint32_t *)0xC0000000, 480U * 272U * 2U);
+  __DSB();
+  __ISB();
+
+  HAL_LTDC_SetAddress(&hltdc, 0xC0000000, LTDC_LAYER_1);
+  HAL_LTDC_Reload(&hltdc, LTDC_RELOAD_IMMEDIATE);
   /* USER CODE END LTDC_Init 2 */
 
 }

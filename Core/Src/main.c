@@ -49,6 +49,7 @@
 #include <math.h>
 #include "ff.h"
 #include "arm_math.h"
+#include "audio_equalizer.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -92,11 +93,6 @@ extern volatile uint8_t AudioVolume;
 
 #define FFT_SIZE 1024
 #define FFT_BANDS 16
-#define EQ_BLOCK_SIZE 1024
-#define EQ_BAND_COUNT 5
-#define BIQUAD_COEFFS_PER_STAGE 5
-#define BIQUAD_STATE_PER_STAGE 4
-#define EQ_MAX_HEADROOM_DB 6.0f
 #define EQ_LIMITER_THRESHOLD 32000.0f
 #define EQ_LIMITER_RELEASE 0.05f
 
@@ -162,40 +158,7 @@ static float32_t nrFftInput[NR_FRAME_SIZE];
 static float32_t nrFftOutput[NR_FRAME_SIZE];
 static float32_t nrCurrentGain[NR_BIN_COUNT];
 
-static const float32_t eqBandFrequencies[EQ_BAND_COUNT] =
-{
-    100.0f,
-    300.0f,
-    1000.0f,
-    3000.0f,
-    8000.0f
-};
-
-float32_t eqBandGainsDB[EQ_BAND_COUNT] =
-{
-    0.0f,   // 100 Hz
-    0.0f,   // 300 Hz
-    0.0f,   // 1 kHz
-    0.0f,   // 3 kHz
-    0.0f    // 8 kHz
-};
-
-volatile float32_t eqRequestedGainsDB[EQ_BAND_COUNT] =
-{
-    0.0f,
-    0.0f,
-    0.0f,
-    0.0f,
-    0.0f
-};
-volatile uint8_t eqUpdatePending = 0;
-float32_t eqSampleRate = 48000.0f;
-float32_t eqPreampGain = 1.0f;
 float32_t eqLimiterGain = 1.0f;
-
-float32_t eqCoeffs[EQ_BAND_COUNT * BIQUAD_COEFFS_PER_STAGE];
-float32_t eqStateLeft[EQ_BAND_COUNT * BIQUAD_STATE_PER_STAGE];
-float32_t eqStateRight[EQ_BAND_COUNT * BIQUAD_STATE_PER_STAGE];
 float32_t eqLeftBuffer[EQ_BLOCK_SIZE];
 float32_t eqRightBuffer[EQ_BLOCK_SIZE];
 
@@ -221,8 +184,6 @@ static ReverbDelayLine
 
 arm_rfft_fast_instance_f32 fftInstance;
 arm_rfft_fast_instance_f32 nrFftInstance;
-arm_biquad_casd_df1_inst_f32 eqLeft;
-arm_biquad_casd_df1_inst_f32 eqRight;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -237,18 +198,13 @@ void WavPlayer_FillHalf(uint8_t *half);
 
 void AudioFFT_Process(uint8_t *audioData);
 
-void AudioEQ_Init(float32_t sampleRate);
 void AudioEQ_Process(uint8_t *audioData);
-void AudioEQ_SetBandGain(uint8_t band, float32_t gainDB);
 void AudioEcho_SetEnabled(uint8_t enabled);
 uint8_t AudioEcho_IsEnabled(void);
 void AudioReverb_SetEnabled(uint8_t enabled);
 uint8_t AudioReverb_IsEnabled(void);
 void AudioNoiseReduction_SetEnabled(uint8_t enabled);
 uint8_t AudioNoiseReduction_IsEnabled(void);
-static void AudioEQ_CalculateCoefficients(void);
-static void AudioEQ_UpdatePreampGain(void);
-static void AudioEQ_ApplyPendingGains(void);
 static void AudioEQ_ApplyLimiter(void);
 static void AudioEcho_Init(float32_t sampleRate);
 static void AudioEcho_Reset(void);
@@ -716,7 +672,10 @@ uint8_t WavPlayer_Start(const char *filename)
   }
 
   AudioRemainingBytes = dataSize;
-  AudioEQ_Init((float32_t)sampleRate);
+  AudioEqualizer_Init((float32_t)sampleRate);
+  AudioEcho_Init((float32_t)sampleRate);
+  AudioReverb_Init((float32_t)sampleRate);
+  AudioNoiseReduction_Init();
   printf("Calling BSP_AUDIO_OUT_Init with sampleRate=%lu\r\n", (unsigned long)sampleRate);
   audio_status = BSP_AUDIO_OUT_Init(
       OUTPUT_DEVICE_HEADPHONE,
@@ -761,130 +720,6 @@ uint8_t WavPlayer_Start(const char *filename)
   printf("Playback started!\r\n");
 
   return 1;
-}
-
-static void AudioEQ_CalculateCoefficients(void)
-{
-    const float32_t Q = 1.0f;
-
-    for (uint32_t band = 0; band < EQ_BAND_COUNT; band++)
-    {
-        float32_t frequency = eqBandFrequencies[band];
-        float32_t gainDB = eqBandGainsDB[band];
-        float32_t A = powf(10.0f, gainDB / 40.0f);
-        float32_t omega = 2.0f * PI * frequency / eqSampleRate;
-        float32_t alpha = sinf(omega) / (2.0f * Q);
-        float32_t cosOmega = cosf(omega);
-
-        float32_t b0 = 1.0f + alpha * A;
-        float32_t b1 = -2.0f * cosOmega;
-        float32_t b2 = 1.0f - alpha * A;
-        float32_t a0 = 1.0f + alpha / A;
-        float32_t a1 = -2.0f * cosOmega;
-        float32_t a2 = 1.0f - alpha / A;
-
-        uint32_t coeffIndex = band * BIQUAD_COEFFS_PER_STAGE;
-
-        eqCoeffs[coeffIndex] = b0 / a0;
-        eqCoeffs[coeffIndex + 1] = b1 / a0;
-        eqCoeffs[coeffIndex + 2] = b2 / a0;
-
-        /* CMSIS-DSP DF1 expects the feedback coefficients with inverted signs. */
-        eqCoeffs[coeffIndex + 3] = -(a1 / a0);
-        eqCoeffs[coeffIndex + 4] = -(a2 / a0);
-    }
-}
-
-static void AudioEQ_UpdatePreampGain(void)
-{
-    float32_t maxBoostDB = 0.0f;
-
-    for (uint32_t band = 0; band < EQ_BAND_COUNT; band++)
-    {
-        if (eqBandGainsDB[band] > maxBoostDB)
-        {
-            maxBoostDB = eqBandGainsDB[band];
-        }
-    }
-
-    float32_t headroomDB = maxBoostDB;
-
-    if (headroomDB > EQ_MAX_HEADROOM_DB)
-    {
-        headroomDB = EQ_MAX_HEADROOM_DB;
-    }
-
-    eqPreampGain = powf(10.0f, -headroomDB / 20.0f);
-}
-
-void AudioEQ_Init(float32_t sampleRate)
-{
-    eqSampleRate = sampleRate;
-    AudioEcho_Init(sampleRate);
-    AudioReverb_Init(sampleRate);
-    AudioNoiseReduction_Init();
-
-    for (uint32_t band = 0; band < EQ_BAND_COUNT; band++)
-    {
-        eqBandGainsDB[band] = eqRequestedGainsDB[band];
-    }
-
-    eqUpdatePending = 0;
-    eqLimiterGain = 1.0f;
-    AudioEQ_UpdatePreampGain();
-    AudioEQ_CalculateCoefficients();
-
-    arm_biquad_cascade_df1_init_f32(
-        &eqLeft,
-        EQ_BAND_COUNT,
-        eqCoeffs,
-        eqStateLeft
-    );
-
-    arm_biquad_cascade_df1_init_f32(
-        &eqRight,
-        EQ_BAND_COUNT,
-        eqCoeffs,
-        eqStateRight
-    );
-}
-
-void AudioEQ_SetBandGain(uint8_t band, float32_t gainDB)
-{
-    if (band >= EQ_BAND_COUNT)
-    {
-        return;
-    }
-
-    if (gainDB < -12.0f)
-    {
-        gainDB = -12.0f;
-    }
-    else if (gainDB > 12.0f)
-    {
-        gainDB = 12.0f;
-    }
-
-    eqRequestedGainsDB[band] = gainDB;
-    eqUpdatePending = 1;
-}
-
-static void AudioEQ_ApplyPendingGains(void)
-{
-    if (!eqUpdatePending)
-    {
-        return;
-    }
-
-    eqUpdatePending = 0;
-
-    for (uint32_t band = 0; band < EQ_BAND_COUNT; band++)
-    {
-        eqBandGainsDB[band] = eqRequestedGainsDB[band];
-    }
-
-    AudioEQ_UpdatePreampGain();
-    AudioEQ_CalculateCoefficients();
 }
 
 static void AudioEQ_ApplyLimiter(void)
@@ -1504,8 +1339,6 @@ void AudioEQ_Process(uint8_t *audioData)
         return;
     }
 
-    AudioEQ_ApplyPendingGains();
-
     int16_t *samples =
         (int16_t *)audioData;
     for (uint32_t i = 0; i < EQ_BLOCK_SIZE; i++)
@@ -1524,22 +1357,8 @@ void AudioEQ_Process(uint8_t *audioData)
 
     if (EQEnabled)
     {
-        for (uint32_t i = 0; i < EQ_BLOCK_SIZE; i++)
-        {
-            eqLeftBuffer[i] *= eqPreampGain;
-            eqRightBuffer[i] *= eqPreampGain;
-        }
-
-        arm_biquad_cascade_df1_f32(
-            &eqLeft,
+        AudioEqualizer_Process(
             eqLeftBuffer,
-            eqLeftBuffer,
-            EQ_BLOCK_SIZE
-        );
-
-        arm_biquad_cascade_df1_f32(
-            &eqRight,
-            eqRightBuffer,
             eqRightBuffer,
             EQ_BLOCK_SIZE
         );

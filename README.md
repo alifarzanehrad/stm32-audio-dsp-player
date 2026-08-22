@@ -201,10 +201,59 @@ Tracks 4, 5, and 6 are used for noise-reduction tests at 5 dB, 10 dB, and 15 dB 
 ## Build and flash
 
 1. Generate TouchGFX assets on Windows when the UI is modified.
-2. Open the project in STM32CubeIDE.
-3. Select the Debug configuration, then clean and build the project.
-4. Connect the STM32F746G-DISCO through its ST-LINK USB connector.
-5. Program the board using either method below.
+2. Open the project in STM32CubeIDE on Windows or macOS.
+3. Select the Debug configuration and apply the required settings below.
+4. Clean and build the project.
+5. Connect the STM32F746G-DISCO through its ST-LINK USB connector.
+6. Program the board using STM32CubeIDE or pyOCD.
+
+### Required compiler optimization
+
+Real-time DSP can miss the 21.33 ms DMA half-buffer deadline when compiled
+without optimization. Set both compilers to **Optimize for speed (-Ofast)**:
+
+```text
+Project → Properties → C/C++ Build → Settings → Tool Settings
+MCU/MPU GCC Compiler → Optimization → Optimize for speed (-Ofast)
+MCU/MPU G++ Compiler → Optimization → Optimize for speed (-Ofast)
+```
+
+Verify that the build commands contain `-Ofast` instead of `-O0`.
+Running the effects with `-O0` may cause buffer underruns, audible noise,
+or broken playback.
+
+### TouchGFX library path
+
+For GCC builds, add the TouchGFX precompiled library directory under:
+
+```text
+Project → Properties → C/C++ Build → Settings
+→ Tool Settings → MCU/MPU G++ Linker → Libraries
+```
+
+Add this value to **Library search path (-L)**:
+
+```text
+${workspace_loc:/${ProjName}/Middlewares/ST/touchgfx/lib/core/cortex_m7/gcc}
+```
+
+If the workspace variable is not resolved, use:
+
+```text
+../Middlewares/ST/touchgfx/lib/core/cortex_m7/gcc
+```
+
+The Libraries list must contain:
+
+```text
+:libtouchgfx-float-abi-hard.a
+```
+
+Use the `gcc` directory, not `stclang`. A missing search path produces:
+
+```text
+cannot find -l:libtouchgfx-float-abi-hard.a
+```
 
 ### STM32CubeIDE
 
@@ -227,7 +276,9 @@ pyocd flash -t stm32f746nghx Debug/V1.elf
 ## Repository structure
 
 ```text
-Core/Src/main.c                         Audio DSP algorithms and WAV player
+Core/Src/main.c                         Hardware setup, WAV player, and DSP pipeline
+Core/Src/audio_equalizer.c              Five-band biquad equalizer
+Core/Src/audio_echo.c                   Stereo delay and feedback echo
 Core/Src/freertos.c                     Player task, playlist, and DMA refill flow
 TouchGFX/gui/src/model/                 UI-to-firmware interface
 TouchGFX/gui/src/screen1_screen/        Player screen logic

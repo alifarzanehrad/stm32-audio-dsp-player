@@ -1,6 +1,7 @@
 #include "audio_equalizer.h"
 
 #include <math.h>
+#include <stddef.h>
 
 #define BIQUAD_COEFFS_PER_STAGE 5U
 #define BIQUAD_STATE_PER_STAGE 4U

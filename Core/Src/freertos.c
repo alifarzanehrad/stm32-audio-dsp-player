@@ -99,7 +99,6 @@ static uint8_t AudioPlayer_ChangeTrack(int8_t delta, const char *reason);
 void StartDefaultTask(void const * argument);
 extern void TouchGFX_Task(void const * argument);
 
-extern void MX_USB_HOST_Init(void);
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
 /* GetIdleTaskMemory prototype (linked to static allocation support) */
@@ -186,7 +185,6 @@ void MX_FREERTOS_Init(void) {
 void StartDefaultTask(void const * argument)
 {
   /* init code for USB_HOST */
-  MX_USB_HOST_Init();
   /* USER CODE BEGIN StartDefaultTask */
 
   setvbuf(stdout, NULL, _IONBF, 0);

@@ -50,6 +50,7 @@
 #include "ff.h"
 #include "arm_math.h"
 #include "audio_equalizer.h"
+#include "audio_echo.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -82,8 +83,6 @@ volatile uint8_t  HalfBufferNeedsFill = 0;
 volatile uint8_t  FullBufferNeedsFill = 0;
 volatile uint8_t AudioTrackFinished = 0;
 volatile uint8_t EQEnabled = 1;
-volatile uint8_t EchoEnabled = 0;
-volatile uint8_t echoResetPending = 0;
 volatile uint8_t ReverbEnabled = 0;
 volatile uint8_t reverbResetPending = 0;
 volatile uint8_t NoiseReductionEnabled = 0;
@@ -95,18 +94,6 @@ extern volatile uint8_t AudioVolume;
 #define FFT_BANDS 16
 #define EQ_LIMITER_THRESHOLD 32000.0f
 #define EQ_LIMITER_RELEASE 0.05f
-
-#define ECHO_BUFFER_ADDRESS 0xC0100000U
-#define ECHO_MAX_SAMPLE_RATE 48000U
-#define ECHO_MAX_DELAY_MS 500U
-#define ECHO_DELAY_MS 280U
-#define ECHO_CHANNEL_COUNT 2U
-#define ECHO_MIX 0.28f
-#define ECHO_FEEDBACK 0.37f
-#define ECHO_MAX_DELAY_SAMPLES \
-    ((ECHO_MAX_SAMPLE_RATE * ECHO_MAX_DELAY_MS) / 1000U)
-#define ECHO_BUFFER_FLOAT_COUNT \
-    (ECHO_MAX_DELAY_SAMPLES * ECHO_CHANNEL_COUNT)
 
 #define REVERB_BUFFER_ADDRESS 0xC0140000U
 #define REVERB_CHANNEL_COUNT 2U
@@ -162,11 +149,6 @@ float32_t eqLimiterGain = 1.0f;
 float32_t eqLeftBuffer[EQ_BLOCK_SIZE];
 float32_t eqRightBuffer[EQ_BLOCK_SIZE];
 
-static float32_t *const echoBuffer =
-    (float32_t *)ECHO_BUFFER_ADDRESS;
-static uint32_t echoIndex = 0;
-static uint32_t echoDelaySamples = 1;
-
 typedef struct
 {
     float32_t *buffer;
@@ -199,16 +181,11 @@ void WavPlayer_FillHalf(uint8_t *half);
 void AudioFFT_Process(uint8_t *audioData);
 
 void AudioEQ_Process(uint8_t *audioData);
-void AudioEcho_SetEnabled(uint8_t enabled);
-uint8_t AudioEcho_IsEnabled(void);
 void AudioReverb_SetEnabled(uint8_t enabled);
 uint8_t AudioReverb_IsEnabled(void);
 void AudioNoiseReduction_SetEnabled(uint8_t enabled);
 uint8_t AudioNoiseReduction_IsEnabled(void);
 static void AudioEQ_ApplyLimiter(void);
-static void AudioEcho_Init(float32_t sampleRate);
-static void AudioEcho_Reset(void);
-static void AudioEcho_Process(void);
 static void AudioReverb_Init(float32_t sampleRate);
 static void AudioReverb_Reset(void);
 static void AudioReverb_Process(void);
@@ -767,85 +744,6 @@ static void AudioEQ_ApplyLimiter(void)
     }
 }
 
-void AudioEcho_SetEnabled(uint8_t enabled)
-{
-    uint8_t newState = enabled ? 1U : 0U;
-
-    if (EchoEnabled != newState)
-    {
-        EchoEnabled = newState;
-        echoResetPending = 1U;
-    }
-}
-
-uint8_t AudioEcho_IsEnabled(void)
-{
-    return EchoEnabled;
-}
-
-static void AudioEcho_Reset(void)
-{
-    echoIndex = 0U;
-
-    memset(
-        echoBuffer,
-        0,
-        ECHO_BUFFER_FLOAT_COUNT * sizeof(float32_t)
-    );
-}
-
-static void AudioEcho_Init(float32_t sampleRate)
-{
-    uint32_t requestedSamples =
-        (uint32_t)((sampleRate * ECHO_DELAY_MS) / 1000.0f);
-
-    if (requestedSamples < 1U)
-    {
-        requestedSamples = 1U;
-    }
-    else if (requestedSamples > ECHO_MAX_DELAY_SAMPLES)
-    {
-        requestedSamples = ECHO_MAX_DELAY_SAMPLES;
-    }
-
-    echoDelaySamples = requestedSamples;
-    AudioEcho_Reset();
-}
-
-static void AudioEcho_Process(void)
-{
-    const float32_t dryMix = 1.0f - ECHO_MIX;
-
-    for (uint32_t i = 0; i < EQ_BLOCK_SIZE; i++)
-    {
-        uint32_t bufferIndex = echoIndex * ECHO_CHANNEL_COUNT;
-
-        float32_t dryLeft = eqLeftBuffer[i];
-        float32_t dryRight = eqRightBuffer[i];
-        float32_t delayedLeft = echoBuffer[bufferIndex];
-        float32_t delayedRight = echoBuffer[bufferIndex + 1U];
-
-        /* y[n] = (1-M)x[n] + M d[n] */
-        eqLeftBuffer[i] =
-            dryMix * dryLeft + ECHO_MIX * delayedLeft;
-        eqRightBuffer[i] =
-            dryMix * dryRight + ECHO_MIX * delayedRight;
-
-        /* b[n] = x[n] + F d[n] */
-        echoBuffer[bufferIndex] =
-            dryLeft + ECHO_FEEDBACK * delayedLeft;
-        echoBuffer[bufferIndex + 1U] =
-            dryRight + ECHO_FEEDBACK * delayedRight;
-
-        echoIndex++;
-
-        if (echoIndex >= echoDelaySamples)
-        {
-            echoIndex = 0U;
-        }
-    }
-}
-
 void AudioReverb_SetEnabled(uint8_t enabled)
 {
     uint8_t newState = enabled ? 1U : 0U;
@@ -1314,12 +1212,6 @@ static void AudioNoiseReduction_Process(void)
 
 void AudioEQ_Process(uint8_t *audioData)
 {
-    if (echoResetPending)
-    {
-        echoResetPending = 0U;
-        AudioEcho_Reset();
-    }
-
     if (reverbResetPending)
     {
         reverbResetPending = 0U;
@@ -1333,7 +1225,7 @@ void AudioEQ_Process(uint8_t *audioData)
     }
 
     if (!EQEnabled &&
-        !EchoEnabled &&
+        !AudioEcho_IsEnabled() &&
         !ReverbEnabled &&
         !NoiseReductionEnabled)
     {
@@ -1365,9 +1257,13 @@ void AudioEQ_Process(uint8_t *audioData)
         );
     }
 
-    if (EchoEnabled)
+    if (AudioEcho_IsEnabled())
     {
-        AudioEcho_Process();
+        AudioEcho_Process(
+            eqLeftBuffer,
+            eqRightBuffer,
+            EQ_BLOCK_SIZE
+        );
     }
 
     if (ReverbEnabled)

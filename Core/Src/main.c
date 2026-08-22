@@ -43,14 +43,8 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include "stm32746g_discovery_audio.h"
 #include <stdio.h>
-#include <string.h>
-#include <math.h>
-#include "ff.h"
-#include "arm_math.h"
 #include "audio_spectrum.h"
-#include "audio_pipeline.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -71,18 +65,6 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-FATFS SDFatFs;
-
-#define AUDIO_BUFFER_SIZE   8192
-#define AUDIO_HALF_BUFFER   (AUDIO_BUFFER_SIZE / 2)
-FIL WavFile;
-uint8_t AudioBuffer[AUDIO_BUFFER_SIZE];
-volatile uint32_t AudioRemainingBytes = 0;
-volatile uint8_t  AudioPlaying = 0;
-volatile uint8_t  HalfBufferNeedsFill = 0;
-volatile uint8_t  FullBufferNeedsFill = 0;
-volatile uint8_t AudioTrackFinished = 0;
-
 extern volatile uint8_t AudioVolume;
 
 /* USER CODE END PV */
@@ -93,9 +75,6 @@ void PeriphCommonClock_Config(void);
 void MX_FREERTOS_Init(void);
 /* USER CODE BEGIN PFP */
 static void SDRAM_Initialization_Sequence(SDRAM_HandleTypeDef *hsdram);
-
-uint8_t WavPlayer_Start(const char *filename);
-void WavPlayer_FillHalf(uint8_t *half);
 
 /* USER CODE END PFP */
 
@@ -361,221 +340,6 @@ int _write(int file, char *ptr, int len)
 {
   HAL_UART_Transmit(&huart1, (uint8_t *)ptr, len, HAL_MAX_DELAY);
   return len;
-}
-
-void WavPlayer_FillHalf(uint8_t *half)
-{
-  UINT bytesread = 0;
-
-  if (!AudioPlaying)
-    return;
-
-  if (AudioRemainingBytes > 0)
-  {
-    UINT toRead = (AudioRemainingBytes < AUDIO_HALF_BUFFER) ? AudioRemainingBytes : AUDIO_HALF_BUFFER;
-    f_read(&WavFile, half, toRead, &bytesread);
-    AudioRemainingBytes -= bytesread;
-
-    if (bytesread < AUDIO_HALF_BUFFER)
-    {
-      memset(&half[bytesread], 0, AUDIO_HALF_BUFFER - bytesread);
-    }
-  }
-  else
-  {
-      memset(half, 0, AUDIO_HALF_BUFFER);
-
-      AudioPlaying = 0;
-      HalfBufferNeedsFill = 0;
-      FullBufferNeedsFill = 0;
-
-      f_close(&WavFile);
-
-      AudioTrackFinished = 1;
-
-      printf("Playback finished!\r\n");
-  }
-}
-
-void WavPlayer_Stop(void)
-{
-    if (AudioPlaying)
-    {
-        BSP_AUDIO_OUT_Stop(CODEC_PDWN_SW);
-
-        AudioPlaying = 0;
-
-        HalfBufferNeedsFill = 0;
-        FullBufferNeedsFill = 0;
-
-        f_close(&WavFile);
-
-        printf("Playback stopped\r\n");
-    }
-}
-
-void BSP_AUDIO_OUT_HalfTransfer_CallBack(void)
-{
-  HalfBufferNeedsFill = 1;
-}
-
-void BSP_AUDIO_OUT_TransferComplete_CallBack(void)
-{
-  FullBufferNeedsFill = 1;
-}
-
-uint8_t WavPlayer_Start(const char *filename)
-{
-  FRESULT res;
-  UINT bytesread;
-  uint8_t audio_status;
-  char chunkId[4];
-  uint32_t chunkSize;
-
-  AudioPlaying = 0;
-  HalfBufferNeedsFill = 0;
-  FullBufferNeedsFill = 0;
-  AudioTrackFinished = 0;
-
-  printf("Opening file %s...\r\n", filename);
-  res = f_open(&WavFile, filename, FA_READ);
-  if (res != FR_OK)
-  {
-    printf("f_open failed, res=%d\r\n", res);
-    return 0;
-  }
-  printf("File opened OK\r\n");
-
-  /* Read RIFF header (12 bytes total: "RIFF" + size(4) + "WAVE") */
-  char riff[4], wave[4];
-  uint32_t riffSize;
-  f_read(&WavFile, riff, 4, &bytesread);
-  f_read(&WavFile, &riffSize, 4, &bytesread);
-  f_read(&WavFile, wave, 4, &bytesread);
-
-  if (strncmp(riff, "RIFF", 4) != 0 || strncmp(wave, "WAVE", 4) != 0)
-  {
-    printf("Invalid WAV file (bad RIFF/WAVE header)!\r\n");
-    f_close(&WavFile);
-    return 0;
-  }
-  printf("RIFF/WAVE header OK\r\n");
-
-  uint8_t foundFmt = 0, foundData = 0;
-  uint16_t audioFormat = 0, numChannels = 0, bitsPerSample = 0, blockAlign = 0;
-  uint32_t sampleRate = 0, byteRate = 0;
-  uint32_t dataSize = 0;
-
-  /* Walk chunks until we find both "fmt " and "data" */
-  while (!foundData)
-  {
-    res = f_read(&WavFile, chunkId, 4, &bytesread);
-    if (res != FR_OK || bytesread != 4)
-    {
-      printf("Failed to read chunk id (EOF before data chunk found)\r\n");
-      f_close(&WavFile);
-      return 0;
-    }
-
-    res = f_read(&WavFile, &chunkSize, 4, &bytesread);
-    if (res != FR_OK || bytesread != 4)
-    {
-      printf("Failed to read chunk size\r\n");
-      f_close(&WavFile);
-      return 0;
-    }
-
-    printf("Found chunk '%.4s' size=%lu\r\n", chunkId, (unsigned long)chunkSize);
-
-    if (strncmp(chunkId, "fmt ", 4) == 0)
-    {
-      FSIZE_t fmtChunkStart = f_tell(&WavFile);
-
-      f_read(&WavFile, &audioFormat, 2, &bytesread);
-      f_read(&WavFile, &numChannels, 2, &bytesread);
-      f_read(&WavFile, &sampleRate, 4, &bytesread);
-      f_read(&WavFile, &byteRate, 4, &bytesread);
-      f_read(&WavFile, &blockAlign, 2, &bytesread);
-      f_read(&WavFile, &bitsPerSample, 2, &bytesread);
-
-      f_lseek(&WavFile, fmtChunkStart + chunkSize);
-      foundFmt = 1;
-    }
-    else if (strncmp(chunkId, "data", 4) == 0)
-    {
-      dataSize = chunkSize;
-      foundData = 1;
-    }
-    else
-    {
-      FSIZE_t currentPos = f_tell(&WavFile);
-      f_lseek(&WavFile, currentPos + chunkSize);
-    }
-  }
-
-  if (!foundFmt)
-  {
-    printf("No fmt chunk found!\r\n");
-    f_close(&WavFile);
-    return 0;
-  }
-
-  printf("AudioFormat=%u NumChannels=%u SampleRate=%lu BitsPerSample=%u DataSize=%lu\r\n",
-         audioFormat, numChannels, (unsigned long)sampleRate, bitsPerSample, (unsigned long)dataSize);
-
-  if (audioFormat != 1)
-  {
-    printf("Not PCM format!\r\n");
-    f_close(&WavFile);
-    return 0;
-  }
-
-  AudioRemainingBytes = dataSize;
-  AudioPipeline_Init((float32_t)sampleRate);
-  printf("Calling BSP_AUDIO_OUT_Init with sampleRate=%lu\r\n", (unsigned long)sampleRate);
-  audio_status = BSP_AUDIO_OUT_Init(
-      OUTPUT_DEVICE_HEADPHONE,
-      AudioVolume,
-      sampleRate
-  );
-  if (audio_status != AUDIO_OK)
-  {
-    printf("BSP_AUDIO_OUT_Init failed, status=%u\r\n", audio_status);
-    f_close(&WavFile);
-    return 0;
-  }
-  BSP_AUDIO_OUT_SetAudioFrameSlot(CODEC_AUDIOFRAME_SLOT_02);
-  printf("Audio codec init OK\r\n");
-
-  f_read(&WavFile, AudioBuffer, AUDIO_BUFFER_SIZE, &bytesread);
-  if (bytesread < AUDIO_BUFFER_SIZE)
-  {
-    memset(&AudioBuffer[bytesread], 0, AUDIO_BUFFER_SIZE - bytesread);
-  }
-  AudioRemainingBytes -= bytesread;
-
-  AudioPipeline_Process(&AudioBuffer[0]);
-
-  AudioPipeline_Process(
-      &AudioBuffer[AUDIO_HALF_BUFFER]
-  );
-
-  printf("Initial buffer filled, bytesread=%u\r\n", bytesread);
-
-  AudioPlaying = 1;
-
-  audio_status = BSP_AUDIO_OUT_Play((uint16_t *)AudioBuffer, AUDIO_BUFFER_SIZE);
-  if (audio_status != AUDIO_OK)
-  {
-    printf("BSP_AUDIO_OUT_Play failed, status=%u\r\n", audio_status);
-    BSP_AUDIO_OUT_Stop(CODEC_PDWN_SW);
-    AudioPlaying = 0;
-    f_close(&WavFile);
-    return 0;
-  }
-  printf("Playback started!\r\n");
-
-  return 1;
 }
 
 /* USER CODE END 4 */

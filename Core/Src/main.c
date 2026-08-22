@@ -53,6 +53,7 @@
 #include "audio_echo.h"
 #include "audio_reverb.h"
 #include "noise_reduction.h"
+#include "audio_spectrum.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -88,23 +89,13 @@ volatile uint8_t EQEnabled = 1;
 
 extern volatile uint8_t AudioVolume;
 
-#define FFT_SIZE 1024
-#define FFT_BANDS 16
 #define EQ_LIMITER_THRESHOLD 32000.0f
 #define EQ_LIMITER_RELEASE 0.05f
-
-float32_t fftBands[FFT_BANDS];
-float32_t fftBandsSmoothed[FFT_BANDS];
-float32_t fftInput[FFT_SIZE];
-float32_t fftOutput[FFT_SIZE];
-float32_t fftMagnitude[FFT_SIZE / 2];
-float32_t hannWindow[FFT_SIZE];
 
 float32_t eqLimiterGain = 1.0f;
 float32_t eqLeftBuffer[EQ_BLOCK_SIZE];
 float32_t eqRightBuffer[EQ_BLOCK_SIZE];
 
-arm_rfft_fast_instance_f32 fftInstance;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -116,8 +107,6 @@ static void SDRAM_Initialization_Sequence(SDRAM_HandleTypeDef *hsdram);
 
 uint8_t WavPlayer_Start(const char *filename);
 void WavPlayer_FillHalf(uint8_t *half);
-
-void AudioFFT_Process(uint8_t *audioData);
 
 void AudioEQ_Process(uint8_t *audioData);
 static void AudioEQ_ApplyLimiter(void);
@@ -199,18 +188,7 @@ int main(void)
   /* Call PreOsInit function */
   MX_TouchGFX_PreOSInit();
   /* USER CODE BEGIN 2 */
-  if (arm_rfft_fast_init_f32(&fftInstance, FFT_SIZE) != ARM_MATH_SUCCESS)
-  {
-      printf("FFT init failed\r\n");
-      Error_Handler();
-  }
-  for (uint32_t i = 0; i < FFT_SIZE; i++)
-  {
-      hannWindow[i] =
-          0.5f *
-          (1.0f -
-           cosf((2.0f * PI * i) / (FFT_SIZE - 1)));
-  }
+  AudioSpectrum_Init();
   /* USER CODE END 2 */
 
   /* Call init function for freertos objects (in cmsis_os2.c) */
@@ -743,137 +721,6 @@ void AudioEQ_Process(uint8_t *audioData)
         samples[2 * i + 1] =
             (int16_t)right;
     }
-}
-
-void AudioFFT_Process(uint8_t *audioData)
-{
-    int16_t *samples = (int16_t *)audioData;
-
-    for (uint32_t i = 0; i < FFT_SIZE; i++)
-    {
-        int32_t left  = samples[2 * i];
-        int32_t right = samples[2 * i + 1];
-
-        fftInput[i] = ((float32_t)left + (float32_t)right) * 0.5f;
-    }
-
-    float32_t mean = 0.0f;
-
-    for (uint32_t i = 0; i < FFT_SIZE; i++)
-    {
-        mean += fftInput[i];
-    }
-
-    mean /= FFT_SIZE;
-
-    for (uint32_t i = 0; i < FFT_SIZE; i++)
-    {
-        fftInput[i] -= mean;
-    }
-
-    for (uint32_t i = 0; i < FFT_SIZE; i++)
-    {
-        fftInput[i] *= hannWindow[i];
-    }
-
-    arm_rfft_fast_f32(
-        &fftInstance,
-        fftInput,
-        fftOutput,
-        0
-    );
-
-    fftMagnitude[0] = fabsf(fftOutput[0])/ FFT_SIZE;
-
-    for (uint32_t k = 1; k < FFT_SIZE / 2; k++)
-    {
-        float32_t real = fftOutput[2 * k];
-        float32_t imag = fftOutput[2 * k + 1];
-
-        fftMagnitude[k] =
-            sqrtf(real * real + imag * imag)/ FFT_SIZE;
-    }
-
-    uint32_t maxBin = 1;
-    float32_t maxMagnitude = fftMagnitude[1];
-
-    for (uint32_t k = 2; k < FFT_SIZE / 2; k++)
-    {
-        if (fftMagnitude[k] > maxMagnitude)
-        {
-            maxMagnitude = fftMagnitude[k];
-            maxBin = k;
-        }
-    }
-    static const uint16_t bandEdges[FFT_BANDS + 1] =
-    {
-        1,
-        2,
-        3,
-        4,
-        6,
-        9,
-        13,
-        19,
-        28,
-        41,
-        60,
-        88,
-        129,
-        189,
-        277,
-        405,
-        511
-    };
-
-    for (uint32_t band = 0; band < FFT_BANDS; band++)
-    {
-        float32_t sum = 0.0f;
-
-        uint32_t startBin = bandEdges[band];
-        uint32_t endBin   = bandEdges[band + 1];
-
-        for (uint32_t k = startBin; k < endBin; k++)
-        {
-            sum += fftMagnitude[k];
-        }
-
-        uint32_t count = endBin - startBin;
-
-        if (count > 0)
-        {
-            fftBands[band] = sum / (float32_t)count;
-        }
-        else
-        {
-            fftBands[band] = 0.0f;
-        }
-    }
-    float32_t maxBand = 1.0f;
-
-    for (uint32_t band = 0; band < FFT_BANDS; band++)
-    {
-        if (fftBands[band] > maxBand)
-        {
-            maxBand = fftBands[band];
-        }
-    }
-
-    for (uint32_t band = 0; band < FFT_BANDS; band++)
-    {
-        float32_t normalized =
-            (fftBands[band] / maxBand) * 100.0f;
-
-        if (normalized > 100.0f)
-        {
-            normalized = 100.0f;
-        }
-
-        fftBandsSmoothed[band] =
-            0.7f * fftBandsSmoothed[band] +
-            0.3f * normalized;
-    }
-
 }
 
 /* USER CODE END 4 */

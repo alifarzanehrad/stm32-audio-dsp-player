@@ -30,6 +30,8 @@
 #include <stdio.h>
 #include "sdmmc.h"
 #include "arm_math.h"
+#include "audio_pipeline.h"
+#include "audio_spectrum.h"
 #include <math.h>
 
 extern uint8_t WavPlayer_Start(const char *filename);
@@ -42,8 +44,6 @@ extern volatile uint8_t HalfBufferNeedsFill;
 extern volatile uint8_t FullBufferNeedsFill;
 extern volatile uint8_t AudioTrackFinished;
 extern uint8_t AudioBuffer[];
-extern void AudioFFT_Process(uint8_t *audioData);
-extern void AudioEQ_Process(uint8_t *audioData);
 
 #define AUDIO_HALF_BUFFER 4096
 #define FFT_SIZE      1024
@@ -313,7 +313,7 @@ void StartDefaultTask(void const * argument)
 
 	      if (AudioPlaying)
 	      {
-	          AudioEQ_Process(&AudioBuffer[0]);
+	          AudioPipeline_Process(&AudioBuffer[0]);
 
 	          AudioFFT_Process(&AudioBuffer[0]);
 	      }
@@ -329,7 +329,7 @@ void StartDefaultTask(void const * argument)
 
 	      if (AudioPlaying)
 	      {
-	          AudioEQ_Process(
+	          AudioPipeline_Process(
 	              &AudioBuffer[AUDIO_HALF_BUFFER]
 	          );
 

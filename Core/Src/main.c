@@ -25,12 +25,9 @@
 #include "fatfs.h"
 #include "i2c.h"
 #include "ltdc.h"
-#include "quadspi.h"
 #include "sai.h"
 #include "sdmmc.h"
-#include "tim.h"
 #include "usart.h"
-#include "usb_host.h"
 #include "gpio.h"
 #include "fmc.h"
 #include "app_touchgfx.h"
@@ -114,15 +111,9 @@ int main(void)
   MX_I2C1_Init();
   MX_I2C3_Init();
   MX_LTDC_Init();
-  MX_QUADSPI_Init();
   MX_SAI2_Init();
   MX_SDMMC1_SD_Init();
-  MX_TIM3_Init();
-  MX_TIM5_Init();
-  MX_TIM8_Init();
-  MX_TIM12_Init();
   MX_USART1_UART_Init();
-  MX_USART6_UART_Init();
   MX_FATFS_Init();
   MX_TouchGFX_Init();
   /* Call PreOsInit function */

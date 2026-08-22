@@ -32,20 +32,11 @@
 #include "arm_math.h"
 #include "audio_pipeline.h"
 #include "audio_spectrum.h"
+#include "audio_player.h"
 #include <math.h>
 
-extern uint8_t WavPlayer_Start(const char *filename);
-extern void WavPlayer_FillHalf(uint8_t *half);
-extern void WavPlayer_Stop(void);
-extern FATFS SDFatFs;
 extern SD_HandleTypeDef hsd1;
-extern volatile uint8_t AudioPlaying;
-extern volatile uint8_t HalfBufferNeedsFill;
-extern volatile uint8_t FullBufferNeedsFill;
-extern volatile uint8_t AudioTrackFinished;
-extern uint8_t AudioBuffer[];
 
-#define AUDIO_HALF_BUFFER 4096
 #define FFT_SIZE      1024
 #define SAMPLE_RATE   48000.0f
 /* USER CODE END Includes */
@@ -324,17 +315,17 @@ void StartDefaultTask(void const * argument)
 	      FullBufferNeedsFill = 0;
 
 	      WavPlayer_FillHalf(
-	          &AudioBuffer[AUDIO_HALF_BUFFER]
+	          &AudioBuffer[AUDIO_PLAYER_HALF_BUFFER_SIZE]
 	      );
 
 	      if (AudioPlaying)
 	      {
 	          AudioPipeline_Process(
-	              &AudioBuffer[AUDIO_HALF_BUFFER]
+	              &AudioBuffer[AUDIO_PLAYER_HALF_BUFFER_SIZE]
 	          );
 
 	          AudioFFT_Process(
-	              &AudioBuffer[AUDIO_HALF_BUFFER]
+	              &AudioBuffer[AUDIO_PLAYER_HALF_BUFFER_SIZE]
 	          );
 	      }
 	  }

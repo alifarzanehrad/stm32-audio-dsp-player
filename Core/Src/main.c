@@ -74,8 +74,6 @@ void SystemClock_Config(void);
 void PeriphCommonClock_Config(void);
 void MX_FREERTOS_Init(void);
 /* USER CODE BEGIN PFP */
-static void SDRAM_Initialization_Sequence(SDRAM_HandleTypeDef *hsdram);
-
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -122,7 +120,6 @@ int main(void)
   MX_DMA2D_Init();
   MX_ETH_Init();
   MX_FMC_Init();
-  SDRAM_Initialization_Sequence(&hsdram1);
   MX_I2C1_Init();
   MX_I2C3_Init();
   MX_LTDC_Init();
@@ -252,75 +249,6 @@ void PeriphCommonClock_Config(void)
 }
 
 /* USER CODE BEGIN 4 */
-static void SDRAM_Initialization_Sequence(SDRAM_HandleTypeDef *hsdram)
-{
-    FMC_SDRAM_CommandTypeDef Command;
-    uint32_t modeRegister;
-
-    /* Step 1: Enable SDRAM clock */
-    Command.CommandMode = FMC_SDRAM_CMD_CLK_ENABLE;
-    Command.CommandTarget = FMC_SDRAM_CMD_TARGET_BANK1;
-    Command.AutoRefreshNumber = 1;
-    Command.ModeRegisterDefinition = 0;
-
-    if (HAL_SDRAM_SendCommand(hsdram, &Command, 0xFFFF) != HAL_OK)
-    {
-        Error_Handler();
-    }
-
-    /* Step 2: At least 100 us delay */
-    HAL_Delay(1);
-
-    /* Step 3: Precharge all */
-    Command.CommandMode = FMC_SDRAM_CMD_PALL;
-    Command.CommandTarget = FMC_SDRAM_CMD_TARGET_BANK1;
-    Command.AutoRefreshNumber = 1;
-    Command.ModeRegisterDefinition = 0;
-
-    if (HAL_SDRAM_SendCommand(hsdram, &Command, 0xFFFF) != HAL_OK)
-    {
-        Error_Handler();
-    }
-
-    /* Step 4: Auto refresh */
-    Command.CommandMode = FMC_SDRAM_CMD_AUTOREFRESH_MODE;
-    Command.CommandTarget = FMC_SDRAM_CMD_TARGET_BANK1;
-    Command.AutoRefreshNumber = 8;
-    Command.ModeRegisterDefinition = 0;
-
-    if (HAL_SDRAM_SendCommand(hsdram, &Command, 0xFFFF) != HAL_OK)
-    {
-        Error_Handler();
-    }
-
-    /*
-     * Step 5: Load Mode Register
-     * CubeMX FMC setting = CAS Latency 3
-     */
-    modeRegister =
-          0x0000U       /* Burst length 1 */
-        | 0x0000U       /* Sequential */
-        | 0x0030U       /* CAS latency 3 */
-        | 0x0000U       /* Standard operating mode */
-        | 0x0200U;      /* Single write burst */
-
-    Command.CommandMode = FMC_SDRAM_CMD_LOAD_MODE;
-    Command.CommandTarget = FMC_SDRAM_CMD_TARGET_BANK1;
-    Command.AutoRefreshNumber = 1;
-    Command.ModeRegisterDefinition = modeRegister;
-
-    if (HAL_SDRAM_SendCommand(hsdram, &Command, 0xFFFF) != HAL_OK)
-    {
-        Error_Handler();
-    }
-
-    /* Step 6: Refresh rate for 100 MHz SDRAM clock */
-    if (HAL_SDRAM_ProgramRefreshRate(hsdram, 0x0603) != HAL_OK)
-    {
-        Error_Handler();
-    }
-}
-
 int __io_putchar(int ch)
 {
   HAL_UART_Transmit(&huart1, (uint8_t *)&ch, 1, HAL_MAX_DELAY);

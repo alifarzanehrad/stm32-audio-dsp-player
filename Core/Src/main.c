@@ -673,6 +673,7 @@ uint8_t WavPlayer_Start(const char *filename)
 
   AudioRemainingBytes = dataSize;
   AudioEqualizer_Init((float32_t)sampleRate);
+  eqLimiterGain = 1.0f;
   AudioEcho_Init((float32_t)sampleRate);
   AudioReverb_Init((float32_t)sampleRate);
   AudioNoiseReduction_Init();

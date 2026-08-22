@@ -276,7 +276,8 @@ pyocd flash -t stm32f746nghx Debug/V1.elf
 ## Repository structure
 
 ```text
-Core/Src/main.c                         Hardware initialization and WAV playback
+Core/Src/main.c                         MCU and peripheral initialization
+Core/Src/audio_player.c                 WAV parsing, DMA buffers, and codec playback
 Core/Src/audio_pipeline.c               DSP stage order, PCM conversion, and limiter
 Core/Src/audio_equalizer.c              Five-band biquad equalizer
 Core/Src/audio_echo.c                   Stereo delay and feedback echo

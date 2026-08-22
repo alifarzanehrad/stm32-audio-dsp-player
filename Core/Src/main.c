@@ -26,11 +26,8 @@
 #include "i2c.h"
 #include "ltdc.h"
 #include "quadspi.h"
-#include "rtc.h"
 #include "sai.h"
 #include "sdmmc.h"
-#include "spdifrx.h"
-#include "spi.h"
 #include "tim.h"
 #include "usart.h"
 #include "usb_host.h"
@@ -118,13 +115,8 @@ int main(void)
   MX_I2C3_Init();
   MX_LTDC_Init();
   MX_QUADSPI_Init();
-  MX_RTC_Init();
   MX_SAI2_Init();
   MX_SDMMC1_SD_Init();
-  MX_SPDIFRX_Init();
-  MX_SPI2_Init();
-  MX_TIM1_Init();
-  MX_TIM2_Init();
   MX_TIM3_Init();
   MX_TIM5_Init();
   MX_TIM8_Init();

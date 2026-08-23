@@ -27,6 +27,7 @@ typedef enum
 #if AUDIO_BENCHMARK_ENABLED
 
 void AudioBenchmark_Init(void);
+void AudioBenchmark_Reset(void);
 uint32_t AudioBenchmark_Start(void);
 void AudioBenchmark_End(AudioBenchmarkStage stage, uint32_t startCycles);
 void AudioBenchmark_Report(void);
@@ -34,6 +35,7 @@ void AudioBenchmark_Report(void);
 #else
 
 #define AudioBenchmark_Init() ((void)0)
+#define AudioBenchmark_Reset() ((void)0)
 #define AudioBenchmark_Start() (0U)
 #define AudioBenchmark_End(stage, startCycles) ((void)0)
 #define AudioBenchmark_Report() ((void)0)

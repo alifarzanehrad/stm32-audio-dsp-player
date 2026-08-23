@@ -1,5 +1,7 @@
 #include "audio_echo.h"
 
+#include "audio_benchmark.h"
+
 #include <stddef.h>
 #include <string.h>
 
@@ -62,6 +64,7 @@ void AudioEcho_SetEnabled(uint8_t newEnabled)
     {
         enabled = newState;
         resetPending = 1U;
+        AudioBenchmark_RequestReset();
     }
 }
 

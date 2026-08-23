@@ -13,6 +13,7 @@ typedef struct
 {
     uint64_t cycles;
     uint32_t calls;
+    uint32_t maximumCycles;
 } AudioBenchmarkCounter;
 
 static AudioBenchmarkCounter counters[AUDIO_BENCH_STAGE_COUNT];
@@ -79,10 +80,16 @@ void AudioBenchmark_End(
     }
 
     /* Unsigned subtraction also handles a CYCCNT wraparound. */
-    counters[stage].cycles +=
+    uint32_t elapsedCycles =
         (uint32_t)(DWT->CYCCNT - startCycles);
 
+    counters[stage].cycles += elapsedCycles;
     counters[stage].calls++;
+
+    if (elapsedCycles > counters[stage].maximumCycles)
+    {
+        counters[stage].maximumCycles = elapsedCycles;
+    }
 }
 
 void AudioBenchmark_Report(void)
@@ -121,12 +128,21 @@ void AudioBenchmark_Report(void)
                   )
                 : 0U;
 
+        uint32_t maximumUs =
+            (SystemCoreClock > 0U)
+                ? (uint32_t)(
+                    ((uint64_t)counters[i].maximumCycles * 1000000U) /
+                    SystemCoreClock
+                  )
+                : 0U;
+
         printf(
-            "%-17s %3lu.%lu%%  avg=%lu us  calls=%lu\r\n",
+            "%-17s %3lu.%lu%%  avg=%lu us  max=%lu us  calls=%lu\r\n",
             stageNames[i],
             (unsigned long)(cpuPermille / 10U),
             (unsigned long)(cpuPermille % 10U),
             (unsigned long)averageUs,
+            (unsigned long)maximumUs,
             (unsigned long)calls
         );
     }

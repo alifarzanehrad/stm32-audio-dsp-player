@@ -17,6 +17,16 @@ volatile uint8_t AudioTrackFinished;
 
 static FIL wavFile;
 static volatile uint32_t remainingBytes;
+static uint8_t wavFileOpen;
+
+static void WavPlayer_CloseFile(void)
+{
+    if (wavFileOpen != 0U)
+    {
+        f_close(&wavFile);
+        wavFileOpen = 0U;
+    }
+}
 
 extern volatile uint8_t AudioVolume;
 
@@ -36,14 +46,23 @@ void WavPlayer_FillHalf(uint8_t *half)
                 ? (UINT)remainingBytes
                 : (UINT)AUDIO_PLAYER_HALF_BUFFER_SIZE;
 
-        f_read(
+        FRESULT result = f_read(
             &wavFile,
             half,
             bytesToRead,
             &bytesRead
         );
 
-        remainingBytes -= bytesRead;
+        if (result != FR_OK)
+        {
+            bytesRead = 0U;
+            remainingBytes = 0U;
+            AudioTrackFinished = 1U;
+        }
+        else
+        {
+            remainingBytes -= bytesRead;
+        }
 
         if (bytesRead < AUDIO_PLAYER_HALF_BUFFER_SIZE)
         {
@@ -66,27 +85,27 @@ void WavPlayer_FillHalf(uint8_t *half)
         HalfBufferNeedsFill = 0U;
         FullBufferNeedsFill = 0U;
 
-        f_close(&wavFile);
+        /*
+         * Keep the file open until the player task stops DMA. This avoids
+         * starting the next track while the previous DMA stream is alive.
+         */
         AudioTrackFinished = 1U;
-
-        printf("Playback finished!\r\n");
     }
 }
 
 void WavPlayer_Stop(void)
 {
-    if (AudioPlaying != 0U)
-    {
-        BSP_AUDIO_OUT_Stop(CODEC_PDWN_SW);
+    /*
+     * Stop the peripheral even when AudioPlaying was cleared at EOF. DMA may
+     * still be producing callbacks until BSP_AUDIO_OUT_Stop() is called.
+     */
+    BSP_AUDIO_OUT_Stop(CODEC_PDWN_SW);
 
-        AudioPlaying = 0U;
-        HalfBufferNeedsFill = 0U;
-        FullBufferNeedsFill = 0U;
+    AudioPlaying = 0U;
+    HalfBufferNeedsFill = 0U;
+    FullBufferNeedsFill = 0U;
 
-        f_close(&wavFile);
-
-        printf("Playback stopped\r\n");
-    }
+    WavPlayer_CloseFile();
 }
 
 void BSP_AUDIO_OUT_HalfTransfer_CallBack(void)
@@ -114,6 +133,7 @@ uint8_t WavPlayer_Start(const char *filename)
 
     printf("Opening file %s...\r\n", filename);
 
+    WavPlayer_CloseFile();
     result = f_open(&wavFile, filename, FA_READ);
 
     if (result != FR_OK)
@@ -122,6 +142,7 @@ uint8_t WavPlayer_Start(const char *filename)
         return 0U;
     }
 
+    wavFileOpen = 1U;
     printf("File opened OK\r\n");
 
     char riff[4];
@@ -136,7 +157,7 @@ uint8_t WavPlayer_Start(const char *filename)
         (strncmp(wave, "WAVE", 4U) != 0))
     {
         printf("Invalid WAV file (bad RIFF/WAVE header)!\r\n");
-        f_close(&wavFile);
+        WavPlayer_CloseFile();
         return 0U;
     }
 
@@ -165,7 +186,7 @@ uint8_t WavPlayer_Start(const char *filename)
         if ((result != FR_OK) || (bytesRead != 4U))
         {
             printf("EOF before data chunk was found\r\n");
-            f_close(&wavFile);
+            WavPlayer_CloseFile();
             return 0U;
         }
 
@@ -179,7 +200,7 @@ uint8_t WavPlayer_Start(const char *filename)
         if ((result != FR_OK) || (bytesRead != 4U))
         {
             printf("Failed to read chunk size\r\n");
-            f_close(&wavFile);
+            WavPlayer_CloseFile();
             return 0U;
         }
 
@@ -218,7 +239,7 @@ uint8_t WavPlayer_Start(const char *filename)
     if (foundFormat == 0U)
     {
         printf("No fmt chunk found!\r\n");
-        f_close(&wavFile);
+        WavPlayer_CloseFile();
         return 0U;
     }
 
@@ -235,7 +256,7 @@ uint8_t WavPlayer_Start(const char *filename)
     if (audioFormat != 1U)
     {
         printf("Not PCM format!\r\n");
-        f_close(&wavFile);
+        WavPlayer_CloseFile();
         return 0U;
     }
 
@@ -260,19 +281,32 @@ uint8_t WavPlayer_Start(const char *filename)
             audioStatus
         );
 
-        f_close(&wavFile);
+        WavPlayer_CloseFile();
         return 0U;
     }
 
     BSP_AUDIO_OUT_SetAudioFrameSlot(CODEC_AUDIOFRAME_SLOT_02);
     printf("Audio codec init OK\r\n");
 
-    f_read(
+    UINT initialBytesToRead =
+        (remainingBytes < AUDIO_PLAYER_BUFFER_SIZE)
+            ? (UINT)remainingBytes
+            : (UINT)AUDIO_PLAYER_BUFFER_SIZE;
+
+    result = f_read(
         &wavFile,
         AudioBuffer,
-        AUDIO_PLAYER_BUFFER_SIZE,
+        initialBytesToRead,
         &bytesRead
     );
+
+    if (result != FR_OK)
+    {
+        printf("Initial audio read failed, res=%d\r\n", result);
+        BSP_AUDIO_OUT_Stop(CODEC_PDWN_SW);
+        WavPlayer_CloseFile();
+        return 0U;
+    }
 
     if (bytesRead < AUDIO_PLAYER_BUFFER_SIZE)
     {
@@ -312,7 +346,7 @@ uint8_t WavPlayer_Start(const char *filename)
 
         BSP_AUDIO_OUT_Stop(CODEC_PDWN_SW);
         AudioPlaying = 0U;
-        f_close(&wavFile);
+        WavPlayer_CloseFile();
         return 0U;
     }
 

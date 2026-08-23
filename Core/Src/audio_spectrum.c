@@ -1,5 +1,7 @@
 #include "audio_spectrum.h"
 
+#include "audio_benchmark.h"
+
 #include "main.h"
 #include <math.h>
 #include <stddef.h>
@@ -47,6 +49,7 @@ void AudioFFT_Process(uint8_t *audioData)
         return;
     }
 
+    uint32_t benchmarkStart = AudioBenchmark_Start();
     int16_t *samples = (int16_t *)audioData;
 
     /* Convert stereo PCM16 to a mono analysis signal. */
@@ -178,4 +181,6 @@ void AudioFFT_Process(uint8_t *audioData)
             0.7f * fftBandsSmoothed[band] +
             0.3f * normalized;
     }
+
+    AudioBenchmark_End(AUDIO_BENCH_SPECTRUM, benchmarkStart);
 }

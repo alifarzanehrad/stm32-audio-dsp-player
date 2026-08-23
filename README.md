@@ -291,28 +291,30 @@ TouchGFX/gui/src/equalizerscreen_screen Equalizer screen logic
 TouchGFX/gui/src/effectsscreen_screen/  Effects screen logic
 ```
 
-## Benchmark plan
+## Measured performance
 
-The following measurements will be added in a future documentation update. No unmeasured values are reported yet.
+Final on-board stress testing was performed with noise reduction, EQ, echo,
+reverb, limiter, and the display spectrum active.
 
-| Category | Planned measurement |
-|---|---|
-| CPU load | Average and worst-case cycles for each processing stage |
-| Real-time margin | Processing time compared with the 21.33 ms DMA deadline |
-| Stage cost | EQ, Echo, Reverb, Noise Reduction, display FFT, and TouchGFX |
-| Audio stability | DMA underruns, missed refills, and long-duration playback |
-| Memory | Flash, static RAM, stack, external SDRAM, and effect buffers |
-| Latency | Buffering, STFT overlap, and total input-to-output delay |
-| Equalizer | Measured frequency response for each band and gain setting |
-| Echo | Actual delay time and feedback decay |
-| Reverb | Impulse response and estimated RT60 |
-| Noise reduction | Input/output SNR improvement at 5, 10, and 15 dB |
-| Speech quality | SI-SDR/STOI or another reproducible quality metric |
-| Output quality | Peak level, clipping count, THD+N, and noise floor |
-| UI impact | Frame rate and audio-processing cost while TouchGFX is active |
-| Power | Board current with effects disabled and enabled |
+| Metric | Result |
+|---|---:|
+| Complete DSP pipeline | 11.006 ms average, 11.059 ms maximum |
+| Spectrum FFT | 0.941 ms average, 0.953 ms maximum |
+| Conservative worst case | 12.012 ms |
+| DMA half-buffer deadline | 21.333 ms |
+| Remaining real-time margin | 9.321 ms (43.7%) |
+| Audio deadline misses | 0 |
+| Flash utilization | 370,154 bytes (35.3%) |
+| Static internal RAM | 93,232 bytes (28.5%) |
+| Minimum free heap | 19,920 bytes |
 
-CPU timing will be measured with the Cortex-M7 DWT cycle counter around each DSP stage. Audio measurements will use known test signals and saved reference/output recordings where possible.
+The final stress test included repeated screen navigation, EQ changes, effect
+toggles, volume adjustments, and track changes without audible glitches,
+playback stalls, or UI failures.
+
+See [Performance and Runtime Validation](docs/performance.md) for per-stage CPU
+timing, stack high-water marks, memory calculations, acceptance criteria, and
+reproduction instructions.
 
 ## Current limitations and future work
 
@@ -321,7 +323,7 @@ CPU timing will be measured with the Cortex-M7 DWT cycle counter around each DSP
 - Noise reduction is optimized for speech with background noise, not arbitrary music restoration.
 - Effect parameters are compile-time constants.
 - No automatic WAV-file discovery is implemented yet.
-- Objective performance and audio-quality measurements are still pending.
+- External audio-quality measurements such as THD+N, RT60, and objective SNR improvement remain future work.
 
 Potential future improvements:
 
@@ -331,7 +333,6 @@ Potential future improvements:
 - On-screen track browser
 - Saved settings
 - Automated DSP regression tests
-- Release-mode optimization and profiling
 
 ## Release
 

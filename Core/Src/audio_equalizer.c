@@ -1,5 +1,7 @@
 #include "audio_equalizer.h"
 
+#include "audio_benchmark.h"
+
 #include <math.h>
 #include <stddef.h>
 
@@ -150,8 +152,12 @@ void AudioEQ_SetBandGain(uint8_t band, float32_t gainDB)
         gainDB = 12.0f;
     }
 
-    requestedGainsDB[band] = gainDB;
-    updatePending = 1U;
+    if (requestedGainsDB[band] != gainDB)
+    {
+        requestedGainsDB[band] = gainDB;
+        updatePending = 1U;
+        AudioBenchmark_RequestReset();
+    }
 }
 
 void AudioEqualizer_Process(

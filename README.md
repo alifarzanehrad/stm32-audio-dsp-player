@@ -324,6 +324,21 @@ See [Performance and Runtime Validation](docs/performance.md) for per-stage CPU
 timing, stack high-water marks, memory calculations, acceptance criteria, and
 reproduction instructions.
 
+## Automated testing
+
+GitHub Actions runs two checks on every push to `main` and every pull request:
+
+- **DSP host tests:** compiles the production equalizer and audio pipeline with GCC, then verifies flat-EQ transparency, the 1 kHz band response, gain clamping, finite output, and limiter bounds.
+- **Firmware build:** builds the `V1/Debug` target headlessly with STM32CubeIDE, reports the ELF size, and uploads the ELF and HEX artifacts.
+
+Run the DSP regression tests locally on macOS, Linux, or Windows with a GCC-compatible environment:
+
+```bash
+make -C tests test
+```
+
+These tests do not replace listening tests or on-board deadline measurements; they catch deterministic DSP regressions and broken firmware builds before changes reach the board.
+
 ## Current limitations and future work
 
 - Playlist filenames are currently fixed in firmware.
@@ -340,7 +355,6 @@ Potential future improvements:
 - EQ presets
 - On-screen track browser
 - Saved settings
-- Automated DSP regression tests
 
 ## Release
 

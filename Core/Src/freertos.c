@@ -173,11 +173,19 @@ void MX_FREERTOS_Init(void) {
    * Audio refill must preempt TouchGFX rendering. Both tasks at the same
    * priority allowed screen transitions to consume the DMA refill deadline.
    */
-  osThreadDef(defaultTask, StartDefaultTask, osPriorityAboveNormal, 0, 4096);
+  /*
+   * Measured high-water usage is below 200 words. Keep more than 5x margin
+   * for audio processing and diagnostics.
+   */
+  osThreadDef(defaultTask, StartDefaultTask, osPriorityAboveNormal, 0, 1024);
   defaultTaskHandle = osThreadCreate(osThread(defaultTask), NULL);
 
   /* definition and creation of TouchGFXTask */
-  osThreadDef(TouchGFXTask, TouchGFX_Task, osPriorityNormal, 0, 4096);
+  /*
+   * TouchGFX used about 570 words during screen-transition stress testing.
+   * 2048 words preserves a wide margin for future UI changes.
+   */
+  osThreadDef(TouchGFXTask, TouchGFX_Task, osPriorityNormal, 0, 2048);
   TouchGFXTaskHandle = osThreadCreate(osThread(TouchGFXTask), NULL);
 
   /* USER CODE BEGIN RTOS_THREADS */

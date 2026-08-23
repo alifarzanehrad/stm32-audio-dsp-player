@@ -1,5 +1,7 @@
 #include "audio_pipeline.h"
 
+#include "audio_benchmark.h"
+
 #include "audio_equalizer.h"
 #include "audio_echo.h"
 #include "audio_reverb.h"
@@ -68,6 +70,7 @@ static void AudioPipeline_ApplyLimiter(void)
 void AudioPipeline_Init(float32_t sampleRate)
 {
     limiterGain = 1.0f;
+    AudioBenchmark_Init();
 
     AudioEqualizer_Init(sampleRate);
     AudioEcho_Init(sampleRate);
@@ -90,7 +93,10 @@ void AudioPipeline_Process(uint8_t *audioData)
         return;
     }
 
+    uint32_t pipelineStart = AudioBenchmark_Start();
     int16_t *samples = (int16_t *)audioData;
+
+    uint32_t stageStart = AudioBenchmark_Start();
 
     /* Convert interleaved stereo PCM16 to separate float buffers. */
     for (uint32_t i = 0U;
@@ -104,47 +110,84 @@ void AudioPipeline_Process(uint8_t *audioData)
             (float32_t)samples[2U * i + 1U];
     }
 
+    AudioBenchmark_End(
+        AUDIO_BENCH_INPUT_CONVERSION,
+        stageStart
+    );
+
     /*
      * Processing order:
      * Noise Reduction -> Equalizer -> Echo -> Reverb -> Limiter
      */
     if (AudioNoiseReduction_IsEnabled() != 0U)
     {
+        stageStart = AudioBenchmark_Start();
+
         AudioNoiseReduction_Process(
             leftBuffer,
             rightBuffer,
             AUDIO_PIPELINE_FRAME_COUNT
         );
+
+        AudioBenchmark_End(
+            AUDIO_BENCH_NOISE_REDUCTION,
+            stageStart
+        );
     }
 
     if (equalizerEnabled != 0U)
     {
+        stageStart = AudioBenchmark_Start();
+
         AudioEqualizer_Process(
             leftBuffer,
             rightBuffer,
             AUDIO_PIPELINE_FRAME_COUNT
         );
+
+        AudioBenchmark_End(
+            AUDIO_BENCH_EQUALIZER,
+            stageStart
+        );
     }
 
     if (AudioEcho_IsEnabled() != 0U)
     {
+        stageStart = AudioBenchmark_Start();
+
         AudioEcho_Process(
             leftBuffer,
             rightBuffer,
             AUDIO_PIPELINE_FRAME_COUNT
         );
+
+        AudioBenchmark_End(
+            AUDIO_BENCH_ECHO,
+            stageStart
+        );
     }
 
     if (AudioReverb_IsEnabled() != 0U)
     {
+        stageStart = AudioBenchmark_Start();
+
         AudioReverb_Process(
             leftBuffer,
             rightBuffer,
             AUDIO_PIPELINE_FRAME_COUNT
         );
+
+        AudioBenchmark_End(
+            AUDIO_BENCH_REVERB,
+            stageStart
+        );
     }
 
+    stageStart = AudioBenchmark_Start();
     AudioPipeline_ApplyLimiter();
+    AudioBenchmark_End(AUDIO_BENCH_LIMITER, stageStart);
+
+    stageStart = AudioBenchmark_Start();
 
     /* Saturate and convert the processed samples back to PCM16. */
     for (uint32_t i = 0U;
@@ -175,4 +218,11 @@ void AudioPipeline_Process(uint8_t *audioData)
         samples[2U * i] = (int16_t)left;
         samples[2U * i + 1U] = (int16_t)right;
     }
+
+    AudioBenchmark_End(
+        AUDIO_BENCH_OUTPUT_CONVERSION,
+        stageStart
+    );
+
+    AudioBenchmark_End(AUDIO_BENCH_PIPELINE, pipelineStart);
 }

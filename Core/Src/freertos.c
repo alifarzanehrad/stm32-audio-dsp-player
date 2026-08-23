@@ -86,6 +86,9 @@ volatile int8_t AudioVolumeChangePending = 0;
 
 volatile uint8_t AudioVolume = 70;
 
+/* The LCD only needs about 23 spectrum updates per second. */
+static uint8_t spectrumDecimationCounter;
+
 /* USER CODE END Variables */
 osThreadId defaultTaskHandle;
 osThreadId TouchGFXTaskHandle;
@@ -95,6 +98,7 @@ osThreadId TouchGFXTaskHandle;
 static void AudioPlayer_ClearTransferFlags(void);
 static uint8_t AudioPlayer_StartSelectedTrack(const char *reason);
 static uint8_t AudioPlayer_ChangeTrack(int8_t delta, const char *reason);
+static void AudioPlayer_ServiceBuffer(uint8_t *buffer);
 /* USER CODE END FunctionPrototypes */
 
 void StartDefaultTask(void const * argument);
@@ -164,7 +168,11 @@ void MX_FREERTOS_Init(void) {
 
   /* Create the thread(s) */
   /* definition and creation of defaultTask */
-  osThreadDef(defaultTask, StartDefaultTask, osPriorityNormal, 0, 4096);
+  /*
+   * Audio refill must preempt TouchGFX rendering. Both tasks at the same
+   * priority allowed screen transitions to consume the DMA refill deadline.
+   */
+  osThreadDef(defaultTask, StartDefaultTask, osPriorityAboveNormal, 0, 4096);
   defaultTaskHandle = osThreadCreate(osThread(defaultTask), NULL);
 
   /* definition and creation of TouchGFXTask */
@@ -215,8 +223,33 @@ void StartDefaultTask(void const * argument)
   /* Infinite loop */
   for(;;)
   {
+      uint8_t fillFirstHalf;
+      uint8_t fillSecondHalf;
       int8_t trackDelta;
       int8_t volumeSteps;
+
+      /*
+       * Service DMA first. TouchGFX commands are intentionally handled only
+       * after every pending audio half-buffer has been refilled.
+       */
+      taskENTER_CRITICAL();
+      fillFirstHalf = HalfBufferNeedsFill;
+      fillSecondHalf = FullBufferNeedsFill;
+      HalfBufferNeedsFill = 0U;
+      FullBufferNeedsFill = 0U;
+      taskEXIT_CRITICAL();
+
+      if (fillFirstHalf != 0U)
+      {
+          AudioPlayer_ServiceBuffer(&AudioBuffer[0]);
+      }
+
+      if (fillSecondHalf != 0U)
+      {
+          AudioPlayer_ServiceBuffer(
+              &AudioBuffer[AUDIO_PLAYER_HALF_BUFFER_SIZE]
+          );
+      }
 
       taskENTER_CRITICAL();
       trackDelta = AudioTrackChangePending;
@@ -228,18 +261,18 @@ void StartDefaultTask(void const * argument)
       /* Manual track changes have priority over automatic next. */
       if (trackDelta != 0)
       {
-          AudioTrackFinished = 0;
+          AudioTrackFinished = 0U;
           AudioPlayer_ChangeTrack(trackDelta, "TRACK CHANGE");
       }
-      else if (AudioTrackFinished)
+      else if (AudioTrackFinished != 0U)
       {
-          AudioTrackFinished = 0;
+          AudioTrackFinished = 0U;
           AudioPlayer_ChangeTrack(1, "AUTO NEXT");
       }
 
-      if (AudioPlayPauseRequested)
+      if (AudioPlayPauseRequested != 0U)
       {
-          AudioPlayPauseRequested = 0;
+          AudioPlayPauseRequested = 0U;
 
           if (PlayerState == PLAYER_STOPPED)
           {
@@ -248,6 +281,7 @@ void StartDefaultTask(void const * argument)
           else if (PlayerState == PLAYER_PLAYING)
           {
               BSP_AUDIO_OUT_Pause();
+              AudioPlayer_ClearTransferFlags();
               PlayerState = PLAYER_PAUSED;
 
               /* Print only after DMA playback is paused. */
@@ -259,6 +293,7 @@ void StartDefaultTask(void const * argument)
               /* Finish UART output before DMA playback resumes. */
               printf("Player state = PLAYING\r\n");
 
+              AudioPlayer_ClearTransferFlags();
               AudioBenchmark_Reset();
               BSP_AUDIO_OUT_Resume();
               PlayerState = PLAYER_PLAYING;
@@ -286,42 +321,8 @@ void StartDefaultTask(void const * argument)
               BSP_AUDIO_OUT_SetVolume(AudioVolume);
           }
 
-          printf("Volume = %u\r\n", AudioVolume);
+          /* Do not use blocking UART while the DMA stream is active. */
       }
-
-	  if (HalfBufferNeedsFill)
-	  {
-	      HalfBufferNeedsFill = 0;
-
-	      WavPlayer_FillHalf(&AudioBuffer[0]);
-
-	      if (AudioPlaying)
-	      {
-	          AudioPipeline_Process(&AudioBuffer[0]);
-
-	          AudioFFT_Process(&AudioBuffer[0]);
-	      }
-	  }
-
-	  if (FullBufferNeedsFill)
-	  {
-	      FullBufferNeedsFill = 0;
-
-	      WavPlayer_FillHalf(
-	          &AudioBuffer[AUDIO_PLAYER_HALF_BUFFER_SIZE]
-	      );
-
-	      if (AudioPlaying)
-	      {
-	          AudioPipeline_Process(
-	              &AudioBuffer[AUDIO_PLAYER_HALF_BUFFER_SIZE]
-	          );
-
-	          AudioFFT_Process(
-	              &AudioBuffer[AUDIO_PLAYER_HALF_BUFFER_SIZE]
-	          );
-	      }
-	  }
 
       osDelay(1);
   }
@@ -333,14 +334,41 @@ void StartDefaultTask(void const * argument)
 
 static void AudioPlayer_ClearTransferFlags(void)
 {
-    HalfBufferNeedsFill = 0;
-    FullBufferNeedsFill = 0;
-    AudioTrackFinished = 0;
+    taskENTER_CRITICAL();
+    HalfBufferNeedsFill = 0U;
+    FullBufferNeedsFill = 0U;
+    AudioTrackFinished = 0U;
+    taskEXIT_CRITICAL();
+}
+
+static void AudioPlayer_ServiceBuffer(uint8_t *buffer)
+{
+    WavPlayer_FillHalf(buffer);
+
+    if (AudioPlaying == 0U)
+    {
+        return;
+    }
+
+    AudioPipeline_Process(buffer);
+
+    /*
+     * Spectrum data is displayed much slower than the audio block rate.
+     * Analyze every second block to leave more CPU time for TouchGFX.
+     */
+    spectrumDecimationCounter++;
+
+    if (spectrumDecimationCounter >= 2U)
+    {
+        spectrumDecimationCounter = 0U;
+        AudioFFT_Process(buffer);
+    }
 }
 
 static uint8_t AudioPlayer_StartSelectedTrack(const char *reason)
 {
     AudioPlayer_ClearTransferFlags();
+    spectrumDecimationCounter = 0U;
 
     printf("%s -> %s\r\n", reason, playlist[currentTrack]);
 
@@ -359,10 +387,11 @@ static uint8_t AudioPlayer_ChangeTrack(int8_t delta, const char *reason)
 {
     PlayerState = PLAYER_STOPPED;
 
-    if (AudioPlaying)
-    {
-        WavPlayer_Stop();
-    }
+    /*
+     * Always stop DMA. At EOF AudioPlaying is already zero, but the previous
+     * DMA stream can still be active until explicitly stopped.
+     */
+    WavPlayer_Stop();
 
     /* Let DMA and codec stop before starting the next track. */
     osDelay(15);
@@ -425,10 +454,8 @@ void AudioPlayer_RequestVolumeUp(void)
 {
     taskENTER_CRITICAL();
 
-    if (AudioVolumeChangePending < 20)
-    {
-        AudioVolumeChangePending++;
-    }
+    /* Coalesce repeated GUI events; one processed press equals one 5% step. */
+    AudioVolumeChangePending = 1;
 
     taskEXIT_CRITICAL();
 }
@@ -437,10 +464,8 @@ void AudioPlayer_RequestVolumeDown(void)
 {
     taskENTER_CRITICAL();
 
-    if (AudioVolumeChangePending > -20)
-    {
-        AudioVolumeChangePending--;
-    }
+    /* Coalesce repeated GUI events; one processed press equals one 5% step. */
+    AudioVolumeChangePending = -1;
 
     taskEXIT_CRITICAL();
 }

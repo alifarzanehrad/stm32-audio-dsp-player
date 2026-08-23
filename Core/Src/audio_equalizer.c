@@ -8,6 +8,7 @@
 #define BIQUAD_COEFFS_PER_STAGE 5U
 #define BIQUAD_STATE_PER_STAGE 4U
 #define EQ_MAX_HEADROOM_DB 6.0f
+#define EQ_GAIN_RAMP_DB_PER_BLOCK 0.5f
 
 static const float32_t bandFrequencies[EQ_BAND_COUNT] =
 {
@@ -97,15 +98,53 @@ static void AudioEqualizer_ApplyPendingGains(void)
         return;
     }
 
+    /*
+     * Consume the current request at an audio-block boundary. A concurrent
+     * TouchGFX update sets the flag again and is handled on the next block.
+     */
     updatePending = 0U;
+
+    uint8_t coefficientsChanged = 0U;
+    uint8_t targetReached = 1U;
 
     for (uint32_t band = 0U; band < EQ_BAND_COUNT; band++)
     {
-        bandGainsDB[band] = requestedGainsDB[band];
+        float32_t targetGainDB = requestedGainsDB[band];
+        float32_t difference = targetGainDB - bandGainsDB[band];
+
+        /*
+         * Ramp each gain instead of changing the biquad response abruptly.
+         * g[n+1] = g[n] + clamp(gTarget - g[n], -step, +step)
+         */
+        if (difference > EQ_GAIN_RAMP_DB_PER_BLOCK)
+        {
+            bandGainsDB[band] += EQ_GAIN_RAMP_DB_PER_BLOCK;
+            targetReached = 0U;
+            coefficientsChanged = 1U;
+        }
+        else if (difference < -EQ_GAIN_RAMP_DB_PER_BLOCK)
+        {
+            bandGainsDB[band] -= EQ_GAIN_RAMP_DB_PER_BLOCK;
+            targetReached = 0U;
+            coefficientsChanged = 1U;
+        }
+        else if (difference != 0.0f)
+        {
+            bandGainsDB[band] = targetGainDB;
+            coefficientsChanged = 1U;
+        }
     }
 
-    AudioEqualizer_UpdatePreampGain();
-    AudioEqualizer_CalculateCoefficients();
+    if (coefficientsChanged != 0U)
+    {
+        AudioEqualizer_UpdatePreampGain();
+        AudioEqualizer_CalculateCoefficients();
+    }
+
+    if (targetReached == 0U)
+    {
+        updatePending = 1U;
+    }
 }
 
 void AudioEqualizer_Init(float32_t newSampleRate)

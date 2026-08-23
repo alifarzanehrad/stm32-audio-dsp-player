@@ -1,5 +1,7 @@
 #include "noise_reduction.h"
 
+#include "audio_benchmark.h"
+
 #include "main.h"
 #include <math.h>
 #include <stddef.h>
@@ -82,6 +84,7 @@ void AudioNoiseReduction_SetEnabled(uint8_t newEnabled)
     {
         enabled = newState;
         resetPending = 1U;
+        AudioBenchmark_RequestReset();
     }
 }
 

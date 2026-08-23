@@ -1,8 +1,7 @@
 CC ?= cc
 
 CPPFLAGS := -I./support -I../Core/Inc
-CFLAGS := -std=c11 -O2 -Wall -Wextra -Werror -pedantic \\
-	-Wno-unused-variable -Wno-unused-but-set-variable
+CFLAGS := -std=c11 -O2 -Wall -Wextra -Werror -pedantic -Wno-unused-variable -Wno-unused-but-set-variable
 LDLIBS := -lm
 
 SOURCES := \

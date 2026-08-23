@@ -33,15 +33,16 @@ static const char *const stageNames[AUDIO_BENCH_STAGE_COUNT] =
 
 void AudioBenchmark_Init(void)
 {
-    CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk;
-    DWT->CYCCNT = 0U;
-    DWT->CTRL |= DWT_CTRL_CYCCNTENA_Msk;
-
     AudioBenchmark_Reset();
 }
 
 void AudioBenchmark_Reset(void)
 {
+    /* Resume may leave trace counting disabled, so arm it again. */
+    CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk;
+    DWT->CTRL |= DWT_CTRL_CYCCNTENA_Msk;
+    DWT->CYCCNT = 0U;
+
     memset(counters, 0, sizeof(counters));
     previousReportTick = HAL_GetTick();
 }

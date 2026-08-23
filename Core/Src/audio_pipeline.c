@@ -93,6 +93,8 @@ void AudioPipeline_Process(uint8_t *audioData)
         return;
     }
 
+    AudioBenchmark_ApplyPendingReset();
+
     uint32_t pipelineStart = AudioBenchmark_Start();
     int16_t *samples = (int16_t *)audioData;
 

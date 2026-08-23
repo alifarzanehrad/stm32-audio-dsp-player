@@ -256,11 +256,12 @@ void StartDefaultTask(void const * argument)
           }
           else if (PlayerState == PLAYER_PAUSED)
           {
-              /* Start a clean measurement interval before playback. */
+              /* Finish UART output before DMA playback resumes. */
+              printf("Player state = PLAYING\r\n");
+
               AudioBenchmark_Reset();
               BSP_AUDIO_OUT_Resume();
               PlayerState = PLAYER_PLAYING;
-              printf("Player state = PLAYING\r\n");
           }
       }
 

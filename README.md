@@ -4,6 +4,12 @@ A real-time audio player and DSP platform built on the **STM32F746G-DISCO**. The
 
 > Current stable release: **v1.0.1**
 
+## Hardware demo
+
+[▶ Watch the STM32F746G-DISCO audio player and DSP interface in action](docs/4_5789937754087366513.mp4)
+
+The demo shows the project running on the physical board with its TouchGFX user interface and real-time audio visualization.
+
 ## Features
 
 - WAV playback from an SD card using FATFS

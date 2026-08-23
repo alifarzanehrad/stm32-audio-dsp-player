@@ -249,10 +249,15 @@ void StartDefaultTask(void const * argument)
           {
               BSP_AUDIO_OUT_Pause();
               PlayerState = PLAYER_PAUSED;
+
+              /* Print only after DMA playback is paused. */
+              AudioBenchmark_Report();
               printf("Player state = PAUSED\r\n");
           }
           else if (PlayerState == PLAYER_PAUSED)
           {
+              /* Start a clean measurement interval before playback. */
+              AudioBenchmark_Reset();
               BSP_AUDIO_OUT_Resume();
               PlayerState = PLAYER_PLAYING;
               printf("Player state = PLAYING\r\n");
@@ -316,11 +321,6 @@ void StartDefaultTask(void const * argument)
 	          );
 	      }
 	  }
-
-      if (AudioPlaying != 0U)
-      {
-          AudioBenchmark_Report();
-      }
 
       osDelay(1);
   }

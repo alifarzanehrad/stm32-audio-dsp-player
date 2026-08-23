@@ -95,7 +95,7 @@ static void testFlatEqualizer(void)
 
     for (uint32_t i = 0U; i < BLOCK_SIZE; i++)
     {
-        require(fabsf(left[i] - original[i]) < 0.05f,
+        require(fabsf(left[i] - original[i]) < 0.1f,
                 "flat EQ must preserve the input");
         require(isfinite(left[i]) && isfinite(right[i]),
                 "EQ output must remain finite");

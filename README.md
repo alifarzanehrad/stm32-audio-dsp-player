@@ -2,7 +2,7 @@
 
 A real-time audio player and DSP platform built on the **STM32F746G-DISCO**. The project reads stereo WAV files from an SD card, processes the audio in real time, displays a live spectrum on the LCD, and provides TouchGFX controls for playback, equalization, and audio effects.
 
-> Current stable release: **v1.0.1**
+> Current stable release: **v1.1.0**
 
 ## Hardware demo
 
@@ -344,7 +344,7 @@ Potential future improvements:
 
 ## Release
 
-The latest stable tag is [v1.0.1](https://github.com/alifarzanehrad/stm32-audio-dsp-player/tree/v1.0.1).
+The latest stable tag is [v1.1.0](https://github.com/alifarzanehrad/stm32-audio-dsp-player/tree/v1.1.0).
 
 ## License
 

@@ -17,6 +17,7 @@ typedef struct
 
 static AudioBenchmarkCounter counters[AUDIO_BENCH_STAGE_COUNT];
 static uint32_t previousReportTick;
+static volatile uint8_t resetPending;
 
 static const char *const stageNames[AUDIO_BENCH_STAGE_COUNT] =
 {
@@ -45,6 +46,21 @@ void AudioBenchmark_Reset(void)
 
     memset(counters, 0, sizeof(counters));
     previousReportTick = HAL_GetTick();
+    resetPending = 0U;
+}
+
+void AudioBenchmark_RequestReset(void)
+{
+    /* Called from the TouchGFX task; reset in the audio task. */
+    resetPending = 1U;
+}
+
+void AudioBenchmark_ApplyPendingReset(void)
+{
+    if (resetPending != 0U)
+    {
+        AudioBenchmark_Reset();
+    }
 }
 
 uint32_t AudioBenchmark_Start(void)

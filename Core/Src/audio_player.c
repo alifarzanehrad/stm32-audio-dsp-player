@@ -14,6 +14,7 @@ volatile uint8_t AudioPlaying;
 volatile uint8_t HalfBufferNeedsFill;
 volatile uint8_t FullBufferNeedsFill;
 volatile uint8_t AudioTrackFinished;
+volatile uint32_t AudioBufferDeadlineMisses;
 
 static FIL wavFile;
 static volatile uint32_t remainingBytes;
@@ -110,12 +111,32 @@ void WavPlayer_Stop(void)
 
 void BSP_AUDIO_OUT_HalfTransfer_CallBack(void)
 {
+    if (HalfBufferNeedsFill != 0U)
+    {
+        AudioBufferDeadlineMisses++;
+    }
+
     HalfBufferNeedsFill = 1U;
 }
 
 void BSP_AUDIO_OUT_TransferComplete_CallBack(void)
 {
+    if (FullBufferNeedsFill != 0U)
+    {
+        AudioBufferDeadlineMisses++;
+    }
+
     FullBufferNeedsFill = 1U;
+}
+
+void AudioPlayer_ResetDeadlineMisses(void)
+{
+    AudioBufferDeadlineMisses = 0U;
+}
+
+uint32_t AudioPlayer_GetDeadlineMisses(void)
+{
+    return AudioBufferDeadlineMisses;
 }
 
 uint8_t WavPlayer_Start(const char *filename)

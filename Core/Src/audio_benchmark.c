@@ -37,6 +37,11 @@ void AudioBenchmark_Init(void)
     DWT->CYCCNT = 0U;
     DWT->CTRL |= DWT_CTRL_CYCCNTENA_Msk;
 
+    AudioBenchmark_Reset();
+}
+
+void AudioBenchmark_Reset(void)
+{
     memset(counters, 0, sizeof(counters));
     previousReportTick = HAL_GetTick();
 }

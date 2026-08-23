@@ -19,10 +19,13 @@ extern volatile uint8_t AudioPlaying;
 extern volatile uint8_t HalfBufferNeedsFill;
 extern volatile uint8_t FullBufferNeedsFill;
 extern volatile uint8_t AudioTrackFinished;
+extern volatile uint32_t AudioBufferDeadlineMisses;
 
 uint8_t WavPlayer_Start(const char *filename);
 void WavPlayer_FillHalf(uint8_t *half);
 void WavPlayer_Stop(void);
+void AudioPlayer_ResetDeadlineMisses(void);
+uint32_t AudioPlayer_GetDeadlineMisses(void);
 
 #ifdef __cplusplus
 }

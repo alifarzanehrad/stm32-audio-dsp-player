@@ -30,6 +30,7 @@
 #include <stdio.h>
 #include "sdmmc.h"
 #include "audio_pipeline.h"
+#include "audio_benchmark.h"
 #include "audio_spectrum.h"
 #include "audio_player.h"
 
@@ -315,6 +316,11 @@ void StartDefaultTask(void const * argument)
 	          );
 	      }
 	  }
+
+      if (AudioPlaying != 0U)
+      {
+          AudioBenchmark_Report();
+      }
 
       osDelay(1);
   }

@@ -1,0 +1,55 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  dsp-host-tests:
+    name: DSP host tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Build and run DSP regression tests
+        run: make -C tests test
+
+  firmware-build:
+    name: STM32 firmware build
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Build Debug firmware with STM32CubeIDE
+        uses: xanderhendriks/action-build-stm32cubeide@v17.0
+        with:
+          project-path: .
+          project-target: V1/Debug
+
+      - name: Report firmware size
+        run: |
+          test -f Debug/V1.elf
+          arm-none-eabi-size Debug/V1.elf
+
+      - name: Upload firmware artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: stm32-audio-dsp-player-debug
+          path: |
+            Debug/V1.elf
+            Debug/V1.hex
+          if-no-files-found: error

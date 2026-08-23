@@ -7,7 +7,7 @@ A real-time audio player and DSP platform built on the **STM32F746G-DISCO**. The
 ## Hardware demo
 
 <p align="center">
-  <img src="docs/4_5789937754087366513.gif" alt="STM32 Audio DSP Player running on the STM32F746G-DISCO" width="720">
+  <img src="docs/4_5789937754087366513.gif?v=2" alt="STM32 Audio DSP Player running on the STM32F746G-DISCO" width="720">
 </p>
 
 The demo shows the project running on the physical STM32F746G-DISCO board with its TouchGFX interface and real-time spectrum visualization.

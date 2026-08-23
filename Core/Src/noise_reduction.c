@@ -27,8 +27,14 @@ typedef struct
     uint32_t initFrameCount;
 } NoiseReductionChannel;
 
-static NoiseReductionChannel leftChannel;
-static NoiseReductionChannel rightChannel;
+/*
+ * Estimate and suppress common-mode noise on the Mid channel only.
+ * The Side channel is delayed by one hop so it stays aligned with the
+ * overlap-add latency of the processed Mid signal.
+ */
+static NoiseReductionChannel midChannel;
+static float32_t sideDelay[NR_HOP_SIZE];
+static uint32_t sideDelayIndex;
 
 static float32_t window[NR_FRAME_SIZE];
 static float32_t fftInput[NR_FRAME_SIZE];
@@ -42,13 +48,13 @@ static volatile uint8_t resetPending;
 
 static void AudioNoiseReduction_Reset(void)
 {
-    memset(&leftChannel, 0, sizeof(leftChannel));
-    memset(&rightChannel, 0, sizeof(rightChannel));
+    memset(&midChannel, 0, sizeof(midChannel));
+    memset(sideDelay, 0, sizeof(sideDelay));
+    sideDelayIndex = 0U;
 
     for (uint32_t k = 0U; k < NR_BIN_COUNT; k++)
     {
-        leftChannel.previousGain[k] = 1.0f;
-        rightChannel.previousGain[k] = 1.0f;
+        midChannel.previousGain[k] = 1.0f;
     }
 }
 
@@ -293,15 +299,57 @@ void AudioNoiseReduction_Process(
         return;
     }
 
+    /*
+     * Mid/Side transform:
+     *   M[n] = 0.5 * (L[n] + R[n])
+     *   S[n] = 0.5 * (L[n] - R[n])
+     *
+     * Most background noise and mono speech are common to both channels, so
+     * spectral subtraction is performed once on M instead of independently
+     * on L and R. This nearly halves the FFT workload.
+     */
+    for (uint32_t i = 0U; i < sampleCount; i++)
+    {
+        float32_t inputLeft = left[i];
+        float32_t inputRight = right[i];
+        float32_t side =
+            0.5f * (inputLeft - inputRight);
+
+        left[i] =
+            0.5f * (inputLeft + inputRight);
+
+        /*
+         * The STFT overlap-add path delays Mid by NR_HOP_SIZE samples.
+         * Apply the same delay to Side before stereo reconstruction.
+         */
+        right[i] = sideDelay[sideDelayIndex];
+        sideDelay[sideDelayIndex] = side;
+
+        sideDelayIndex++;
+
+        if (sideDelayIndex >= NR_HOP_SIZE)
+        {
+            sideDelayIndex = 0U;
+        }
+    }
+
     AudioNoiseReduction_ProcessChannel(
-        &leftChannel,
+        &midChannel,
         left,
         sampleCount
     );
 
-    AudioNoiseReduction_ProcessChannel(
-        &rightChannel,
-        right,
-        sampleCount
-    );
+    /*
+     * Stereo reconstruction:
+     *   L[n] = M[n] + S[n]
+     *   R[n] = M[n] - S[n]
+     */
+    for (uint32_t i = 0U; i < sampleCount; i++)
+    {
+        float32_t mid = left[i];
+        float32_t side = right[i];
+
+        left[i] = mid + side;
+        right[i] = mid - side;
+    }
 }

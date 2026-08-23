@@ -8,7 +8,7 @@ extern "C" {
 #endif
 
 /* Set to 0U for a zero-overhead release build. */
-#define AUDIO_BENCHMARK_ENABLED 1U
+#define AUDIO_BENCHMARK_ENABLED 0U
 
 typedef enum
 {

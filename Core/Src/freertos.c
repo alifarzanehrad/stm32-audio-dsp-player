@@ -99,6 +99,7 @@ static void AudioPlayer_ClearTransferFlags(void);
 static uint8_t AudioPlayer_StartSelectedTrack(const char *reason);
 static uint8_t AudioPlayer_ChangeTrack(int8_t delta, const char *reason);
 static void AudioPlayer_ServiceBuffer(uint8_t *buffer);
+static void AudioPlayer_ReportRuntimeDiagnostics(void);
 /* USER CODE END FunctionPrototypes */
 
 void StartDefaultTask(void const * argument);
@@ -276,6 +277,7 @@ void StartDefaultTask(void const * argument)
 
           if (PlayerState == PLAYER_STOPPED)
           {
+              AudioPlayer_ResetDeadlineMisses();
               AudioPlayer_StartSelectedTrack("PLAY");
           }
           else if (PlayerState == PLAYER_PLAYING)
@@ -286,6 +288,7 @@ void StartDefaultTask(void const * argument)
 
               /* Print only after DMA playback is paused. */
               AudioBenchmark_Report();
+              AudioPlayer_ReportRuntimeDiagnostics();
               printf("Player state = PAUSED\r\n");
           }
           else if (PlayerState == PLAYER_PAUSED)
@@ -294,6 +297,7 @@ void StartDefaultTask(void const * argument)
               printf("Player state = PLAYING\r\n");
 
               AudioPlayer_ClearTransferFlags();
+              AudioPlayer_ResetDeadlineMisses();
               AudioBenchmark_Reset();
               BSP_AUDIO_OUT_Resume();
               PlayerState = PLAYER_PLAYING;
@@ -363,6 +367,42 @@ static void AudioPlayer_ServiceBuffer(uint8_t *buffer)
         spectrumDecimationCounter = 0U;
         AudioFFT_Process(buffer);
     }
+}
+
+static void AudioPlayer_ReportRuntimeDiagnostics(void)
+{
+    UBaseType_t audioStackFreeWords =
+        uxTaskGetStackHighWaterMark((TaskHandle_t)defaultTaskHandle);
+
+    UBaseType_t touchGFXStackFreeWords =
+        uxTaskGetStackHighWaterMark((TaskHandle_t)TouchGFXTaskHandle);
+
+    size_t freeHeapBytes = xPortGetFreeHeapSize();
+    size_t minimumFreeHeapBytes = xPortGetMinimumEverFreeHeapSize();
+
+    printf("\r\nRuntime memory diagnostics:\r\n");
+    printf(
+        "Audio stack min free    = %lu words (%lu bytes)\r\n",
+        (unsigned long)audioStackFreeWords,
+        (unsigned long)(audioStackFreeWords * sizeof(StackType_t))
+    );
+    printf(
+        "TouchGFX stack min free = %lu words (%lu bytes)\r\n",
+        (unsigned long)touchGFXStackFreeWords,
+        (unsigned long)(touchGFXStackFreeWords * sizeof(StackType_t))
+    );
+    printf(
+        "Heap free now           = %lu bytes\r\n",
+        (unsigned long)freeHeapBytes
+    );
+    printf(
+        "Heap minimum ever free  = %lu bytes\r\n",
+        (unsigned long)minimumFreeHeapBytes
+    );
+    printf(
+        "Audio deadline misses   = %lu\r\n",
+        (unsigned long)AudioPlayer_GetDeadlineMisses()
+    );
 }
 
 static uint8_t AudioPlayer_StartSelectedTrack(const char *reason)

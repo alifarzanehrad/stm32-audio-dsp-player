@@ -1,5 +1,7 @@
 #include "audio_reverb.h"
 
+#include "audio_benchmark.h"
+
 #include <stddef.h>
 #include <string.h>
 
@@ -173,6 +175,7 @@ void AudioReverb_SetEnabled(uint8_t newEnabled)
     {
         enabled = newState;
         resetPending = 1U;
+        AudioBenchmark_RequestReset();
     }
 }
 

@@ -40,10 +40,10 @@ jobs:
           project-path: .
           project-target: V1/Debug
 
-      - name: Report firmware size
+      - name: Verify firmware artifact
         run: |
-          test -f Debug/V1.elf
-          arm-none-eabi-size Debug/V1.elf
+          test -s Debug/V1.elf
+          ls -lh Debug/V1.elf
 
       - name: Upload firmware artifact
         uses: actions/upload-artifact@v4

@@ -33,6 +33,7 @@
 #include "audio_benchmark.h"
 #include "audio_spectrum.h"
 #include "audio_player.h"
+#include <string.h>
 
 extern SD_HandleTypeDef hsd1;
 
@@ -67,17 +68,11 @@ volatile PlayerState_t PlayerState = PLAYER_STOPPED;
 
 volatile uint8_t AudioPlayPauseRequested = 0;
 
-const char *playlist[] =
-{
-    "one.wav",
-    "two.wav",
-    "three.wav",
-    "four.wav",
-    "five.wav",
-    "six.wav"
-};
+#define PLAYLIST_MAX_TRACKS 32U
+#define PLAYLIST_FILENAME_SIZE 128U
 
-#define TRACK_COUNT (sizeof(playlist) / sizeof(playlist[0]))
+static char playlist[PLAYLIST_MAX_TRACKS][PLAYLIST_FILENAME_SIZE];
+static uint16_t trackCount;
 
 volatile int currentTrack = 0;
 
@@ -96,6 +91,9 @@ osThreadId TouchGFXTaskHandle;
 /* Private function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN FunctionPrototypes */
 static void AudioPlayer_ClearTransferFlags(void);
+static uint8_t AudioPlayer_ScanPlaylist(void);
+static uint8_t AudioPlayer_IsWavFile(const char *filename);
+static void AudioPlayer_SortPlaylist(void);
 static uint8_t AudioPlayer_StartSelectedTrack(const char *reason);
 static uint8_t AudioPlayer_ChangeTrack(int8_t delta, const char *reason);
 static void AudioPlayer_ServiceBuffer(uint8_t *buffer);
@@ -223,11 +221,7 @@ void StartDefaultTask(void const * argument)
     }
   printf("SD card mounted OK\r\n");
 
-//  if (!WavPlayer_Start("one.wav"))
-//  {
-//    printf("WavPlayer_Start FAILED\r\n");
-//    Error_Handler();
-//  }
+  AudioPlayer_ScanPlaylist();
 
   /* Infinite loop */
   for(;;)
@@ -353,6 +347,115 @@ static void AudioPlayer_ClearTransferFlags(void)
     taskEXIT_CRITICAL();
 }
 
+static uint8_t AudioPlayer_IsWavFile(const char *filename)
+{
+    size_t length = strlen(filename);
+
+    if (length < 4U)
+    {
+        return 0U;
+    }
+
+    const char *extension = &filename[length - 4U];
+
+    return (extension[0] == '.') &&
+           ((extension[1] == 'w') || (extension[1] == 'W')) &&
+           ((extension[2] == 'a') || (extension[2] == 'A')) &&
+           ((extension[3] == 'v') || (extension[3] == 'V'));
+}
+
+static void AudioPlayer_SortPlaylist(void)
+{
+    char temporary[PLAYLIST_FILENAME_SIZE];
+
+    for (uint16_t i = 1U; i < trackCount; i++)
+    {
+        uint16_t position = i;
+        memcpy(temporary, playlist[i], sizeof(temporary));
+
+        while ((position > 0U) &&
+               (strcmp(playlist[position - 1U], temporary) > 0))
+        {
+            memcpy(
+                playlist[position],
+                playlist[position - 1U],
+                sizeof(playlist[position])
+            );
+            position--;
+        }
+
+        memcpy(playlist[position], temporary, sizeof(playlist[position]));
+    }
+}
+
+static uint8_t AudioPlayer_ScanPlaylist(void)
+{
+    DIR directory;
+    FILINFO fileInfo;
+    FRESULT result;
+
+    trackCount = 0U;
+    currentTrack = 0;
+
+    result = f_opendir(&directory, "/");
+
+    if (result != FR_OK)
+    {
+        printf("Playlist scan failed: %d\r\n", result);
+        return 0U;
+    }
+
+    while (trackCount < PLAYLIST_MAX_TRACKS)
+    {
+        result = f_readdir(&directory, &fileInfo);
+
+        if ((result != FR_OK) || (fileInfo.fname[0] == '\0'))
+        {
+            break;
+        }
+
+        if (((fileInfo.fattrib & AM_DIR) != 0U) ||
+            (AudioPlayer_IsWavFile(fileInfo.fname) == 0U))
+        {
+            continue;
+        }
+
+        size_t filenameLength = strlen(fileInfo.fname);
+
+        if (filenameLength >= PLAYLIST_FILENAME_SIZE)
+        {
+            printf("Skipping long filename: %s\r\n", fileInfo.fname);
+            continue;
+        }
+
+        memcpy(
+            playlist[trackCount],
+            fileInfo.fname,
+            filenameLength + 1U
+        );
+        trackCount++;
+    }
+
+    f_closedir(&directory);
+
+    if (result != FR_OK)
+    {
+        printf("Playlist scan failed: %d\r\n", result);
+        trackCount = 0U;
+        return 0U;
+    }
+
+    AudioPlayer_SortPlaylist();
+    printf("Playlist: %u WAV file(s) found\r\n", (unsigned int)trackCount);
+
+    for (uint16_t i = 0U; i < trackCount; i++)
+    {
+        printf("  %u: %s\r\n", (unsigned int)(i + 1U), playlist[i]);
+    }
+
+    return (trackCount > 0U) ? 1U : 0U;
+}
+
 static void AudioPlayer_ServiceBuffer(uint8_t *buffer)
 {
     WavPlayer_FillHalf(buffer);
@@ -415,6 +518,13 @@ static void AudioPlayer_ReportRuntimeDiagnostics(void)
 
 static uint8_t AudioPlayer_StartSelectedTrack(const char *reason)
 {
+    if (trackCount == 0U)
+    {
+        printf("No WAV files found on SD card\r\n");
+        PlayerState = PLAYER_STOPPED;
+        return 0U;
+    }
+
     AudioPlayer_ClearTransferFlags();
     spectrumDecimationCounter = 0U;
 
@@ -433,6 +543,12 @@ static uint8_t AudioPlayer_StartSelectedTrack(const char *reason)
 
 static uint8_t AudioPlayer_ChangeTrack(int8_t delta, const char *reason)
 {
+    if (trackCount == 0U)
+    {
+        printf("Track change ignored: playlist is empty\r\n");
+        return 0U;
+    }
+
     PlayerState = PLAYER_STOPPED;
 
     /*
@@ -446,9 +562,9 @@ static uint8_t AudioPlayer_ChangeTrack(int8_t delta, const char *reason)
     AudioPlayer_ClearTransferFlags();
 
     int nextTrack = currentTrack + (int)delta;
-    int trackCount = (int)TRACK_COUNT;
+    int availableTracks = (int)trackCount;
 
-    nextTrack %= trackCount;
+    nextTrack %= availableTracks;
 
     if (nextTrack < 0)
     {
@@ -478,7 +594,7 @@ void AudioPlayer_RequestNext(void)
 {
     taskENTER_CRITICAL();
 
-    if (AudioTrackChangePending < (int8_t)TRACK_COUNT)
+    if (AudioTrackChangePending < (int8_t)PLAYLIST_MAX_TRACKS)
     {
         AudioTrackChangePending++;
     }
@@ -490,7 +606,7 @@ void AudioPlayer_RequestPrevious(void)
 {
     taskENTER_CRITICAL();
 
-    if (AudioTrackChangePending > -(int8_t)TRACK_COUNT)
+    if (AudioTrackChangePending > -(int8_t)PLAYLIST_MAX_TRACKS)
     {
         AudioTrackChangePending--;
     }
@@ -519,4 +635,3 @@ void AudioPlayer_RequestVolumeDown(void)
 }
 
 /* USER CODE END Application */
-

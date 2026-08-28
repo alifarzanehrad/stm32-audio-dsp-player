@@ -37,7 +37,7 @@ KEEP extern const uint32_t indicesGb[] TEXT_LOCATION_FLASH_ATTRIBUTE = {
     118, // T___SINGLEUSE_LCF1: "Back"
     144, // T___SINGLEUSE_AWN3: "+"
     146, // T___SINGLEUSE_20I2: "-"
-    70,  // T___SINGLEUSE_4DIF: "one.wav\n"
+    70,  // T___SINGLEUSE_4DIF: "SD card\n"
     43,  // T___SINGLEUSE_NYEE: "Play / Pause"
     133, // T___SINGLEUSE_YANH: "Next"
     61   // T___SINGLEUSE_V7EU: "Previous"

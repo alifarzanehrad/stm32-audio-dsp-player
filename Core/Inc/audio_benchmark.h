@@ -36,7 +36,6 @@ uint32_t AudioBenchmark_Start(void);
 void AudioBenchmark_End(AudioBenchmarkStage stage, uint32_t startCycles);
 uint32_t AudioBenchmark_GetMaximumProcessingUs(void);
 uint32_t AudioBenchmark_GetLoadPercent(void);
-void AudioBenchmark_Report(void);
 
 #else
 
@@ -48,7 +47,6 @@ void AudioBenchmark_Report(void);
 #define AudioBenchmark_End(stage, startCycles) ((void)0)
 #define AudioBenchmark_GetMaximumProcessingUs() (0U)
 #define AudioBenchmark_GetLoadPercent() (0U)
-#define AudioBenchmark_Report() ((void)0)
 
 #endif
 

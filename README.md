@@ -336,22 +336,22 @@ reverb, limiter, and the display spectrum active.
 
 | Metric | Result |
 |---|---:|
-| Complete DSP pipeline | 11.006 ms average, 11.059 ms maximum |
-| Spectrum FFT | 0.941 ms average, 0.953 ms maximum |
-| Conservative worst case | 12.012 ms |
+| Complete DSP pipeline | 12.892 ms average, 17.598 ms maximum |
+| Spectrum FFT | 0.940 ms average, 0.953 ms maximum |
+| Conservative worst case | 18.551 ms |
 | DMA half-buffer deadline | 21.333 ms |
-| Remaining real-time margin | 9.321 ms (43.7%) |
+| Remaining real-time margin | 2.782 ms (13.0%) |
 | Audio deadline misses | 0 |
 | Flash utilization | 370,154 bytes (35.3%) |
 | Static internal RAM | 93,232 bytes (28.5%) |
 | Minimum free heap | 19,920 bytes |
-| Latest observed on-device DSP load | 67% peak |
+| Latest observed on-device DSP load | 68% interval load |
 
-The later interactive UI run reached a displayed peak DSP load of **67%**, which
-corresponds to approximately **14.29 ms** of the 21.33 ms audio-buffer period and
-leaves about **7.04 ms (33%)** of nominal timing headroom. The deadline-miss
-counter remains the definitive indicator of whether real-time processing was
-completed on time.
+The latest on-board test used all effects simultaneously with every EQ band at
+`+6 dB`. Noise reduction averaged **6.620 ms** and remained the most expensive
+stage. The live Performance screen reported up to **68%** interval load. The
+conservative maximum of **18.551 ms** still met the 21.333 ms deadline with
+**2.782 ms** of measured headroom and zero deadline misses.
 
 The final stress test included repeated screen navigation, EQ changes, effect
 toggles, volume adjustments, and track changes without audible glitches,

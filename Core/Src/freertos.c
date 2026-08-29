@@ -287,8 +287,6 @@ void StartDefaultTask(void const * argument)
               AudioPlayer_ClearTransferFlags();
               PlayerState = PLAYER_PAUSED;
 
-              /* UART reporting is safe only after audio DMA is paused. */
-              AudioBenchmark_Report();
               printf("Player state = PAUSED\r\n");
           }
           else if (PlayerState == PLAYER_PAUSED)

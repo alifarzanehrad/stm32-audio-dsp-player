@@ -16,8 +16,8 @@ while processing stereo PCM16 audio at 48 kHz.
 | Active DSP | Noise reduction, 5-band EQ, echo, reverb, limiter |
 | Spectrum | 1024-point FFT, evaluated every second audio block |
 | Timing source | Cortex-M7 DWT cycle counter |
-| Test duration | 48.245 s |
-| Processed blocks | 2242 |
+| Test duration | 27.445 s |
+| Processed blocks | 1286 |
 | Stability test | UI navigation, EQ changes, effect toggles, volume and track controls |
 
 The reported pipeline time includes the real-time audio processing path.
@@ -28,15 +28,15 @@ every second block.
 
 | Stage | CPU load | Average | Maximum | Calls |
 |---|---:|---:|---:|---:|
-| Complete pipeline | 51.1% | 11,006 us | 11,059 us | 2242 |
-| PCM16 to float | 0.7% | 156 us | 169 us | 2242 |
-| Noise reduction | 21.9% | 4,731 us | 4,745 us | 2242 |
-| Equalizer | 7.6% | 1,652 us | 1,668 us | 2242 |
-| Echo | 1.6% | 361 us | 368 us | 2242 |
-| Reverb | 17.2% | 3,703 us | 3,737 us | 2242 |
-| Limiter | 0.8% | 175 us | 188 us | 2242 |
-| Float to PCM16 | 1.0% | 220 us | 229 us | 2242 |
-| Spectrum FFT | 2.1% | 941 us | 953 us | 1120 |
+| Complete pipeline | 60.4% | 12,892 us | 17,598 us | 1286 |
+| PCM16 to float | 0.7% | 156 us | 180 us | 1286 |
+| Noise reduction | 31.0% | 6,620 us | 6,664 us | 1286 |
+| Equalizer | 7.7% | 1,652 us | 1,710 us | 1286 |
+| Echo | 1.7% | 363 us | 3,584 us | 1286 |
+| Reverb | 17.3% | 3,696 us | 5,122 us | 1286 |
+| Limiter | 0.8% | 175 us | 184 us | 1286 |
+| Float to PCM16 | 1.0% | 220 us | 229 us | 1286 |
+| Spectrum FFT | 2.2% | 940 us | 953 us | 643 |
 
 ### Real-time margin
 
@@ -49,12 +49,12 @@ A DMA half-buffer contains 1024 frames, therefore its processing deadline is:
 Using the conservative sum of the maximum pipeline and maximum spectrum times:
 
 ```text
-11.059 ms + 0.953 ms = 12.012 ms
-21.333 ms - 12.012 ms = 9.321 ms
+17.598 ms + 0.953 ms = 18.551 ms
+21.333 ms - 18.551 ms = 2.782 ms
 ```
 
-The worst measured case therefore retains approximately **9.32 ms**, or
-**43.7%**, of the audio deadline. No deadline misses were observed.
+The worst measured case therefore retains approximately **2.78 ms**, or
+**13.0%**, of the audio deadline. No deadline misses were observed.
 
 Noise reduction is the most expensive individual DSP stage, followed by the
 Schroeder reverb. Spectrum decimation prevents the display analysis from
@@ -98,7 +98,7 @@ or allocation failure was observed.
 | Check | Requirement | Result |
 |---|---|---|
 | Audio deadline misses | 0 | **Pass: 0** |
-| Worst pipeline + spectrum | Below 21.33 ms | **Pass: 12.012 ms** |
+| Worst pipeline + spectrum | Below 21.33 ms | **Pass: 18.551 ms** |
 | Audio stack reserve | At least 256 words | **Pass: 850 words** |
 | TouchGFX stack reserve | At least 512 words | **Pass: 1493 words** |
 | Minimum free heap | At least 8 KiB | **Pass: 19.45 KiB** |
@@ -112,17 +112,16 @@ were observed.
 ## Reproducing the benchmark
 
 1. Build with both C and C++ optimization set to `-Ofast`.
-2. Set `AUDIO_BENCHMARK_ENABLED` to `1U` in
-   `Core/Inc/audio_benchmark.h`.
-3. Build and flash the firmware.
-4. Open the UART at 115200 baud.
-5. Enable noise reduction, echo, and reverb; exercise EQ, navigation, volume,
-   and track controls.
-6. Leave playback undisturbed for at least 30 seconds.
-7. Pause playback to print the benchmark and runtime diagnostics.
+2. Build and flash the firmware.
+3. Enable noise reduction, echo, and reverb and set the EQ bands as required.
+4. Return to the Player screen so the display FFT remains active.
+5. Leave playback undisturbed for at least 20 seconds.
+6. Read live load, maximum DSP time, deadline misses, heap, and stack reserve
+   from the Performance screen.
 
-Benchmark instrumentation is disabled in the normal release configuration to
-remove measurement and UART overhead. Re-enable it only for profiling.
+DWT instrumentation remains enabled because it supplies the on-device
+Performance screen. Normal firmware does not print periodic benchmark data to
+UART while audio is running.
 
 ## Measurements still planned
 

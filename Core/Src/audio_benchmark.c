@@ -6,7 +6,6 @@
 #include "FreeRTOS.h"
 #include "task.h"
 
-#include <stdio.h>
 #include <string.h>
 
 typedef struct
@@ -20,20 +19,6 @@ static AudioBenchmarkCounter counters[AUDIO_BENCH_STAGE_COUNT];
 static volatile uint8_t resetPending;
 static volatile uint32_t loadProcessingCycles;
 static uint32_t loadPreviousCycles;
-static uint32_t benchmarkStartTick;
-
-static const char *const stageNames[AUDIO_BENCH_STAGE_COUNT] =
-{
-    "Pipeline",
-    "PCM16->float",
-    "Noise reduction",
-    "Equalizer",
-    "Echo",
-    "Reverb",
-    "Limiter",
-    "float->PCM16",
-    "Spectrum"
-};
 
 void AudioBenchmark_Init(void)
 {
@@ -55,7 +40,6 @@ void AudioBenchmark_Reset(void)
     memset(counters, 0, sizeof(counters));
     loadProcessingCycles = 0U;
     loadPreviousCycles = DWT->CYCCNT;
-    benchmarkStartTick = HAL_GetTick();
     resetPending = 0U;
 }
 
@@ -150,56 +134,6 @@ uint32_t AudioBenchmark_GetLoadPercent(void)
     );
 
     return (loadPercent > 100U) ? 100U : loadPercent;
-}
-
-void AudioBenchmark_Report(void)
-{
-    uint32_t elapsedMs = HAL_GetTick() - benchmarkStartTick;
-    uint64_t availableCycles;
-
-    if ((elapsedMs == 0U) || (SystemCoreClock == 0U))
-    {
-        return;
-    }
-
-    availableCycles =
-        ((uint64_t)SystemCoreClock * elapsedMs) / 1000U;
-
-    printf(
-        "\r\nDSP benchmark (%lu ms):\r\n",
-        (unsigned long)elapsedMs
-    );
-
-    for (uint32_t i = 0U; i < AUDIO_BENCH_STAGE_COUNT; i++)
-    {
-        uint64_t cycles = counters[i].cycles;
-        uint32_t calls = counters[i].calls;
-        uint32_t cpuPermille =
-            (availableCycles > 0U)
-                ? (uint32_t)((cycles * 1000U) / availableCycles)
-                : 0U;
-        uint32_t averageUs =
-            (calls > 0U)
-                ? (uint32_t)(
-                    ((cycles / calls) * 1000000U) /
-                    SystemCoreClock
-                  )
-                : 0U;
-        uint32_t maximumUs = (uint32_t)(
-            ((uint64_t)counters[i].maximumCycles * 1000000U) /
-            SystemCoreClock
-        );
-
-        printf(
-            "%-17s %3lu.%lu%%  avg=%lu us  max=%lu us  calls=%lu\r\n",
-            stageNames[i],
-            (unsigned long)(cpuPermille / 10U),
-            (unsigned long)(cpuPermille % 10U),
-            (unsigned long)averageUs,
-            (unsigned long)maximumUs,
-            (unsigned long)calls
-        );
-    }
 }
 
 #endif /* AUDIO_BENCHMARK_ENABLED */

@@ -27,9 +27,15 @@ void AudioBenchmark_Init(void)
 
 void AudioBenchmark_Reset(void)
 {
-    /* DWT is shared with the FreeRTOS CPU-load counter; never reset CYCCNT. */
+    /* DWT is dedicated to the on-device audio performance counters. */
     CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk;
+
+    /* Cortex-M7 debug components can remain locked after reset/debugging. */
+    DWT->LAR = 0xC5ACCE55U;
+    DWT->CYCCNT = 0U;
     DWT->CTRL |= DWT_CTRL_CYCCNTENA_Msk;
+    __DSB();
+    __ISB();
 
     memset(counters, 0, sizeof(counters));
     loadProcessingCycles = 0U;

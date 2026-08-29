@@ -15,8 +15,6 @@ typedef struct
     uint32_t freeHeapBytes;
 } SystemMetricsSnapshot;
 
-void SystemMetrics_ConfigureRunTimeStats(void);
-uint32_t SystemMetrics_GetRunTimeCounter(void);
 void SystemMetrics_GetSnapshot(SystemMetricsSnapshot *snapshot);
 
 #ifdef __cplusplus

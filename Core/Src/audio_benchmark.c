@@ -3,6 +3,8 @@
 #if AUDIO_BENCHMARK_ENABLED
 
 #include "main.h"
+#include "FreeRTOS.h"
+#include "task.h"
 
 #include <string.h>
 
@@ -15,6 +17,8 @@ typedef struct
 
 static AudioBenchmarkCounter counters[AUDIO_BENCH_STAGE_COUNT];
 static volatile uint8_t resetPending;
+static volatile uint32_t loadProcessingCycles;
+static uint32_t loadPreviousCycles;
 
 void AudioBenchmark_Init(void)
 {
@@ -28,6 +32,8 @@ void AudioBenchmark_Reset(void)
     DWT->CTRL |= DWT_CTRL_CYCCNTENA_Msk;
 
     memset(counters, 0, sizeof(counters));
+    loadProcessingCycles = 0U;
+    loadPreviousCycles = DWT->CYCCNT;
     resetPending = 0U;
 }
 
@@ -71,6 +77,12 @@ void AudioBenchmark_End(
     {
         counters[stage].maximumCycles = elapsedCycles;
     }
+
+    if ((stage == AUDIO_BENCH_PIPELINE) ||
+        (stage == AUDIO_BENCH_SPECTRUM))
+    {
+        loadProcessingCycles += elapsedCycles;
+    }
 }
 
 uint32_t AudioBenchmark_GetMaximumProcessingUs(void)
@@ -91,6 +103,31 @@ uint32_t AudioBenchmark_GetMaximumProcessingUs(void)
     return (uint32_t)(
         (maximumCycles * 1000000U) / SystemCoreClock
     );
+}
+
+uint32_t AudioBenchmark_GetLoadPercent(void)
+{
+    uint32_t currentCycles = DWT->CYCCNT;
+    uint32_t elapsedCycles = currentCycles - loadPreviousCycles;
+    uint32_t processingCycles;
+
+    taskENTER_CRITICAL();
+    processingCycles = loadProcessingCycles;
+    loadProcessingCycles = 0U;
+    taskEXIT_CRITICAL();
+
+    loadPreviousCycles = currentCycles;
+
+    if (elapsedCycles == 0U)
+    {
+        return 0U;
+    }
+
+    uint32_t loadPercent = (uint32_t)(
+        ((uint64_t)processingCycles * 100U) / elapsedCycles
+    );
+
+    return (loadPercent > 100U) ? 100U : loadPercent;
 }
 
 #endif /* AUDIO_BENCHMARK_ENABLED */

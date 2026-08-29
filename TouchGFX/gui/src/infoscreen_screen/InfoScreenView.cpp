@@ -81,26 +81,26 @@ void InfoScreenView::updateMetrics()
     touchgfx::Unicode::snprintf(
         CpuLoadValueBuffer,
         CPULOADVALUE_SIZE,
-        "%lu",
-        static_cast<unsigned long>(metrics.cpuLoadPercent)
+        "%u",
+        static_cast<unsigned int>(metrics.cpuLoadPercent)
     );
     touchgfx::Unicode::snprintf(
         DspMaxValueBuffer,
         DSPMAXVALUE_SIZE,
-        "%lu",
-        static_cast<unsigned long>(dspMaximumMs)
+        "%u",
+        static_cast<unsigned int>(dspMaximumMs)
     );
     touchgfx::Unicode::snprintf(
         DeadlineMissesValueBuffer,
         DEADLINEMISSESVALUE_SIZE,
-        "%lu",
-        static_cast<unsigned long>(metrics.deadlineMisses)
+        "%u",
+        static_cast<unsigned int>(metrics.deadlineMisses)
     );
     touchgfx::Unicode::snprintf(
         FreeHeapValueBuffer,
         FREEHEAPVALUE_SIZE,
-        "%lu",
-        static_cast<unsigned long>(freeHeapKB)
+        "%u",
+        static_cast<unsigned int>(freeHeapKB)
     );
 
     CpuLoadValue.invalidate();

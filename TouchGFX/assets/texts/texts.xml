@@ -6,8 +6,68 @@
   <Texts>
     <TextGroup Id="Group1" />
     <TextGroup Id="Unsorted">
-      <Text Id="__SingleUse_PPEW" Alignment="Center" TypographyId="Default">
-        <Translation Language="GB">Back</Translation>
+      <Text Id="__SingleUse_DU7X" Alignment="Left" TypographyId="Default">
+        <Translation Language="GB">--</Translation>
+      </Text>
+      <Text Id="__SingleUse_C40D" Alignment="Center" TypographyId="Default">
+        <Translation Language="GB">&lt;value&gt; KB</Translation>
+      </Text>
+      <Text Id="__SingleUse_KVJS" Alignment="Left" TypographyId="Default">
+        <Translation Language="GB">--</Translation>
+      </Text>
+      <Text Id="__SingleUse_23ZB" Alignment="Center" TypographyId="Default">
+        <Translation Language="GB">&lt;value&gt; </Translation>
+      </Text>
+      <Text Id="__SingleUse_A0QU" Alignment="Left" TypographyId="Default">
+        <Translation Language="GB">--</Translation>
+      </Text>
+      <Text Id="__SingleUse_WH9I" Alignment="Center" TypographyId="Default">
+        <Translation Language="GB">&lt;value&gt; ms</Translation>
+      </Text>
+      <Text Id="__SingleUse_VYXP" Alignment="Left" TypographyId="Default">
+        <Translation Language="GB">--</Translation>
+      </Text>
+      <Text Id="__SingleUse_SY55" Alignment="Center" TypographyId="Default">
+        <Translation Language="GB">&lt;value&gt; %</Translation>
+      </Text>
+      <Text Id="__SingleUse_7G2I" Alignment="Center" TypographyId="Default">
+        <Translation Language="GB">&lt;-</Translation>
+      </Text>
+      <Text Id="__SingleUse_OPL4" Alignment="Center" TypographyId="Default">
+        <Translation Language="GB">Free Heap</Translation>
+      </Text>
+      <Text Id="__SingleUse_OPJE" Alignment="Center" TypographyId="Default">
+        <Translation Language="GB">CPU Load   </Translation>
+      </Text>
+      <Text Id="__SingleUse_XF2M" Alignment="Center" TypographyId="Default">
+        <Translation Language="GB">Deadline Misses</Translation>
+      </Text>
+      <Text Id="__SingleUse_521I" Alignment="Center" TypographyId="Default">
+        <Translation Language="GB">DSP Max</Translation>
+      </Text>
+      <Text Id="__SingleUse_LLBL" Alignment="Center" TypographyId="Default">
+        <Translation Language="GB">System Information</Translation>
+      </Text>
+      <Text Id="__SingleUse_4LBY" Alignment="Center" TypographyId="Default">
+        <Translation Language="GB">&lt;-</Translation>
+      </Text>
+      <Text Id="__SingleUse_8ZK2" Alignment="Center" TypographyId="Default">
+        <Translation Language="GB">-&gt;</Translation>
+      </Text>
+      <Text Id="__SingleUse_T5A5" Alignment="Center" TypographyId="Default">
+        <Translation Language="GB">Classical</Translation>
+      </Text>
+      <Text Id="__SingleUse_7GCR" Alignment="Center" TypographyId="Default">
+        <Translation Language="GB">Pop</Translation>
+      </Text>
+      <Text Id="__SingleUse_Z19A" Alignment="Center" TypographyId="Default">
+        <Translation Language="GB">-&gt;</Translation>
+      </Text>
+      <Text Id="TRACK_NAME" Alignment="Left" TypographyId="Default">
+        <Translation Language="GB">No track</Translation>
+      </Text>
+      <Text Id="__SingleUse_VSLT" Alignment="Center" TypographyId="Default">
+        <Translation Language="GB">&lt;track&gt; </Translation>
       </Text>
       <Text Id="__SingleUse_WS5S" Alignment="Left" TypographyId="Default">
         <Translation Language="GB">Noise Reduction</Translation>
@@ -22,7 +82,7 @@
         <Translation Language="GB">Audio Effects</Translation>
       </Text>
       <Text Id="__SingleUse_6XK3" Alignment="Center" TypographyId="Default">
-        <Translation Language="GB">EF</Translation>
+        <Translation Language="GB">-&gt;</Translation>
       </Text>
       <Text Id="__SingleUse_PGFJ" Alignment="Left" TypographyId="Default">
         <Translation Language="GB">+-0123456789</Translation>
@@ -58,7 +118,7 @@
         <Translation Language="GB">&lt;value&gt; dB</Translation>
       </Text>
       <Text Id="__SingleUse_G21M" Alignment="Center" TypographyId="Default">
-        <Translation Language="GB">EQ</Translation>
+        <Translation Language="GB">&lt;-</Translation>
       </Text>
       <Text Id="__SingleUse_K4HJ" Alignment="Center" TypographyId="Default">
         <Translation Language="GB">8 kHz</Translation>
@@ -78,17 +138,11 @@
       <Text Id="__SingleUse_HBQ8" Alignment="Center" TypographyId="Default">
         <Translation Language="GB">Flat</Translation>
       </Text>
-      <Text Id="__SingleUse_LCF1" Alignment="Center" TypographyId="Default">
-        <Translation Language="GB">Back</Translation>
-      </Text>
       <Text Id="__SingleUse_AWN3" Alignment="Center" TypographyId="Default">
         <Translation Language="GB">+</Translation>
       </Text>
       <Text Id="__SingleUse_20I2" Alignment="Center" TypographyId="Default">
         <Translation Language="GB">-</Translation>
-      </Text>
-      <Text Id="__SingleUse_4DIF" Alignment="Center" TypographyId="Default">
-        <Translation Language="GB">SD card&#10;</Translation>
       </Text>
       <Text Id="__SingleUse_NYEE" Alignment="Center" TypographyId="Default">
         <Translation Language="GB">Play / Pause</Translation>

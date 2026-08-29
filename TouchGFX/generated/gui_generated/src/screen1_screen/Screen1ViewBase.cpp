@@ -38,12 +38,6 @@ Screen1ViewBase::Screen1ViewBase() :
     Stop_button.setLabelColorPressed(touchgfx::Color::getColorFromRGB(0, 0, 0));
     add(Stop_button);
 
-    textArea1.setPosition(98, 154, 300, 30);
-    textArea1.setColor(touchgfx::Color::getColorFromRGB(255, 255, 255));
-    textArea1.setLinespacing(0);
-    textArea1.setTypedText(touchgfx::TypedText(T___SINGLEUSE_4DIF));
-    add(textArea1);
-
     FFT_Background.setPosition(25, 14, 435, 122);
     FFT_Background.setColor(touchgfx::Color::getColorFromRGB(43, 48, 58));
     FFT_Background.setBorderColor(touchgfx::Color::getColorFromRGB(112, 117, 127));
@@ -57,6 +51,14 @@ Screen1ViewBase::Screen1ViewBase() :
     VolumeDown_button.setLabelColorPressed(touchgfx::Color::getColorFromRGB(0, 0, 0));
     add(VolumeDown_button);
 
+    TrackNameText.setPosition(92, 151, 300, 30);
+    TrackNameText.setColor(touchgfx::Color::getColorFromRGB(255, 255, 255));
+    TrackNameText.setLinespacing(0);
+    Unicode::snprintf(TrackNameTextBuffer, TRACKNAMETEXT_SIZE, "%s", touchgfx::TypedText(T_TRACK_NAME).getText());
+    TrackNameText.setWildcard(TrackNameTextBuffer);
+    TrackNameText.setTypedText(touchgfx::TypedText(T___SINGLEUSE_VSLT));
+    add(TrackNameText);
+
     VolumeUp_button.setXY(330, 154);
     VolumeUp_button.setBitmaps(touchgfx::Bitmap(BITMAP_ALTERNATE_THEME_IMAGES_WIDGETS_BUTTON_ICON_ROUND_MICRO_FILL_ACTIVE_ID), touchgfx::Bitmap(BITMAP_ALTERNATE_THEME_IMAGES_WIDGETS_BUTTON_ICON_ROUND_MICRO_FILL_ACTIVE_ID));
     VolumeUp_button.setLabelText(touchgfx::TypedText(T___SINGLEUSE_AWN3));
@@ -64,21 +66,21 @@ Screen1ViewBase::Screen1ViewBase() :
     VolumeUp_button.setLabelColorPressed(touchgfx::Color::getColorFromRGB(0, 0, 0));
     add(VolumeUp_button);
 
-    Equalizer_button.setXY(47, 154);
-    Equalizer_button.setBitmaps(touchgfx::Bitmap(BITMAP_ALTERNATE_THEME_IMAGES_WIDGETS_BUTTON_ICON_ROUND_MICRO_FILL_ACTIVE_ID), touchgfx::Bitmap(BITMAP_ALTERNATE_THEME_IMAGES_WIDGETS_BUTTON_ICON_ROUND_MICRO_FILL_ACTIVE_ID));
-    Equalizer_button.setLabelText(touchgfx::TypedText(T___SINGLEUSE_G21M));
-    Equalizer_button.setLabelColor(touchgfx::Color::getColorFromRGB(0, 0, 0));
-    Equalizer_button.setLabelColorPressed(touchgfx::Color::getColorFromRGB(0, 0, 0));
-    Equalizer_button.setAction(buttonCallback);
-    add(Equalizer_button);
+    LeftPageButton.setXY(47, 154);
+    LeftPageButton.setBitmaps(touchgfx::Bitmap(BITMAP_ALTERNATE_THEME_IMAGES_WIDGETS_BUTTON_ICON_ROUND_MICRO_FILL_ACTIVE_ID), touchgfx::Bitmap(BITMAP_ALTERNATE_THEME_IMAGES_WIDGETS_BUTTON_ICON_ROUND_MICRO_FILL_ACTIVE_ID));
+    LeftPageButton.setLabelText(touchgfx::TypedText(T___SINGLEUSE_G21M));
+    LeftPageButton.setLabelColor(touchgfx::Color::getColorFromRGB(0, 0, 0));
+    LeftPageButton.setLabelColorPressed(touchgfx::Color::getColorFromRGB(0, 0, 0));
+    LeftPageButton.setAction(buttonCallback);
+    add(LeftPageButton);
 
-    Effects_button.setXY(398, 154);
-    Effects_button.setBitmaps(touchgfx::Bitmap(BITMAP_ALTERNATE_THEME_IMAGES_WIDGETS_BUTTON_ICON_ROUND_MICRO_FILL_ACTIVE_ID), touchgfx::Bitmap(BITMAP_ALTERNATE_THEME_IMAGES_WIDGETS_BUTTON_ICON_ROUND_MICRO_FILL_ACTIVE_ID));
-    Effects_button.setLabelText(touchgfx::TypedText(T___SINGLEUSE_6XK3));
-    Effects_button.setLabelColor(touchgfx::Color::getColorFromRGB(0, 0, 0));
-    Effects_button.setLabelColorPressed(touchgfx::Color::getColorFromRGB(0, 0, 0));
-    Effects_button.setAction(buttonCallback);
-    add(Effects_button);
+    RightPageButton.setXY(398, 154);
+    RightPageButton.setBitmaps(touchgfx::Bitmap(BITMAP_ALTERNATE_THEME_IMAGES_WIDGETS_BUTTON_ICON_ROUND_MICRO_FILL_ACTIVE_ID), touchgfx::Bitmap(BITMAP_ALTERNATE_THEME_IMAGES_WIDGETS_BUTTON_ICON_ROUND_MICRO_FILL_ACTIVE_ID));
+    RightPageButton.setLabelText(touchgfx::TypedText(T___SINGLEUSE_6XK3));
+    RightPageButton.setLabelColor(touchgfx::Color::getColorFromRGB(0, 0, 0));
+    RightPageButton.setLabelColorPressed(touchgfx::Color::getColorFromRGB(0, 0, 0));
+    RightPageButton.setAction(buttonCallback);
+    add(RightPageButton);
 }
 
 Screen1ViewBase::~Screen1ViewBase()
@@ -93,17 +95,17 @@ void Screen1ViewBase::setupScreen()
 
 void Screen1ViewBase::buttonCallbackHandler(const touchgfx::AbstractButton& src)
 {
-    if (&src == &Equalizer_button)
+    if (&src == &LeftPageButton)
     {
         //Interaction1
-        //When Equalizer_button clicked change screen to EqualizerScreen
+        //When LeftPageButton clicked change screen to EqualizerScreen
         //Go to EqualizerScreen with no screen transition
         application().gotoEqualizerScreenScreenNoTransition();
     }
-    if (&src == &Effects_button)
+    if (&src == &RightPageButton)
     {
         //Interaction2
-        //When Effects_button clicked change screen to EffectsScreen
+        //When RightPageButton clicked change screen to EffectsScreen
         //Go to EffectsScreen with no screen transition
         application().gotoEffectsScreenScreenNoTransition();
     }

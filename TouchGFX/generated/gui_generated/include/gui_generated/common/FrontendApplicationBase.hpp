@@ -29,6 +29,9 @@ public:
     // EffectsScreen
     void gotoEffectsScreenScreenNoTransition();
 
+    // InfoScreen
+    void gotoInfoScreenScreenNoTransition();
+
 protected:
     touchgfx::Callback<FrontendApplicationBase> transitionCallback;
     FrontendHeap& frontendHeap;
@@ -42,6 +45,9 @@ protected:
 
     // EffectsScreen
     void gotoEffectsScreenScreenNoTransitionImpl();
+
+    // InfoScreen
+    void gotoInfoScreenScreenNoTransitionImpl();
 };
 
 #endif // FRONTENDAPPLICATIONBASE_HPP

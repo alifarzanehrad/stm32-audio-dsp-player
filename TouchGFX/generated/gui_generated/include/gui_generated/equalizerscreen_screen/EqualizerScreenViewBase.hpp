@@ -8,8 +8,8 @@
 #include <mvp/View.hpp>
 #include <gui/equalizerscreen_screen/EqualizerScreenPresenter.hpp>
 #include <touchgfx/widgets/Box.hpp>
-#include <touchgfx/widgets/TextArea.hpp>
 #include <touchgfx/widgets/ButtonWithLabel.hpp>
+#include <touchgfx/widgets/TextArea.hpp>
 #include <touchgfx/containers/Slider.hpp>
 #include <touchgfx/widgets/TextAreaWithWildcard.hpp>
 
@@ -47,6 +47,14 @@ public:
     {
         // Override and implement this function in EqualizerScreen
     }
+    virtual void function1()
+    {
+        // Override and implement this function in EqualizerScreen
+    }
+    virtual void function2()
+    {
+        // Override and implement this function in EqualizerScreen
+    }
 
 protected:
     FrontendApplication& application() {
@@ -58,11 +66,13 @@ protected:
      */
     touchgfx::Box __background;
     touchgfx::Box EQ_Background;
+    touchgfx::ButtonWithLabel RightPageButton;
     touchgfx::TextArea textArea3;
     touchgfx::TextArea textArea4;
     touchgfx::TextArea textArea5;
     touchgfx::ButtonWithLabel Flat_button;
-    touchgfx::ButtonWithLabel Back_button;
+    touchgfx::ButtonWithLabel Pop_button;
+    touchgfx::ButtonWithLabel Classical_button;
     touchgfx::Slider Slider_100Hz;
     touchgfx::Slider Slider_300Hz;
     touchgfx::Slider Slider_1kHz;

@@ -41,10 +41,26 @@ EffectsScreenViewBase::EffectsScreenViewBase() :
     NoiseReductionLabel.setTypedText(touchgfx::TypedText(T___SINGLEUSE_WS5S));
     add(NoiseReductionLabel);
 
+    RightPageButton.setXY(353, 227);
+    RightPageButton.setBitmaps(touchgfx::Bitmap(BITMAP_ALTERNATE_THEME_IMAGES_WIDGETS_BUTTON_ICON_ROUND_MICRO_FILL_ACTIVE_ID), touchgfx::Bitmap(BITMAP_ALTERNATE_THEME_IMAGES_WIDGETS_BUTTON_ICON_ROUND_MICRO_FILL_ACTIVE_ID));
+    RightPageButton.setLabelText(touchgfx::TypedText(T___SINGLEUSE_8ZK2));
+    RightPageButton.setLabelColor(touchgfx::Color::getColorFromRGB(0, 0, 0));
+    RightPageButton.setLabelColorPressed(touchgfx::Color::getColorFromRGB(0, 0, 0));
+    RightPageButton.setAction(buttonCallback);
+    add(RightPageButton);
+
     Echo_toggle.setXY(316, 55);
     Echo_toggle.setBitmaps(touchgfx::Bitmap(BITMAP_ALTERNATE_THEME_IMAGES_WIDGETS_TOGGLEBUTTON_MEDIUM_ROUND_OFF_LIGHT_ID), touchgfx::Bitmap(BITMAP_ALTERNATE_THEME_IMAGES_WIDGETS_TOGGLEBUTTON_MEDIUM_ROUND_ON_ACTIVE_ID));
     Echo_toggle.setAction(buttonCallback);
     add(Echo_toggle);
+
+    LeftPageButton.setXY(72, 227);
+    LeftPageButton.setBitmaps(touchgfx::Bitmap(BITMAP_ALTERNATE_THEME_IMAGES_WIDGETS_BUTTON_ICON_ROUND_MICRO_FILL_ACTIVE_ID), touchgfx::Bitmap(BITMAP_ALTERNATE_THEME_IMAGES_WIDGETS_BUTTON_ICON_ROUND_MICRO_FILL_ACTIVE_ID));
+    LeftPageButton.setLabelText(touchgfx::TypedText(T___SINGLEUSE_4LBY));
+    LeftPageButton.setLabelColor(touchgfx::Color::getColorFromRGB(0, 0, 0));
+    LeftPageButton.setLabelColorPressed(touchgfx::Color::getColorFromRGB(0, 0, 0));
+    LeftPageButton.setAction(buttonCallback);
+    add(LeftPageButton);
 
     Reverb_toggle.setXY(316, 111);
     Reverb_toggle.setBitmaps(touchgfx::Bitmap(BITMAP_ALTERNATE_THEME_IMAGES_WIDGETS_TOGGLEBUTTON_MEDIUM_ROUND_OFF_LIGHT_ID), touchgfx::Bitmap(BITMAP_ALTERNATE_THEME_IMAGES_WIDGETS_TOGGLEBUTTON_MEDIUM_ROUND_ON_ACTIVE_ID));
@@ -55,14 +71,6 @@ EffectsScreenViewBase::EffectsScreenViewBase() :
     NoiseReduction_toggle.setBitmaps(touchgfx::Bitmap(BITMAP_ALTERNATE_THEME_IMAGES_WIDGETS_TOGGLEBUTTON_MEDIUM_ROUND_OFF_LIGHT_ID), touchgfx::Bitmap(BITMAP_ALTERNATE_THEME_IMAGES_WIDGETS_TOGGLEBUTTON_MEDIUM_ROUND_ON_ACTIVE_ID));
     NoiseReduction_toggle.setAction(buttonCallback);
     add(NoiseReduction_toggle);
-
-    Back_button.setXY(40, 208);
-    Back_button.setBitmaps(touchgfx::Bitmap(BITMAP_ALTERNATE_THEME_IMAGES_WIDGETS_BUTTON_REGULAR_HEIGHT_36_TINY_ROUND_ACTIVE_ID), touchgfx::Bitmap(BITMAP_ALTERNATE_THEME_IMAGES_WIDGETS_BUTTON_REGULAR_HEIGHT_36_TINY_ROUND_ACTIVE_ID));
-    Back_button.setLabelText(touchgfx::TypedText(T___SINGLEUSE_PPEW));
-    Back_button.setLabelColor(touchgfx::Color::getColorFromRGB(0, 0, 0));
-    Back_button.setLabelColorPressed(touchgfx::Color::getColorFromRGB(255, 255, 255));
-    Back_button.setAction(buttonCallback);
-    add(Back_button);
 }
 
 EffectsScreenViewBase::~EffectsScreenViewBase()
@@ -77,10 +85,10 @@ void EffectsScreenViewBase::setupScreen()
 
 void EffectsScreenViewBase::buttonCallbackHandler(const touchgfx::AbstractButton& src)
 {
-    if (&src == &Back_button)
+    if (&src == &LeftPageButton)
     {
         //Interaction1
-        //When Back_button clicked change screen to Screen1
+        //When LeftPageButton clicked change screen to Screen1
         //Go to Screen1 with no screen transition
         application().gotoScreen1ScreenNoTransition();
     }
@@ -104,5 +112,12 @@ void EffectsScreenViewBase::buttonCallbackHandler(const touchgfx::AbstractButton
         //When NoiseReduction_toggle clicked call virtual function
         //Call noiseReductionToggled
         noiseReductionToggled();
+    }
+    if (&src == &RightPageButton)
+    {
+        //Interaction5
+        //When RightPageButton clicked change screen to InfoScreen
+        //Go to InfoScreen with no screen transition
+        application().gotoInfoScreenScreenNoTransition();
     }
 }

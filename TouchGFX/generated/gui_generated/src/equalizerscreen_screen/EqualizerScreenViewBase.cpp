@@ -3,8 +3,8 @@
 /*********************************************************************************/
 #include <gui_generated/equalizerscreen_screen/EqualizerScreenViewBase.hpp>
 #include <touchgfx/Color.hpp>
-#include <texts/TextKeysAndLanguages.hpp>
 #include <images/BitmapDatabase.hpp>
+#include <texts/TextKeysAndLanguages.hpp>
 
 EqualizerScreenViewBase::EqualizerScreenViewBase() :
     buttonCallback(this, &EqualizerScreenViewBase::buttonCallbackHandler),
@@ -17,6 +17,14 @@ EqualizerScreenViewBase::EqualizerScreenViewBase() :
     EQ_Background.setPosition(0, 0, 480, 272);
     EQ_Background.setColor(touchgfx::Color::getColorFromRGB(16, 18, 22));
     add(EQ_Background);
+
+    RightPageButton.setXY(419, 227);
+    RightPageButton.setBitmaps(touchgfx::Bitmap(BITMAP_ALTERNATE_THEME_IMAGES_WIDGETS_BUTTON_ICON_ROUND_MICRO_FILL_ACTIVE_ID), touchgfx::Bitmap(BITMAP_ALTERNATE_THEME_IMAGES_WIDGETS_BUTTON_ICON_ROUND_MICRO_FILL_ACTIVE_ID));
+    RightPageButton.setLabelText(touchgfx::TypedText(T___SINGLEUSE_Z19A));
+    RightPageButton.setLabelColor(touchgfx::Color::getColorFromRGB(0, 0, 0));
+    RightPageButton.setLabelColorPressed(touchgfx::Color::getColorFromRGB(0, 0, 0));
+    RightPageButton.setAction(buttonCallback);
+    add(RightPageButton);
 
     textArea3.setXY(11, 95);
     textArea3.setColor(touchgfx::Color::getColorFromRGB(255, 255, 255));
@@ -36,7 +44,7 @@ EqualizerScreenViewBase::EqualizerScreenViewBase() :
     textArea5.setTypedText(touchgfx::TypedText(T___SINGLEUSE_K4HJ));
     add(textArea5);
 
-    Flat_button.setXY(285, 227);
+    Flat_button.setXY(69, 227);
     Flat_button.setBitmaps(touchgfx::Bitmap(BITMAP_ALTERNATE_THEME_IMAGES_WIDGETS_BUTTON_REGULAR_HEIGHT_36_TINY_ROUND_ACTIVE_ID), touchgfx::Bitmap(BITMAP_ALTERNATE_THEME_IMAGES_WIDGETS_BUTTON_REGULAR_HEIGHT_36_TINY_ROUND_ACTIVE_ID));
     Flat_button.setLabelText(touchgfx::TypedText(T___SINGLEUSE_HBQ8));
     Flat_button.setLabelColor(touchgfx::Color::getColorFromRGB(0, 0, 0));
@@ -44,13 +52,21 @@ EqualizerScreenViewBase::EqualizerScreenViewBase() :
     Flat_button.setAction(buttonCallback);
     add(Flat_button);
 
-    Back_button.setXY(98, 227);
-    Back_button.setBitmaps(touchgfx::Bitmap(BITMAP_ALTERNATE_THEME_IMAGES_WIDGETS_BUTTON_REGULAR_HEIGHT_36_TINY_ROUND_ACTIVE_ID), touchgfx::Bitmap(BITMAP_ALTERNATE_THEME_IMAGES_WIDGETS_BUTTON_REGULAR_HEIGHT_36_TINY_ROUND_ACTIVE_ID));
-    Back_button.setLabelText(touchgfx::TypedText(T___SINGLEUSE_LCF1));
-    Back_button.setLabelColor(touchgfx::Color::getColorFromRGB(0, 0, 0));
-    Back_button.setLabelColorPressed(touchgfx::Color::getColorFromRGB(255, 255, 255));
-    Back_button.setAction(buttonCallback);
-    add(Back_button);
+    Pop_button.setXY(184, 227);
+    Pop_button.setBitmaps(touchgfx::Bitmap(BITMAP_ALTERNATE_THEME_IMAGES_WIDGETS_BUTTON_REGULAR_HEIGHT_36_TINY_ROUND_ACTIVE_ID), touchgfx::Bitmap(BITMAP_ALTERNATE_THEME_IMAGES_WIDGETS_BUTTON_REGULAR_HEIGHT_36_TINY_ROUND_ACTIVE_ID));
+    Pop_button.setLabelText(touchgfx::TypedText(T___SINGLEUSE_7GCR));
+    Pop_button.setLabelColor(touchgfx::Color::getColorFromRGB(0, 0, 0));
+    Pop_button.setLabelColorPressed(touchgfx::Color::getColorFromRGB(0, 0, 0));
+    Pop_button.setAction(buttonCallback);
+    add(Pop_button);
+
+    Classical_button.setXY(300, 227);
+    Classical_button.setBitmaps(touchgfx::Bitmap(BITMAP_ALTERNATE_THEME_IMAGES_WIDGETS_BUTTON_REGULAR_HEIGHT_36_TINY_ROUND_ACTIVE_ID), touchgfx::Bitmap(BITMAP_ALTERNATE_THEME_IMAGES_WIDGETS_BUTTON_REGULAR_HEIGHT_36_TINY_ROUND_ACTIVE_ID));
+    Classical_button.setLabelText(touchgfx::TypedText(T___SINGLEUSE_T5A5));
+    Classical_button.setLabelColor(touchgfx::Color::getColorFromRGB(0, 0, 0));
+    Classical_button.setLabelColorPressed(touchgfx::Color::getColorFromRGB(0, 0, 0));
+    Classical_button.setAction(buttonCallback);
+    add(Classical_button);
 
     Slider_100Hz.setXY(74, 11);
     Slider_100Hz.setBitmaps(touchgfx::Bitmap(BITMAP_ALTERNATE_THEME_IMAGES_WIDGETS_SLIDER_HORIZONTAL_THICK_TRACK_MEDIUM_ID), touchgfx::Bitmap(BITMAP_ALTERNATE_THEME_IMAGES_WIDGETS_SLIDER_HORIZONTAL_THICK_FILLER_MEDIUM_ID), touchgfx::Bitmap(BITMAP_ALTERNATE_THEME_IMAGES_WIDGETS_SLIDER_HORIZONTAL_THICK_ROUNDED_DARK_ID));
@@ -164,10 +180,10 @@ void EqualizerScreenViewBase::setupScreen()
 
 void EqualizerScreenViewBase::buttonCallbackHandler(const touchgfx::AbstractButton& src)
 {
-    if (&src == &Back_button)
+    if (&src == &RightPageButton)
     {
         //Interaction1
-        //When Back_button clicked change screen to Screen1
+        //When RightPageButton clicked change screen to Screen1
         //Go to Screen1 with no screen transition
         application().gotoScreen1ScreenNoTransition();
     }
@@ -177,6 +193,20 @@ void EqualizerScreenViewBase::buttonCallbackHandler(const touchgfx::AbstractButt
         //When Flat_button clicked call virtual function
         //Call flatButtonClicked
         flatButtonClicked();
+    }
+    if (&src == &Pop_button)
+    {
+        //Interaction8
+        //When Pop_button clicked call virtual function
+        //Call function1
+        function1();
+    }
+    if (&src == &Classical_button)
+    {
+        //Interaction9
+        //When Classical_button clicked call virtual function
+        //Call function2
+        function2();
     }
 }
 

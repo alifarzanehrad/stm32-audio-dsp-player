@@ -30,6 +30,9 @@
     <ClCompile Include="..\..\gui\src\effectsscreen_screen\EffectsScreenPresenter.cpp"/>
     <ClCompile Include="..\..\gui\src\effectsscreen_screen\EffectsScreenView.cpp"/>
     <ClCompile Include="..\..\generated\gui_generated\src\effectsscreen_screen\EffectsScreenViewBase.cpp"/>
+    <ClCompile Include="..\..\gui\src\infoscreen_screen\InfoScreenPresenter.cpp"/>
+    <ClCompile Include="..\..\gui\src\infoscreen_screen\InfoScreenView.cpp"/>
+    <ClCompile Include="..\..\generated\gui_generated\src\infoscreen_screen\InfoScreenViewBase.cpp"/>
   </ItemGroup>
   <ItemGroup>
     <None Include="$(ApplicationRoot)\assets\texts\texts.xml"/>
@@ -189,6 +192,9 @@
     <ClInclude Include="..\..\gui\include\gui\effectsscreen_screen\EffectsScreenPresenter.hpp"/>
     <ClInclude Include="..\..\gui\include\gui\effectsscreen_screen\EffectsScreenView.hpp"/>
     <ClInclude Include="..\..\generated\gui_generated\include\gui_generated\effectsscreen_screen\EffectsScreenViewBase.hpp"/>
+    <ClInclude Include="..\..\gui\include\gui\infoscreen_screen\InfoScreenPresenter.hpp"/>
+    <ClInclude Include="..\..\gui\include\gui\infoscreen_screen\InfoScreenView.hpp"/>
+    <ClInclude Include="..\..\generated\gui_generated\include\gui_generated\infoscreen_screen\InfoScreenViewBase.hpp"/>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="$(ApplicationRoot)\generated\simulator\touchgfx.rc"/>

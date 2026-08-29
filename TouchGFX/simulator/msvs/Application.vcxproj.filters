@@ -208,6 +208,18 @@
     <Filter Include="Source Files\generated\gui_generated\effectsscreen_screen">
       <UniqueIdentifier>85CEEB5F-388C-E98E-6EDF-5644123C7FC1</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\gui\infoscreen_screen">
+      <UniqueIdentifier>44E060ED-F00A-2BCC-1C27-8DEF82977D54</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\gui\infoscreen_screen">
+      <UniqueIdentifier>B230F74B-B00A-807B-B1E5-C2D27EDD5EC0</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\generated\gui_generated\infoscreen_screen">
+      <UniqueIdentifier>030756FA-9A6B-9C2A-8D5E-D54D76BC03EF</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\generated\gui_generated\infoscreen_screen">
+      <UniqueIdentifier>286ACD89-A568-BB39-5256-1AFE771BBCF0</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="$(TouchGFXReleasePath)\framework\source\platform\driver\touch\SDL2TouchController.cpp">
@@ -266,6 +278,15 @@
     </ClCompile>
     <ClCompile Include="..\..\generated\gui_generated\src\effectsscreen_screen\EffectsScreenViewBase.cpp">
       <Filter>Source Files\generated\gui_generated\effectsscreen_screen</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\gui\src\infoscreen_screen\InfoScreenPresenter.cpp">
+      <Filter>Source Files\gui\infoscreen_screen</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\gui\src\infoscreen_screen\InfoScreenView.cpp">
+      <Filter>Source Files\gui\infoscreen_screen</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\generated\gui_generated\src\infoscreen_screen\InfoScreenViewBase.cpp">
+      <Filter>Source Files\generated\gui_generated\infoscreen_screen</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -735,6 +756,15 @@
     </ClInclude>
     <ClInclude Include="..\..\generated\gui_generated\include\gui_generated\effectsscreen_screen\EffectsScreenViewBase.hpp">
       <Filter>Header Files\generated\gui_generated\effectsscreen_screen</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\gui\include\gui\infoscreen_screen\InfoScreenPresenter.hpp">
+      <Filter>Header Files\gui\infoscreen_screen</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\gui\include\gui\infoscreen_screen\InfoScreenView.hpp">
+      <Filter>Header Files\gui\infoscreen_screen</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\generated\gui_generated\include\gui_generated\infoscreen_screen\InfoScreenViewBase.hpp">
+      <Filter>Header Files\generated\gui_generated\infoscreen_screen</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

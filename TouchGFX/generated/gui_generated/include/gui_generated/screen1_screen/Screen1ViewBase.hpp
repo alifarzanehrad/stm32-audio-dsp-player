@@ -9,8 +9,8 @@
 #include <gui/screen1_screen/Screen1Presenter.hpp>
 #include <touchgfx/widgets/Box.hpp>
 #include <touchgfx/widgets/ButtonWithLabel.hpp>
-#include <touchgfx/widgets/TextArea.hpp>
 #include <touchgfx/widgets/BoxWithBorder.hpp>
+#include <touchgfx/widgets/TextAreaWithWildcard.hpp>
 
 class Screen1ViewBase : public touchgfx::View<Screen1Presenter>
 {
@@ -41,12 +41,18 @@ protected:
     touchgfx::ButtonWithLabel Previous_button;
     touchgfx::ButtonWithLabel Next_button;
     touchgfx::ButtonWithLabel Stop_button;
-    touchgfx::TextArea textArea1;
     touchgfx::BoxWithBorder FFT_Background;
     touchgfx::ButtonWithLabel VolumeDown_button;
+    touchgfx::TextAreaWithOneWildcard TrackNameText;
     touchgfx::ButtonWithLabel VolumeUp_button;
-    touchgfx::ButtonWithLabel Equalizer_button;
-    touchgfx::ButtonWithLabel Effects_button;
+    touchgfx::ButtonWithLabel LeftPageButton;
+    touchgfx::ButtonWithLabel RightPageButton;
+
+    /*
+     * Wildcard Buffers
+     */
+    static const uint16_t TRACKNAMETEXT_SIZE = 64;
+    touchgfx::Unicode::UnicodeChar TrackNameTextBuffer[TRACKNAMETEXT_SIZE];
 
 private:
 

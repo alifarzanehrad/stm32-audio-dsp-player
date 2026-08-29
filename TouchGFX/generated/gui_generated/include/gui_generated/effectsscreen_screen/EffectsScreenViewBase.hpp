@@ -9,7 +9,6 @@
 #include <gui/effectsscreen_screen/EffectsScreenPresenter.hpp>
 #include <touchgfx/widgets/Box.hpp>
 #include <touchgfx/widgets/TextArea.hpp>
-#include <touchgfx/widgets/ButtonWithLabel.hpp>
 #include <touchgfx/widgets/ToggleButton.hpp>
 
 class EffectsScreenViewBase : public touchgfx::View<EffectsScreenPresenter>
@@ -49,9 +48,7 @@ protected:
     touchgfx::TextArea EchoLabel;
     touchgfx::TextArea ReverbLabel;
     touchgfx::TextArea NoiseReductionLabel;
-    touchgfx::ButtonWithLabel RightPageButton;
     touchgfx::ToggleButton Echo_toggle;
-    touchgfx::ButtonWithLabel LeftPageButton;
     touchgfx::ToggleButton Reverb_toggle;
     touchgfx::ToggleButton NoiseReduction_toggle;
 

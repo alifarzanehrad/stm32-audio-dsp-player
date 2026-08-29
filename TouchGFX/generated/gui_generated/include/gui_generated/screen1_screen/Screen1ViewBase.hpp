@@ -45,8 +45,6 @@ protected:
     touchgfx::ButtonWithLabel VolumeDown_button;
     touchgfx::TextAreaWithOneWildcard TrackNameText;
     touchgfx::ButtonWithLabel VolumeUp_button;
-    touchgfx::ButtonWithLabel LeftPageButton;
-    touchgfx::ButtonWithLabel RightPageButton;
 
     /*
      * Wildcard Buffers
@@ -55,16 +53,6 @@ protected:
     touchgfx::Unicode::UnicodeChar TrackNameTextBuffer[TRACKNAMETEXT_SIZE];
 
 private:
-
-    /*
-     * Callback Declarations
-     */
-    touchgfx::Callback<Screen1ViewBase, const touchgfx::AbstractButton&> buttonCallback;
-
-    /*
-     * Callback Handler Declarations
-     */
-    void buttonCallbackHandler(const touchgfx::AbstractButton& src);
 
 };
 

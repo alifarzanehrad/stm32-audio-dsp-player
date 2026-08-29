@@ -8,7 +8,6 @@
 #include <mvp/View.hpp>
 #include <gui/infoscreen_screen/InfoScreenPresenter.hpp>
 #include <touchgfx/widgets/Box.hpp>
-#include <touchgfx/widgets/ButtonWithLabel.hpp>
 #include <touchgfx/widgets/TextAreaWithWildcard.hpp>
 #include <touchgfx/widgets/TextArea.hpp>
 
@@ -29,9 +28,10 @@ protected:
      */
     touchgfx::Box __background;
     touchgfx::Box box1;
-    touchgfx::ButtonWithLabel LeftPageButton;
     touchgfx::TextAreaWithOneWildcard FreeHeapValue;
+    touchgfx::TextAreaWithOneWildcard AudioStackValue;
     touchgfx::TextArea FreeHeapLabel;
+    touchgfx::TextArea AudioStackLabel;
     touchgfx::TextAreaWithOneWildcard DeadlineMissesValue;
     touchgfx::TextArea DeadlineMissesLabel;
     touchgfx::TextAreaWithOneWildcard DspMaxValue;
@@ -45,6 +45,8 @@ protected:
      */
     static const uint16_t FREEHEAPVALUE_SIZE = 4;
     touchgfx::Unicode::UnicodeChar FreeHeapValueBuffer[FREEHEAPVALUE_SIZE];
+    static const uint16_t AUDIOSTACKVALUE_SIZE = 4;
+    touchgfx::Unicode::UnicodeChar AudioStackValueBuffer[AUDIOSTACKVALUE_SIZE];
     static const uint16_t DEADLINEMISSESVALUE_SIZE = 4;
     touchgfx::Unicode::UnicodeChar DeadlineMissesValueBuffer[DEADLINEMISSESVALUE_SIZE];
     static const uint16_t DSPMAXVALUE_SIZE = 4;
@@ -53,16 +55,6 @@ protected:
     touchgfx::Unicode::UnicodeChar CpuLoadValueBuffer[CPULOADVALUE_SIZE];
 
 private:
-
-    /*
-     * Callback Declarations
-     */
-    touchgfx::Callback<InfoScreenViewBase, const touchgfx::AbstractButton&> buttonCallback;
-
-    /*
-     * Callback Handler Declarations
-     */
-    void buttonCallbackHandler(const touchgfx::AbstractButton& src);
 
 };
 

@@ -3,11 +3,9 @@
 /*********************************************************************************/
 #include <gui_generated/infoscreen_screen/InfoScreenViewBase.hpp>
 #include <touchgfx/Color.hpp>
-#include <images/BitmapDatabase.hpp>
 #include <texts/TextKeysAndLanguages.hpp>
 
-InfoScreenViewBase::InfoScreenViewBase() :
-    buttonCallback(this, &InfoScreenViewBase::buttonCallbackHandler)
+InfoScreenViewBase::InfoScreenViewBase()
 {
     __background.setPosition(0, 0, 480, 272);
     __background.setColor(touchgfx::Color::getColorFromRGB(0, 0, 0));
@@ -17,14 +15,6 @@ InfoScreenViewBase::InfoScreenViewBase() :
     box1.setColor(touchgfx::Color::getColorFromRGB(16, 18, 22));
     add(box1);
 
-    LeftPageButton.setXY(56, 210);
-    LeftPageButton.setBitmaps(touchgfx::Bitmap(BITMAP_ALTERNATE_THEME_IMAGES_WIDGETS_BUTTON_ICON_ROUND_MICRO_FILL_ACTIVE_ID), touchgfx::Bitmap(BITMAP_ALTERNATE_THEME_IMAGES_WIDGETS_BUTTON_ICON_ROUND_MICRO_FILL_ACTIVE_ID));
-    LeftPageButton.setLabelText(touchgfx::TypedText(T___SINGLEUSE_7G2I));
-    LeftPageButton.setLabelColor(touchgfx::Color::getColorFromRGB(0, 0, 0));
-    LeftPageButton.setLabelColorPressed(touchgfx::Color::getColorFromRGB(0, 0, 0));
-    LeftPageButton.setAction(buttonCallback);
-    add(LeftPageButton);
-
     FreeHeapValue.setPosition(347, 157, 75, 30);
     FreeHeapValue.setColor(touchgfx::Color::getColorFromRGB(255, 255, 255));
     FreeHeapValue.setLinespacing(0);
@@ -33,11 +23,25 @@ InfoScreenViewBase::InfoScreenViewBase() :
     FreeHeapValue.setTypedText(touchgfx::TypedText(T___SINGLEUSE_C40D));
     add(FreeHeapValue);
 
+    AudioStackValue.setPosition(347, 192, 75, 30);
+    AudioStackValue.setColor(touchgfx::Color::getColorFromRGB(255, 255, 255));
+    AudioStackValue.setLinespacing(0);
+    Unicode::snprintf(AudioStackValueBuffer, AUDIOSTACKVALUE_SIZE, "%s", touchgfx::TypedText(T___SINGLEUSE_1WRK).getText());
+    AudioStackValue.setWildcard(AudioStackValueBuffer);
+    AudioStackValue.setTypedText(touchgfx::TypedText(T___SINGLEUSE_8UFC));
+    add(AudioStackValue);
+
     FreeHeapLabel.setXY(23, 160);
     FreeHeapLabel.setColor(touchgfx::Color::getColorFromRGB(255, 255, 255));
     FreeHeapLabel.setLinespacing(0);
     FreeHeapLabel.setTypedText(touchgfx::TypedText(T___SINGLEUSE_OPL4));
     add(FreeHeapLabel);
+
+    AudioStackLabel.setXY(23, 195);
+    AudioStackLabel.setColor(touchgfx::Color::getColorFromRGB(255, 255, 255));
+    AudioStackLabel.setLinespacing(0);
+    AudioStackLabel.setTypedText(touchgfx::TypedText(T___SINGLEUSE_88QC));
+    add(AudioStackLabel);
 
     DeadlineMissesValue.setPosition(347, 121, 75, 30);
     DeadlineMissesValue.setColor(touchgfx::Color::getColorFromRGB(255, 255, 255));
@@ -96,15 +100,4 @@ InfoScreenViewBase::~InfoScreenViewBase()
 void InfoScreenViewBase::setupScreen()
 {
 
-}
-
-void InfoScreenViewBase::buttonCallbackHandler(const touchgfx::AbstractButton& src)
-{
-    if (&src == &LeftPageButton)
-    {
-        //Interaction1
-        //When LeftPageButton clicked change screen to EffectsScreen
-        //Go to EffectsScreen with no screen transition
-        application().gotoEffectsScreenScreenNoTransition();
-    }
 }

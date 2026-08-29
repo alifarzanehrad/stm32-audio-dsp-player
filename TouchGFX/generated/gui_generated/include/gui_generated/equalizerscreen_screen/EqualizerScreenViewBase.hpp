@@ -8,8 +8,8 @@
 #include <mvp/View.hpp>
 #include <gui/equalizerscreen_screen/EqualizerScreenPresenter.hpp>
 #include <touchgfx/widgets/Box.hpp>
-#include <touchgfx/widgets/ButtonWithLabel.hpp>
 #include <touchgfx/widgets/TextArea.hpp>
+#include <touchgfx/widgets/ButtonWithLabel.hpp>
 #include <touchgfx/containers/Slider.hpp>
 #include <touchgfx/widgets/TextAreaWithWildcard.hpp>
 
@@ -66,7 +66,6 @@ protected:
      */
     touchgfx::Box __background;
     touchgfx::Box EQ_Background;
-    touchgfx::ButtonWithLabel RightPageButton;
     touchgfx::TextArea textArea3;
     touchgfx::TextArea textArea4;
     touchgfx::TextArea textArea5;
@@ -106,14 +105,14 @@ private:
     /*
      * Callback Declarations
      */
-    touchgfx::Callback<EqualizerScreenViewBase, const touchgfx::AbstractButton&> buttonCallback;
     touchgfx::Callback<EqualizerScreenViewBase, const touchgfx::Slider&, int> sliderValueChangedCallback;
+    touchgfx::Callback<EqualizerScreenViewBase, const touchgfx::AbstractButton&> buttonCallback;
 
     /*
      * Callback Handler Declarations
      */
-    void buttonCallbackHandler(const touchgfx::AbstractButton& src);
     void sliderValueChangedCallbackHandler(const touchgfx::Slider& src, int value);
+    void buttonCallbackHandler(const touchgfx::AbstractButton& src);
 
 };
 

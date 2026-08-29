@@ -6,6 +6,15 @@
   <Texts>
     <TextGroup Id="Group1" />
     <TextGroup Id="Unsorted">
+      <Text Id="__SingleUse_1WRK" Alignment="Left" TypographyId="Default">
+        <Translation Language="GB">--</Translation>
+      </Text>
+      <Text Id="__SingleUse_8UFC" Alignment="Center" TypographyId="Default">
+        <Translation Language="GB">&lt;value&gt; KB</Translation>
+      </Text>
+      <Text Id="__SingleUse_88QC" Alignment="Center" TypographyId="Default">
+        <Translation Language="GB">Audio Stack </Translation>
+      </Text>
       <Text Id="__SingleUse_DU7X" Alignment="Left" TypographyId="Default">
         <Translation Language="GB">--</Translation>
       </Text>
@@ -30,9 +39,6 @@
       <Text Id="__SingleUse_SY55" Alignment="Center" TypographyId="Default">
         <Translation Language="GB">&lt;value&gt; %</Translation>
       </Text>
-      <Text Id="__SingleUse_7G2I" Alignment="Center" TypographyId="Default">
-        <Translation Language="GB">&lt;-</Translation>
-      </Text>
       <Text Id="__SingleUse_OPL4" Alignment="Center" TypographyId="Default">
         <Translation Language="GB">Free Heap</Translation>
       </Text>
@@ -48,20 +54,11 @@
       <Text Id="__SingleUse_LLBL" Alignment="Center" TypographyId="Default">
         <Translation Language="GB">System Information</Translation>
       </Text>
-      <Text Id="__SingleUse_4LBY" Alignment="Center" TypographyId="Default">
-        <Translation Language="GB">&lt;-</Translation>
-      </Text>
-      <Text Id="__SingleUse_8ZK2" Alignment="Center" TypographyId="Default">
-        <Translation Language="GB">-&gt;</Translation>
-      </Text>
       <Text Id="__SingleUse_T5A5" Alignment="Center" TypographyId="Default">
         <Translation Language="GB">Classical</Translation>
       </Text>
       <Text Id="__SingleUse_7GCR" Alignment="Center" TypographyId="Default">
         <Translation Language="GB">Pop</Translation>
-      </Text>
-      <Text Id="__SingleUse_Z19A" Alignment="Center" TypographyId="Default">
-        <Translation Language="GB">-&gt;</Translation>
       </Text>
       <Text Id="TRACK_NAME" Alignment="Left" TypographyId="Default">
         <Translation Language="GB">No track</Translation>
@@ -80,9 +77,6 @@
       </Text>
       <Text Id="__SingleUse_42GX" Alignment="Center" TypographyId="Default">
         <Translation Language="GB">Audio Effects</Translation>
-      </Text>
-      <Text Id="__SingleUse_6XK3" Alignment="Center" TypographyId="Default">
-        <Translation Language="GB">-&gt;</Translation>
       </Text>
       <Text Id="__SingleUse_PGFJ" Alignment="Left" TypographyId="Default">
         <Translation Language="GB">+-0123456789</Translation>
@@ -117,9 +111,6 @@
       <Text Id="__SingleUse_2SG4" Alignment="Center" TypographyId="Default">
         <Translation Language="GB">&lt;value&gt; dB</Translation>
       </Text>
-      <Text Id="__SingleUse_G21M" Alignment="Center" TypographyId="Default">
-        <Translation Language="GB">&lt;-</Translation>
-      </Text>
       <Text Id="__SingleUse_K4HJ" Alignment="Center" TypographyId="Default">
         <Translation Language="GB">8 kHz</Translation>
       </Text>
@@ -145,13 +136,13 @@
         <Translation Language="GB">-</Translation>
       </Text>
       <Text Id="__SingleUse_NYEE" Alignment="Center" TypographyId="Default">
-        <Translation Language="GB">Play / Pause</Translation>
+        <Translation Language="GB"> Play </Translation>
       </Text>
       <Text Id="__SingleUse_YANH" Alignment="Center" TypographyId="Default">
-        <Translation Language="GB">Next</Translation>
+        <Translation Language="GB">&gt;&gt;</Translation>
       </Text>
       <Text Id="__SingleUse_V7EU" Alignment="Center" TypographyId="Default">
-        <Translation Language="GB">Previous</Translation>
+        <Translation Language="GB">&lt;&lt;</Translation>
       </Text>
     </TextGroup>
   </Texts>

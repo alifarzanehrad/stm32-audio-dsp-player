@@ -3,12 +3,12 @@
 /*********************************************************************************/
 #include <gui_generated/equalizerscreen_screen/EqualizerScreenViewBase.hpp>
 #include <touchgfx/Color.hpp>
-#include <images/BitmapDatabase.hpp>
 #include <texts/TextKeysAndLanguages.hpp>
+#include <images/BitmapDatabase.hpp>
 
 EqualizerScreenViewBase::EqualizerScreenViewBase() :
-    buttonCallback(this, &EqualizerScreenViewBase::buttonCallbackHandler),
-    sliderValueChangedCallback(this, &EqualizerScreenViewBase::sliderValueChangedCallbackHandler)
+    sliderValueChangedCallback(this, &EqualizerScreenViewBase::sliderValueChangedCallbackHandler),
+    buttonCallback(this, &EqualizerScreenViewBase::buttonCallbackHandler)
 {
     __background.setPosition(0, 0, 480, 272);
     __background.setColor(touchgfx::Color::getColorFromRGB(0, 0, 0));
@@ -17,14 +17,6 @@ EqualizerScreenViewBase::EqualizerScreenViewBase() :
     EQ_Background.setPosition(0, 0, 480, 272);
     EQ_Background.setColor(touchgfx::Color::getColorFromRGB(16, 18, 22));
     add(EQ_Background);
-
-    RightPageButton.setXY(419, 227);
-    RightPageButton.setBitmaps(touchgfx::Bitmap(BITMAP_ALTERNATE_THEME_IMAGES_WIDGETS_BUTTON_ICON_ROUND_MICRO_FILL_ACTIVE_ID), touchgfx::Bitmap(BITMAP_ALTERNATE_THEME_IMAGES_WIDGETS_BUTTON_ICON_ROUND_MICRO_FILL_ACTIVE_ID));
-    RightPageButton.setLabelText(touchgfx::TypedText(T___SINGLEUSE_Z19A));
-    RightPageButton.setLabelColor(touchgfx::Color::getColorFromRGB(0, 0, 0));
-    RightPageButton.setLabelColorPressed(touchgfx::Color::getColorFromRGB(0, 0, 0));
-    RightPageButton.setAction(buttonCallback);
-    add(RightPageButton);
 
     textArea3.setXY(11, 95);
     textArea3.setColor(touchgfx::Color::getColorFromRGB(255, 255, 255));
@@ -178,38 +170,6 @@ void EqualizerScreenViewBase::setupScreen()
 
 }
 
-void EqualizerScreenViewBase::buttonCallbackHandler(const touchgfx::AbstractButton& src)
-{
-    if (&src == &RightPageButton)
-    {
-        //Interaction1
-        //When RightPageButton clicked change screen to Screen1
-        //Go to Screen1 with no screen transition
-        application().gotoScreen1ScreenNoTransition();
-    }
-    if (&src == &Flat_button)
-    {
-        //Interaction7
-        //When Flat_button clicked call virtual function
-        //Call flatButtonClicked
-        flatButtonClicked();
-    }
-    if (&src == &Pop_button)
-    {
-        //Interaction8
-        //When Pop_button clicked call virtual function
-        //Call function1
-        function1();
-    }
-    if (&src == &Classical_button)
-    {
-        //Interaction9
-        //When Classical_button clicked call virtual function
-        //Call function2
-        function2();
-    }
-}
-
 void EqualizerScreenViewBase::sliderValueChangedCallbackHandler(const touchgfx::Slider& src, int value)
 {
     if (&src == &Slider_100Hz)
@@ -246,5 +206,30 @@ void EqualizerScreenViewBase::sliderValueChangedCallbackHandler(const touchgfx::
         //When Slider_8kHz value changed call virtual function
         //Call slider8kHzChanged
         slider8kHzChanged(value);
+    }
+}
+
+void EqualizerScreenViewBase::buttonCallbackHandler(const touchgfx::AbstractButton& src)
+{
+    if (&src == &Flat_button)
+    {
+        //Interaction7
+        //When Flat_button clicked call virtual function
+        //Call flatButtonClicked
+        flatButtonClicked();
+    }
+    if (&src == &Pop_button)
+    {
+        //Interaction8
+        //When Pop_button clicked call virtual function
+        //Call function1
+        function1();
+    }
+    if (&src == &Classical_button)
+    {
+        //Interaction9
+        //When Classical_button clicked call virtual function
+        //Call function2
+        function2();
     }
 }

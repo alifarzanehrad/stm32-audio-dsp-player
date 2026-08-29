@@ -18,36 +18,36 @@
           {
             "Type": "ButtonWithLabel",
             "Name": "Previous_button",
-            "X": 33,
-            "Y": 210,
-            "Width": 100,
+            "X": 120,
+            "Y": 203,
+            "Width": 36,
             "Height": 36,
-            "Pressed": "__generated\\alternate_theme_images_widgets_button_regular_height_36_tiny_round_active.png",
-            "Released": "__generated\\alternate_theme_images_widgets_button_regular_height_36_tiny_round_active.png",
+            "Pressed": "__generated\\alternate_theme_images_widgets_button_icon_round_micro_fill_active.png",
+            "Released": "__generated\\alternate_theme_images_widgets_button_icon_round_micro_fill_active.png",
             "TextId": "__SingleUse_V7EU",
             "TextRotation": "0"
           },
           {
             "Type": "ButtonWithLabel",
             "Name": "Next_button",
-            "X": 348,
-            "Y": 210,
-            "Width": 100,
+            "X": 331,
+            "Y": 203,
+            "Width": 36,
             "Height": 36,
-            "Pressed": "__generated\\alternate_theme_images_widgets_button_regular_height_36_tiny_round_active.png",
-            "Released": "__generated\\alternate_theme_images_widgets_button_regular_height_36_tiny_round_active.png",
+            "Pressed": "__generated\\alternate_theme_images_widgets_button_icon_round_micro_fill_active.png",
+            "Released": "__generated\\alternate_theme_images_widgets_button_icon_round_micro_fill_active.png",
             "TextId": "__SingleUse_YANH",
             "TextRotation": "0"
           },
           {
             "Type": "ButtonWithLabel",
             "Name": "Stop_button",
-            "X": 155,
-            "Y": 203,
-            "Width": 175,
+            "X": 187,
+            "Y": 196,
+            "Width": 110,
             "Height": 50,
-            "Pressed": "__generated\\alternate_theme_images_widgets_button_regular_height_50_small_round_active.png",
-            "Released": "__generated\\alternate_theme_images_widgets_button_regular_height_50_small_round_active.png",
+            "Pressed": "__generated\\alternate_theme_images_widgets_button_regular_height_50_tiny_round_active.png",
+            "Released": "__generated\\alternate_theme_images_widgets_button_regular_height_50_tiny_round_active.png",
             "TextId": "__SingleUse_NYEE",
             "TextRotation": "0"
           },
@@ -73,8 +73,8 @@
           {
             "Type": "ButtonWithLabel",
             "Name": "VolumeDown_button",
-            "X": 115,
-            "Y": 151,
+            "X": 54,
+            "Y": 203,
             "Width": 36,
             "Height": 36,
             "Pressed": "__generated\\alternate_theme_images_widgets_button_icon_round_micro_fill_active.png",
@@ -85,8 +85,8 @@
           {
             "Type": "TextArea",
             "Name": "TrackNameText",
-            "X": 92,
-            "Y": 151,
+            "X": 90,
+            "Y": 154,
             "Width": 300,
             "Height": 30,
             "TextId": "__SingleUse_VSLT",
@@ -105,66 +105,17 @@
           {
             "Type": "ButtonWithLabel",
             "Name": "VolumeUp_button",
-            "X": 330,
-            "Y": 154,
+            "X": 390,
+            "Y": 203,
             "Width": 36,
             "Height": 36,
             "Pressed": "__generated\\alternate_theme_images_widgets_button_icon_round_micro_fill_active.png",
             "Released": "__generated\\alternate_theme_images_widgets_button_icon_round_micro_fill_active.png",
             "TextId": "__SingleUse_AWN3",
             "TextRotation": "0"
-          },
-          {
-            "Type": "ButtonWithLabel",
-            "Name": "LeftPageButton",
-            "X": 47,
-            "Y": 154,
-            "Width": 36,
-            "Height": 36,
-            "Pressed": "__generated\\alternate_theme_images_widgets_button_icon_round_micro_fill_active.png",
-            "Released": "__generated\\alternate_theme_images_widgets_button_icon_round_micro_fill_active.png",
-            "TextId": "__SingleUse_G21M",
-            "TextRotation": "0"
-          },
-          {
-            "Type": "ButtonWithLabel",
-            "Name": "RightPageButton",
-            "X": 398,
-            "Y": 154,
-            "Width": 36,
-            "Height": 36,
-            "Pressed": "__generated\\alternate_theme_images_widgets_button_icon_round_micro_fill_active.png",
-            "Released": "__generated\\alternate_theme_images_widgets_button_icon_round_micro_fill_active.png",
-            "TextId": "__SingleUse_6XK3",
-            "TextRotation": "0"
           }
         ],
-        "Interactions": [
-          {
-            "InteractionName": "Interaction1",
-            "Trigger": {
-              "Type": "TriggerClicked",
-              "TriggerComponent": "LeftPageButton"
-            },
-            "Action": {
-              "Type": "ActionGotoScreen",
-              "ScreenTransitionType": "ScreenTransitionNone",
-              "ActionComponent": "EqualizerScreen"
-            }
-          },
-          {
-            "InteractionName": "Interaction2",
-            "Trigger": {
-              "Type": "TriggerClicked",
-              "TriggerComponent": "RightPageButton"
-            },
-            "Action": {
-              "Type": "ActionGotoScreen",
-              "ScreenTransitionType": "ScreenTransitionNone",
-              "ActionComponent": "EffectsScreen"
-            }
-          }
-        ],
+        "Interactions": [],
         "CustomActions": [
           {
             "Name": "action1"
@@ -184,18 +135,6 @@
               "Green": 18,
               "Blue": 22
             }
-          },
-          {
-            "Type": "ButtonWithLabel",
-            "Name": "RightPageButton",
-            "X": 419,
-            "Y": 227,
-            "Width": 36,
-            "Height": 36,
-            "Pressed": "__generated\\alternate_theme_images_widgets_button_icon_round_micro_fill_active.png",
-            "Released": "__generated\\alternate_theme_images_widgets_button_icon_round_micro_fill_active.png",
-            "TextId": "__SingleUse_Z19A",
-            "TextRotation": "0"
           },
           {
             "Type": "TextArea",
@@ -518,18 +457,6 @@
         ],
         "Interactions": [
           {
-            "InteractionName": "Interaction1",
-            "Trigger": {
-              "Type": "TriggerClicked",
-              "TriggerComponent": "RightPageButton"
-            },
-            "Action": {
-              "Type": "ActionGotoScreen",
-              "ScreenTransitionType": "ScreenTransitionNone",
-              "ActionComponent": "Screen1"
-            }
-          },
-          {
             "InteractionName": "Interaction2",
             "Trigger": {
               "Type": "TriggerSliderValueChanged",
@@ -698,18 +625,6 @@
             "AutoSize": true
           },
           {
-            "Type": "ButtonWithLabel",
-            "Name": "RightPageButton",
-            "X": 353,
-            "Y": 227,
-            "Width": 36,
-            "Height": 36,
-            "Pressed": "__generated\\alternate_theme_images_widgets_button_icon_round_micro_fill_active.png",
-            "Released": "__generated\\alternate_theme_images_widgets_button_icon_round_micro_fill_active.png",
-            "TextId": "__SingleUse_8ZK2",
-            "TextRotation": "0"
-          },
-          {
             "Type": "ToggleButton",
             "Name": "Echo_toggle",
             "X": 316,
@@ -718,18 +633,6 @@
             "Height": 50,
             "Pressed": "__generated\\alternate_theme_images_widgets_togglebutton_medium_round_on_active.png",
             "Released": "__generated\\alternate_theme_images_widgets_togglebutton_medium_round_off_light.png"
-          },
-          {
-            "Type": "ButtonWithLabel",
-            "Name": "LeftPageButton",
-            "X": 72,
-            "Y": 227,
-            "Width": 36,
-            "Height": 36,
-            "Pressed": "__generated\\alternate_theme_images_widgets_button_icon_round_micro_fill_active.png",
-            "Released": "__generated\\alternate_theme_images_widgets_button_icon_round_micro_fill_active.png",
-            "TextId": "__SingleUse_4LBY",
-            "TextRotation": "0"
           },
           {
             "Type": "ToggleButton",
@@ -753,18 +656,6 @@
           }
         ],
         "Interactions": [
-          {
-            "InteractionName": "Interaction1",
-            "Trigger": {
-              "Type": "TriggerClicked",
-              "TriggerComponent": "LeftPageButton"
-            },
-            "Action": {
-              "Type": "ActionGotoScreen",
-              "ScreenTransitionType": "ScreenTransitionNone",
-              "ActionComponent": "Screen1"
-            }
-          },
           {
             "InteractionName": "Interaction2",
             "Trigger": {
@@ -797,18 +688,6 @@
               "Type": "ActionCustom",
               "FunctionName": "noiseReductionToggled"
             }
-          },
-          {
-            "InteractionName": "Interaction5",
-            "Trigger": {
-              "Type": "TriggerClicked",
-              "TriggerComponent": "RightPageButton"
-            },
-            "Action": {
-              "Type": "ActionGotoScreen",
-              "ScreenTransitionType": "ScreenTransitionNone",
-              "ActionComponent": "InfoScreen"
-            }
           }
         ]
       },
@@ -825,18 +704,6 @@
               "Green": 18,
               "Blue": 22
             }
-          },
-          {
-            "Type": "ButtonWithLabel",
-            "Name": "LeftPageButton",
-            "X": 56,
-            "Y": 210,
-            "Width": 36,
-            "Height": 36,
-            "Pressed": "__generated\\alternate_theme_images_widgets_button_icon_round_micro_fill_active.png",
-            "Released": "__generated\\alternate_theme_images_widgets_button_icon_round_micro_fill_active.png",
-            "TextId": "__SingleUse_7G2I",
-            "TextRotation": "0"
           },
           {
             "Type": "TextArea",
@@ -860,12 +727,48 @@
           },
           {
             "Type": "TextArea",
+            "Name": "AudioStackValue",
+            "X": 347,
+            "Y": 192,
+            "Width": 75,
+            "Height": 30,
+            "TextId": "__SingleUse_8UFC",
+            "TextRotation": "0",
+            "Color": {
+              "Red": 255,
+              "Green": 255,
+              "Blue": 255
+            },
+            "Wildcard1": {
+              "TextId": "__SingleUse_1WRK",
+              "UseBuffer": true,
+              "BufferSize": 4
+            }
+          },
+          {
+            "Type": "TextArea",
             "Name": "FreeHeapLabel",
             "X": 23,
             "Y": 160,
             "Width": 103,
             "Height": 24,
             "TextId": "__SingleUse_OPL4",
+            "TextRotation": "0",
+            "Color": {
+              "Red": 255,
+              "Green": 255,
+              "Blue": 255
+            },
+            "AutoSize": true
+          },
+          {
+            "Type": "TextArea",
+            "Name": "AudioStackLabel",
+            "X": 23,
+            "Y": 195,
+            "Width": 126,
+            "Height": 24,
+            "TextId": "__SingleUse_88QC",
             "TextRotation": "0",
             "Color": {
               "Red": 255,
@@ -999,20 +902,7 @@
             "AutoSize": true
           }
         ],
-        "Interactions": [
-          {
-            "InteractionName": "Interaction1",
-            "Trigger": {
-              "Type": "TriggerClicked",
-              "TriggerComponent": "LeftPageButton"
-            },
-            "Action": {
-              "Type": "ActionGotoScreen",
-              "ScreenTransitionType": "ScreenTransitionNone",
-              "ActionComponent": "EffectsScreen"
-            }
-          }
-        ]
+        "Interactions": []
       }
     ],
     "CustomContainerDefinitions": [],

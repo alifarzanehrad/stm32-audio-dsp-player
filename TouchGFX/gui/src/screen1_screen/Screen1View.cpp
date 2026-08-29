@@ -1,5 +1,16 @@
 #include <gui/screen1_screen/Screen1View.hpp>
 #include <touchgfx/Color.hpp>
+#include <touchgfx/Unicode.hpp>
+
+#include <cstring>
+
+extern "C"
+{
+    uint8_t AudioPlayer_GetCurrentTrackName(
+        char *destination,
+        uint16_t capacity
+    );
+}
 
 #ifdef SIMULATOR
 
@@ -7,6 +18,23 @@ static float fftBandsSmoothed[16] =
 {
     0.0f
 };
+
+extern "C" uint8_t AudioPlayer_GetCurrentTrackName(
+    char *destination,
+    uint16_t capacity
+)
+{
+    static const char simulatorTrack[] = "Simulator track.wav";
+
+    if ((destination == 0) || (capacity == 0U))
+    {
+        return 0U;
+    }
+
+    std::strncpy(destination, simulatorTrack, capacity - 1U);
+    destination[capacity - 1U] = '\0';
+    return 1U;
+}
 
 #else
 
@@ -23,7 +51,8 @@ Screen1View::Screen1View()
       previousButtonCallback(this, &Screen1View::previousButtonClicked),
       volumeUpButtonCallback(this, &Screen1View::volumeUpButtonClicked),
       volumeDownButtonCallback(this, &Screen1View::volumeDownButtonClicked),
-      fftTickCounter(0)
+      fftTickCounter(0),
+      trackNameTickCounter(0)
 {
 }
 
@@ -38,6 +67,8 @@ void Screen1View::setupScreen()
 
     VolumeUp_button.setAction(volumeUpButtonCallback);
     VolumeDown_button.setAction(volumeDownButtonCallback);
+
+    updateTrackName();
 
     const int16_t startX = 40;
     const int16_t bottomY = 125;
@@ -92,6 +123,14 @@ void Screen1View::volumeDownButtonClicked(const touchgfx::AbstractButton& source
 
 void Screen1View::handleTickEvent()
 {
+    trackNameTickCounter++;
+
+    if (trackNameTickCounter >= 15U)
+    {
+        trackNameTickCounter = 0U;
+        updateTrackName();
+    }
+
     fftTickCounter++;
 
     if (fftTickCounter < 3)
@@ -132,5 +171,40 @@ void Screen1View::handleTickEvent()
         fftBars[i].setHeight(height);
 
         fftBars[i].invalidate();
+    }
+}
+
+void Screen1View::updateTrackName()
+{
+    char trackName[TRACKNAMETEXT_SIZE];
+
+    if (AudioPlayer_GetCurrentTrackName(
+            trackName,
+            sizeof(trackName)
+        ) == 0U)
+    {
+        std::strncpy(trackName, "No track", sizeof(trackName) - 1U);
+        trackName[sizeof(trackName) - 1U] = '\0';
+    }
+
+    touchgfx::Unicode::UnicodeChar updatedName[TRACKNAMETEXT_SIZE];
+    touchgfx::Unicode::fromUTF8(
+        reinterpret_cast<const uint8_t *>(trackName),
+        updatedName,
+        TRACKNAMETEXT_SIZE
+    );
+
+    if (touchgfx::Unicode::strncmp(
+            TrackNameTextBuffer,
+            updatedName,
+            TRACKNAMETEXT_SIZE
+        ) != 0)
+    {
+        touchgfx::Unicode::strncpy(
+            TrackNameTextBuffer,
+            updatedName,
+            TRACKNAMETEXT_SIZE
+        );
+        TrackNameText.invalidate();
     }
 }

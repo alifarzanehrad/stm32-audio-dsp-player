@@ -115,15 +115,49 @@ void EqualizerScreenView::slider8kHzChanged(int value)
 
 void EqualizerScreenView::flatButtonClicked()
 {
-    Slider_100Hz.setValue(12);
-    Slider_300Hz.setValue(12);
-    Slider_1kHz.setValue(12);
-    Slider_3kHz.setValue(12);
-    Slider_8kHz.setValue(12);
+    static const int flat[Model::EQ_BAND_COUNT] =
+    {
+        12, 12, 12, 12, 12
+    };
 
-    slider100HzChanged(12);
-    slider300HzChanged(12);
-    slider1kHzChanged(12);
-    slider3kHzChanged(12);
-    slider8kHzChanged(12);
+    applyPreset(flat);
+}
+
+void EqualizerScreenView::function1()
+{
+    /* Pop: +3, +1, -1, +2, +3 dB. */
+    static const int pop[Model::EQ_BAND_COUNT] =
+    {
+        15, 13, 11, 14, 15
+    };
+
+    applyPreset(pop);
+}
+
+void EqualizerScreenView::function2()
+{
+    /* Classical: 0, 0, +1, +2, +2 dB. */
+    static const int classical[Model::EQ_BAND_COUNT] =
+    {
+        12, 12, 13, 14, 14
+    };
+
+    applyPreset(classical);
+}
+
+void EqualizerScreenView::applyPreset(
+    const int values[Model::EQ_BAND_COUNT]
+)
+{
+    Slider_100Hz.setValue(values[Model::EQ_BAND_100HZ]);
+    Slider_300Hz.setValue(values[Model::EQ_BAND_300HZ]);
+    Slider_1kHz.setValue(values[Model::EQ_BAND_1KHZ]);
+    Slider_3kHz.setValue(values[Model::EQ_BAND_3KHZ]);
+    Slider_8kHz.setValue(values[Model::EQ_BAND_8KHZ]);
+
+    slider100HzChanged(values[Model::EQ_BAND_100HZ]);
+    slider300HzChanged(values[Model::EQ_BAND_300HZ]);
+    slider1kHzChanged(values[Model::EQ_BAND_1KHZ]);
+    slider3kHzChanged(values[Model::EQ_BAND_3KHZ]);
+    slider8kHzChanged(values[Model::EQ_BAND_8KHZ]);
 }

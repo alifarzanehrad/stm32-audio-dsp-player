@@ -97,7 +97,6 @@ static void AudioPlayer_SortPlaylist(void);
 static uint8_t AudioPlayer_StartSelectedTrack(const char *reason);
 static uint8_t AudioPlayer_ChangeTrack(int8_t delta, const char *reason);
 static void AudioPlayer_ServiceBuffer(uint8_t *buffer);
-static void AudioPlayer_ReportRuntimeDiagnostics(void);
 /* USER CODE END FunctionPrototypes */
 
 void StartDefaultTask(void const * argument);
@@ -288,9 +287,6 @@ void StartDefaultTask(void const * argument)
               AudioPlayer_ClearTransferFlags();
               PlayerState = PLAYER_PAUSED;
 
-              /* Print only after DMA playback is paused. */
-              AudioBenchmark_Report();
-              AudioPlayer_ReportRuntimeDiagnostics();
               printf("Player state = PAUSED\r\n");
           }
           else if (PlayerState == PLAYER_PAUSED)
@@ -480,42 +476,6 @@ static void AudioPlayer_ServiceBuffer(uint8_t *buffer)
     }
 }
 
-static void AudioPlayer_ReportRuntimeDiagnostics(void)
-{
-    UBaseType_t audioStackFreeWords =
-        uxTaskGetStackHighWaterMark((TaskHandle_t)defaultTaskHandle);
-
-    UBaseType_t touchGFXStackFreeWords =
-        uxTaskGetStackHighWaterMark((TaskHandle_t)TouchGFXTaskHandle);
-
-    size_t freeHeapBytes = xPortGetFreeHeapSize();
-    size_t minimumFreeHeapBytes = xPortGetMinimumEverFreeHeapSize();
-
-    printf("\r\nRuntime memory diagnostics:\r\n");
-    printf(
-        "Audio stack min free    = %lu words (%lu bytes)\r\n",
-        (unsigned long)audioStackFreeWords,
-        (unsigned long)(audioStackFreeWords * sizeof(StackType_t))
-    );
-    printf(
-        "TouchGFX stack min free = %lu words (%lu bytes)\r\n",
-        (unsigned long)touchGFXStackFreeWords,
-        (unsigned long)(touchGFXStackFreeWords * sizeof(StackType_t))
-    );
-    printf(
-        "Heap free now           = %lu bytes\r\n",
-        (unsigned long)freeHeapBytes
-    );
-    printf(
-        "Heap minimum ever free  = %lu bytes\r\n",
-        (unsigned long)minimumFreeHeapBytes
-    );
-    printf(
-        "Audio deadline misses   = %lu\r\n",
-        (unsigned long)AudioPlayer_GetDeadlineMisses()
-    );
-}
-
 static uint8_t AudioPlayer_StartSelectedTrack(const char *reason)
 {
     if (trackCount == 0U)
@@ -539,6 +499,39 @@ static uint8_t AudioPlayer_StartSelectedTrack(const char *reason)
     PlayerState = PLAYER_STOPPED;
     printf("Playback start failed: %s\r\n", playlist[currentTrack]);
     return 0;
+}
+
+uint8_t AudioPlayer_GetCurrentTrackName(
+    char *destination,
+    uint16_t capacity
+)
+{
+    if ((destination == NULL) || (capacity == 0U))
+    {
+        return 0U;
+    }
+
+    if (trackCount == 0U)
+    {
+        destination[0] = '\0';
+        return 0U;
+    }
+
+    int selectedTrack = currentTrack;
+
+    if ((selectedTrack < 0) || (selectedTrack >= (int)trackCount))
+    {
+        destination[0] = '\0';
+        return 0U;
+    }
+
+    strncpy(
+        destination,
+        playlist[selectedTrack],
+        (size_t)capacity - 1U
+    );
+    destination[capacity - 1U] = '\0';
+    return 1U;
 }
 
 static uint8_t AudioPlayer_ChangeTrack(int8_t delta, const char *reason)

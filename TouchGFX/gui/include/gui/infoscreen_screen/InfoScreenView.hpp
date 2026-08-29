@@ -11,7 +11,10 @@ public:
     virtual ~InfoScreenView() {}
     virtual void setupScreen();
     virtual void tearDownScreen();
+    virtual void handleTickEvent();
 protected:
+    uint16_t updateTickCounter;
+    void updateMetrics();
 };
 
 #endif // INFOSCREENVIEW_HPP

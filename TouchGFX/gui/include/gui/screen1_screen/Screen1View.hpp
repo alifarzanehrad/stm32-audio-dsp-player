@@ -35,6 +35,9 @@ protected:
     touchgfx::Box fftBars[FFT_BAR_COUNT];
 
     uint16_t fftTickCounter;
+    uint16_t trackNameTickCounter;
+
+    void updateTrackName();
 };
 
 #endif

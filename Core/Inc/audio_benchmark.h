@@ -7,8 +7,10 @@
 extern "C" {
 #endif
 
-/* Set to 0U for a zero-overhead release build. */
-#define AUDIO_BENCHMARK_ENABLED 0U
+/* Runtime counters feed the on-device System Information screen. */
+#ifndef AUDIO_BENCHMARK_ENABLED
+#define AUDIO_BENCHMARK_ENABLED 1U
+#endif
 
 typedef enum
 {
@@ -32,7 +34,7 @@ void AudioBenchmark_RequestReset(void);
 void AudioBenchmark_ApplyPendingReset(void);
 uint32_t AudioBenchmark_Start(void);
 void AudioBenchmark_End(AudioBenchmarkStage stage, uint32_t startCycles);
-void AudioBenchmark_Report(void);
+uint32_t AudioBenchmark_GetMaximumProcessingUs(void);
 
 #else
 
@@ -42,7 +44,7 @@ void AudioBenchmark_Report(void);
 #define AudioBenchmark_ApplyPendingReset() ((void)0)
 #define AudioBenchmark_Start() (0U)
 #define AudioBenchmark_End(stage, startCycles) ((void)0)
-#define AudioBenchmark_Report() ((void)0)
+#define AudioBenchmark_GetMaximumProcessingUs() (0U)
 
 #endif
 

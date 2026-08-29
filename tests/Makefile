@@ -1,6 +1,6 @@
 CC ?= cc
 
-CPPFLAGS := -I./support -I../Core/Inc
+CPPFLAGS := -I./support -I../Core/Inc -DAUDIO_BENCHMARK_ENABLED=0
 CFLAGS := -std=c11 -O2 -Wall -Wextra -Werror -pedantic -Wno-unused-variable -Wno-unused-but-set-variable
 LDLIBS := -lm
 

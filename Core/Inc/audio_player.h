@@ -26,6 +26,7 @@ void WavPlayer_FillHalf(uint8_t *half);
 void WavPlayer_Stop(void);
 void AudioPlayer_ResetDeadlineMisses(void);
 uint32_t AudioPlayer_GetDeadlineMisses(void);
+uint8_t AudioPlayer_GetCurrentTrackName(char *destination, uint16_t capacity);
 
 #ifdef __cplusplus
 }

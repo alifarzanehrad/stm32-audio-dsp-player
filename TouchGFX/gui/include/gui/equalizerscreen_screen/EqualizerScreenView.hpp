@@ -20,6 +20,8 @@ public:
     void slider8kHzChanged(int value) override;
 
     void flatButtonClicked() override;
+    void function1() override;
+    void function2() override;
 
 protected:
     void updateGainText(
@@ -28,6 +30,7 @@ protected:
         uint16_t bufferSize,
         int sliderValue
     );
+    void applyPreset(const int values[Model::EQ_BAND_COUNT]);
 };
 
 #endif // EQUALIZERSCREENVIEW_HPP

@@ -4,7 +4,7 @@
 
 A real-time audio player and DSP platform built on the **STM32F746G-DISCO**. The project reads stereo WAV files from an SD card, processes the audio in real time, displays a live spectrum on the LCD, and provides TouchGFX controls for playback, equalization, and audio effects.
 
-> Current stable release: **v1.1.0**
+> Current stable release: **v1.2.0**
 
 ## Hardware demo
 
@@ -21,13 +21,17 @@ The demo shows the project running on the physical STM32F746G-DISCO board with i
 - WM8994 codec output through SAI
 - TouchGFX graphical interface
 - Play/Pause, Next, Previous, and volume controls
+- Automatic WAV playlist discovery with long-filename support
+- Dynamic current-track title on the player screen
 - Real-time 16-column spectrum visualization
 - Five-band parametric equalizer
+- Flat, Pop, and Classical EQ presets
 - Automatic EQ headroom and output limiter
 - Echo effect with feedback
 - Schroeder-style reverb using parallel comb and all-pass filters
 - Adaptive spectral noise reduction
 - Independent enable/disable controls for audio effects
+- On-device CPU load, worst-case DSP time, deadline-miss, and free-heap monitoring
 
 ## Hardware and software
 
@@ -184,29 +188,44 @@ The implementation has been tested with street-noise speech samples at **5 dB, 1
 
 - Five gain sliders
 - Gain values in dB
-- Flat preset
+- Flat, Pop, and Classical presets
 - Persistent values when switching screens
+- Navigation to Player
 
 ### Effects screen
 
 - Echo toggle
 - Reverb toggle
 - Noise Reduction toggle
+- Navigation to Player and Performance
 
-## Test playlist
+### Performance screen
 
-The current firmware uses a fixed six-track playlist:
+- Live audio DSP CPU load
+- Maximum measured DSP processing time
+- Audio DMA deadline-miss counter
+- Current FreeRTOS heap availability
+- Navigation back to Effects
+
+The screens form a linear navigation flow:
 
 ```text
-one.wav
-two.wav
-three.wav
-four.wav
-five.wav
-six.wav
+Equalizer ←→ Player ←→ Effects ←→ Performance
 ```
 
-Tracks 4, 5, and 6 are used for noise-reduction tests at 5 dB, 10 dB, and 15 dB SNR respectively.
+The Player screen is shown at startup.
+
+## Dynamic SD-card playlist
+
+At startup, the firmware scans the SD-card root directory, discovers up to 32
+WAV files, sorts them by filename, and builds the playlist automatically. FatFs
+long-filename support preserves descriptive English track names instead of 8.3
+aliases such as `SOMETH~1.WAV`.
+
+The player UI displays the selected filename without its `.wav` extension.
+Underscores and hyphens are rendered as spaces for a cleaner title. Next,
+Previous, and automatic end-of-track transitions all operate on the discovered
+playlist, so filenames are no longer hardcoded in the firmware.
 
 ## Build and flash
 
@@ -294,11 +313,14 @@ Core/Src/audio_echo.c                   Stereo delay and feedback echo
 Core/Src/audio_reverb.c                 Schroeder comb and all-pass reverb
 Core/Src/noise_reduction.c               Adaptive STFT spectral subtraction
 Core/Src/audio_spectrum.c                Display FFT and 16 smoothed bands
+Core/Src/audio_benchmark.c               Live DSP load and worst-case timing
+Core/Src/system_metrics.c                Performance-screen metric snapshot
 Core/Src/freertos.c                     Player task, playlist, and DMA refill flow
 TouchGFX/gui/src/model/                 UI-to-firmware interface
 TouchGFX/gui/src/screen1_screen/        Player screen logic
 TouchGFX/gui/src/equalizerscreen_screen Equalizer screen logic
 TouchGFX/gui/src/effectsscreen_screen/  Effects screen logic
+TouchGFX/gui/src/infoscreen_screen/     On-device performance screen logic
 ```
 
 ## Measured performance
@@ -343,24 +365,21 @@ These tests do not replace listening tests or on-board deadline measurements; th
 
 ## Current limitations and future work
 
-- Playlist filenames are currently fixed in firmware.
 - WAV processing assumes the tested stereo PCM16 layout.
 - Noise reduction is optimized for speech with background noise, not arbitrary music restoration.
 - Effect parameters are compile-time constants.
-- No automatic WAV-file discovery is implemented yet.
+- Dynamic filenames currently target the generated Latin/English glyph set.
 - External audio-quality measurements such as THD+N, RT60, and objective SNR improvement remain future work.
 
 Potential future improvements:
 
-- Dynamic SD-card playlist
 - Runtime effect controls
-- EQ presets
 - On-screen track browser
 - Saved settings
 
 ## Release
 
-The latest stable tag is [v1.1.0](https://github.com/alifarzanehrad/stm32-audio-dsp-player/tree/v1.1.0).
+The latest stable tag is [v1.2.0](https://github.com/alifarzanehrad/stm32-audio-dsp-player/tree/v1.2.0).
 
 ## License
 

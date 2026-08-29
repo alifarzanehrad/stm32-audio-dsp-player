@@ -10,7 +10,7 @@ typedef struct
 {
     uint64_t cycles;
     uint32_t calls;
-    uint32_t maximumCycles;
+    volatile uint32_t maximumCycles;
 } AudioBenchmarkCounter;
 
 static AudioBenchmarkCounter counters[AUDIO_BENCH_STAGE_COUNT];
@@ -80,9 +80,13 @@ uint32_t AudioBenchmark_GetMaximumProcessingUs(void)
         return 0U;
     }
 
+    uint32_t pipelineMaximum =
+        counters[AUDIO_BENCH_PIPELINE].maximumCycles;
+    uint32_t spectrumMaximum =
+        counters[AUDIO_BENCH_SPECTRUM].maximumCycles;
+
     uint64_t maximumCycles =
-        (uint64_t)counters[AUDIO_BENCH_PIPELINE].maximumCycles +
-        (uint64_t)counters[AUDIO_BENCH_SPECTRUM].maximumCycles;
+        (uint64_t)pipelineMaximum + (uint64_t)spectrumMaximum;
 
     return (uint32_t)(
         (maximumCycles * 1000000U) / SystemCoreClock

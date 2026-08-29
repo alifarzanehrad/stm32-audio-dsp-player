@@ -12,6 +12,8 @@ public:
 
     virtual void setupScreen();
     virtual void tearDownScreen();
+    virtual void handleClickEvent(const touchgfx::ClickEvent& event);
+    virtual void handleGestureEvent(const touchgfx::GestureEvent& event);
 
     void slider100HzChanged(int value) override;
     void slider300HzChanged(int value) override;
@@ -24,6 +26,8 @@ public:
     void function2() override;
 
 protected:
+    bool swipeStartedOnSlider;
+
     void updateGainText(
         touchgfx::TextAreaWithOneWildcard& textArea,
         touchgfx::Unicode::UnicodeChar* buffer,

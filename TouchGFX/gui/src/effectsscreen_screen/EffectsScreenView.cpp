@@ -20,6 +20,26 @@ void EffectsScreenView::tearDownScreen()
     EffectsScreenViewBase::tearDownScreen();
 }
 
+void EffectsScreenView::handleGestureEvent(
+    const touchgfx::GestureEvent& event
+)
+{
+    if (event.getType() != touchgfx::GestureEvent::SWIPE_HORIZONTAL)
+    {
+        EffectsScreenViewBase::handleGestureEvent(event);
+        return;
+    }
+
+    if (event.getVelocity() > 0)
+    {
+        application().gotoPlayerScreen();
+    }
+    else if (event.getVelocity() < 0)
+    {
+        application().gotoInfoScreen();
+    }
+}
+
 void EffectsScreenView::echoToggled()
 {
     presenter->setEchoEnabled(Echo_toggle.getState());

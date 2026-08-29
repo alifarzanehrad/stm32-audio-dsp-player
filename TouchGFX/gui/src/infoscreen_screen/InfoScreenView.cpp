@@ -9,6 +9,7 @@ typedef struct
     uint32_t dspMaximumUs;
     uint32_t deadlineMisses;
     uint32_t freeHeapBytes;
+    uint32_t audioStackFreeBytes;
 } SystemMetricsSnapshot;
 
 extern "C" void SystemMetrics_GetSnapshot(
@@ -27,6 +28,7 @@ extern "C" void SystemMetrics_GetSnapshot(
         snapshot->dspMaximumUs = 12010U;
         snapshot->deadlineMisses = 0U;
         snapshot->freeHeapBytes = 19920U;
+        snapshot->audioStackFreeBytes = 3400U;
     }
 }
 
@@ -62,6 +64,7 @@ void InfoScreenView::updateMetrics()
 
     uint32_t dspMaximumMs = (metrics.dspMaximumUs + 500U) / 1000U;
     uint32_t freeHeapKB = metrics.freeHeapBytes / 1024U;
+    uint32_t audioStackFreeKB = metrics.audioStackFreeBytes / 1024U;
 
     if (dspMaximumMs > 999U)
     {
@@ -76,6 +79,11 @@ void InfoScreenView::updateMetrics()
     if (freeHeapKB > 999U)
     {
         freeHeapKB = 999U;
+    }
+
+    if (audioStackFreeKB > 999U)
+    {
+        audioStackFreeKB = 999U;
     }
 
     touchgfx::Unicode::snprintf(
@@ -102,11 +110,32 @@ void InfoScreenView::updateMetrics()
         "%u",
         static_cast<unsigned int>(freeHeapKB)
     );
+    touchgfx::Unicode::snprintf(
+        AudioStackValueBuffer,
+        AUDIOSTACKVALUE_SIZE,
+        "%u",
+        static_cast<unsigned int>(audioStackFreeKB)
+    );
 
     CpuLoadValue.invalidate();
     DspMaxValue.invalidate();
     DeadlineMissesValue.invalidate();
     FreeHeapValue.invalidate();
+    AudioStackValue.invalidate();
+}
+
+void InfoScreenView::handleGestureEvent(
+    const touchgfx::GestureEvent& event
+)
+{
+    if ((event.getType() == touchgfx::GestureEvent::SWIPE_HORIZONTAL) &&
+        (event.getVelocity() > 0))
+    {
+        application().gotoEffectsScreen();
+        return;
+    }
+
+    InfoScreenViewBase::handleGestureEvent(event);
 }
 
 void InfoScreenView::tearDownScreen()

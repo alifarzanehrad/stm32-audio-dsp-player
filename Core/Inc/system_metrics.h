@@ -13,6 +13,7 @@ typedef struct
     uint32_t dspMaximumUs;
     uint32_t deadlineMisses;
     uint32_t freeHeapBytes;
+    uint32_t audioStackFreeBytes;
 } SystemMetricsSnapshot;
 
 void SystemMetrics_GetSnapshot(SystemMetricsSnapshot *snapshot);

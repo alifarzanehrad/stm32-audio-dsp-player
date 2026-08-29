@@ -96,6 +96,24 @@ void Screen1View::tearDownScreen()
     Screen1ViewBase::tearDownScreen();
 }
 
+void Screen1View::handleGestureEvent(const touchgfx::GestureEvent& event)
+{
+    if (event.getType() != touchgfx::GestureEvent::SWIPE_HORIZONTAL)
+    {
+        Screen1ViewBase::handleGestureEvent(event);
+        return;
+    }
+
+    if (event.getVelocity() > 0)
+    {
+        application().gotoEqualizerScreen();
+    }
+    else if (event.getVelocity() < 0)
+    {
+        application().gotoEffectsScreen();
+    }
+}
+
 void Screen1View::playPauseButtonClicked(const touchgfx::AbstractButton& source)
 {
     presenter->playPause();

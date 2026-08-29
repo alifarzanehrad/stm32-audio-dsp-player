@@ -12,6 +12,7 @@ public:
     virtual void setupScreen();
     virtual void tearDownScreen();
     virtual void handleTickEvent();
+    virtual void handleGestureEvent(const touchgfx::GestureEvent& event);
 protected:
     uint16_t updateTickCounter;
     void updateMetrics();

@@ -2,7 +2,20 @@
 #include <touchgfx/Unicode.hpp>
 
 EqualizerScreenView::EqualizerScreenView()
+    : swipeStartedOnSlider(false)
 {
+}
+
+static bool pointInsideDrawable(
+    const touchgfx::Drawable& drawable,
+    int16_t x,
+    int16_t y
+)
+{
+    return (x >= drawable.getX()) &&
+           (x < (drawable.getX() + drawable.getWidth())) &&
+           (y >= drawable.getY()) &&
+           (y < (drawable.getY() + drawable.getHeight()));
 }
 
 void EqualizerScreenView::setupScreen()
@@ -25,6 +38,38 @@ void EqualizerScreenView::setupScreen()
 void EqualizerScreenView::tearDownScreen()
 {
     EqualizerScreenViewBase::tearDownScreen();
+}
+
+void EqualizerScreenView::handleClickEvent(
+    const touchgfx::ClickEvent& event
+)
+{
+    if (event.getType() == touchgfx::ClickEvent::PRESSED)
+    {
+        swipeStartedOnSlider =
+            pointInsideDrawable(Slider_100Hz, event.getX(), event.getY()) ||
+            pointInsideDrawable(Slider_300Hz, event.getX(), event.getY()) ||
+            pointInsideDrawable(Slider_1kHz, event.getX(), event.getY()) ||
+            pointInsideDrawable(Slider_3kHz, event.getX(), event.getY()) ||
+            pointInsideDrawable(Slider_8kHz, event.getX(), event.getY());
+    }
+
+    EqualizerScreenViewBase::handleClickEvent(event);
+}
+
+void EqualizerScreenView::handleGestureEvent(
+    const touchgfx::GestureEvent& event
+)
+{
+    if ((event.getType() == touchgfx::GestureEvent::SWIPE_HORIZONTAL) &&
+        !swipeStartedOnSlider &&
+        (event.getVelocity() < 0))
+    {
+        application().gotoPlayerScreen();
+        return;
+    }
+
+    EqualizerScreenViewBase::handleGestureEvent(event);
 }
 
 void EqualizerScreenView::updateGainText(

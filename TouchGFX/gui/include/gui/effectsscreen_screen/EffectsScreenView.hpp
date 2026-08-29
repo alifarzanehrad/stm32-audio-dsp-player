@@ -11,6 +11,7 @@ public:
     virtual ~EffectsScreenView() {}
     virtual void setupScreen();
     virtual void tearDownScreen();
+    virtual void handleGestureEvent(const touchgfx::GestureEvent& event);
     virtual void echoToggled();
     virtual void reverbToggled();
     virtual void noiseReductionToggled();

@@ -23,6 +23,7 @@ The demo shows the project running on the physical STM32F746G-DISCO board with i
 - Play/Pause, Next, Previous, and volume controls
 - Automatic WAV playlist discovery with long-filename support
 - Dynamic current-track title on the player screen
+- Horizontal swipe navigation across all four TouchGFX screens
 - Real-time 16-column spectrum visualization
 - Five-band parametric equalizer
 - Flat, Pop, and Classical EQ presets
@@ -31,7 +32,7 @@ The demo shows the project running on the physical STM32F746G-DISCO board with i
 - Schroeder-style reverb using parallel comb and all-pass filters
 - Adaptive spectral noise reduction
 - Independent enable/disable controls for audio effects
-- On-device CPU load, worst-case DSP time, deadline-miss, and free-heap monitoring
+- On-device CPU load, worst-case DSP time, deadline-miss, free-heap, and audio-stack monitoring
 
 ## Hardware and software
 
@@ -182,7 +183,7 @@ The implementation has been tested with street-noise speech samples at **5 dB, 1
 - Play/Pause
 - Previous/Next
 - Volume up/down
-- Navigation to Equalizer and Effects
+- Swipe right to Equalizer and left to Effects
 
 ### Equalizer screen
 
@@ -190,14 +191,15 @@ The implementation has been tested with street-noise speech samples at **5 dB, 1
 - Gain values in dB
 - Flat, Pop, and Classical presets
 - Persistent values when switching screens
-- Navigation to Player
+- Slider-aware swipe handling that prevents accidental page changes
+- Swipe left to Player
 
 ### Effects screen
 
 - Echo toggle
 - Reverb toggle
 - Noise Reduction toggle
-- Navigation to Player and Performance
+- Swipe right to Player and left to Performance
 
 ### Performance screen
 
@@ -205,7 +207,8 @@ The implementation has been tested with street-noise speech samples at **5 dB, 1
 - Maximum measured DSP processing time
 - Audio DMA deadline-miss counter
 - Current FreeRTOS heap availability
-- Navigation back to Effects
+- Minimum remaining audio-task stack space
+- Swipe right to Effects
 
 The screens form a linear navigation flow:
 
@@ -213,7 +216,10 @@ The screens form a linear navigation flow:
 Equalizer ←→ Player ←→ Effects ←→ Performance
 ```
 
-The Player screen is shown at startup.
+The Player screen is shown at startup. Swiping left moves to the next screen and
+swiping right moves to the previous screen. On the Equalizer screen, gestures
+that begin on a gain slider are reserved for gain adjustment and never trigger a
+screen transition.
 
 ## Dynamic SD-card playlist
 
@@ -339,6 +345,13 @@ reverb, limiter, and the display spectrum active.
 | Flash utilization | 370,154 bytes (35.3%) |
 | Static internal RAM | 93,232 bytes (28.5%) |
 | Minimum free heap | 19,920 bytes |
+| Latest observed on-device DSP load | 67% peak |
+
+The later interactive UI run reached a displayed peak DSP load of **67%**, which
+corresponds to approximately **14.29 ms** of the 21.33 ms audio-buffer period and
+leaves about **7.04 ms (33%)** of nominal timing headroom. The deadline-miss
+counter remains the definitive indicator of whether real-time processing was
+completed on time.
 
 The final stress test included repeated screen navigation, EQ changes, effect
 toggles, volume adjustments, and track changes without audible glitches,

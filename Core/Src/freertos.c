@@ -525,12 +525,29 @@ uint8_t AudioPlayer_GetCurrentTrackName(
         return 0U;
     }
 
-    strncpy(
-        destination,
-        playlist[selectedTrack],
-        (size_t)capacity - 1U
-    );
-    destination[capacity - 1U] = '\0';
+    const char *filename = playlist[selectedTrack];
+    size_t titleLength = strlen(filename);
+
+    /* The player screen shows a title, not the WAV storage filename. */
+    if ((titleLength >= 4U) &&
+        (filename[titleLength - 4U] == '.'))
+    {
+        titleLength -= 4U;
+    }
+
+    if (titleLength >= (size_t)capacity)
+    {
+        titleLength = (size_t)capacity - 1U;
+    }
+
+    for (size_t i = 0U; i < titleLength; i++)
+    {
+        char character = filename[i];
+        destination[i] =
+            ((character == '_') || (character == '-')) ? ' ' : character;
+    }
+
+    destination[titleLength] = '\0';
     return 1U;
 }
 

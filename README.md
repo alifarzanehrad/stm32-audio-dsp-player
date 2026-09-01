@@ -51,24 +51,9 @@ The demo shows the project running on the physical STM32F746G-DISCO board with i
 
 ## Audio processing pipeline
 
-```mermaid
-flowchart TD
-    A["WAV files on SD card"] --> B["FATFS and WAV parser"]
-    B --> C["DMA half-buffer"]
-    C --> D["Int16 to float"]
-    D --> E["Adaptive noise reduction (optional)"]
-    E --> F["Five-band equalizer (optional)"]
-    F --> G["Echo (optional)"]
-    G --> H["Schroeder reverb (optional)"]
-    H --> I["Limiter and float-to-Int16"]
-
-    I --> J["SAI2 DMA"]
-    J --> K["WM8994 audio codec"]
-    K --> L["Headphone output"]
-
-    I --> M["1024-point display FFT"]
-    M --> N["16-column TouchGFX spectrum"]
-```
+<p align="center">
+  <img src="docs/audio-processing-pipeline.svg" alt="STM32 real-time audio processing pipeline" width="760">
+</p>
 
 The display FFT is an analysis branch. It observes the processed signal but does not modify the audio. Codec volume is applied after this FFT, so hardware volume changes do not affect the displayed spectrum.
 

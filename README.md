@@ -53,35 +53,21 @@ The demo shows the project running on the physical STM32F746G-DISCO board with i
 
 ```mermaid
 flowchart TD
-    A["WAV file on SD card"] --> B["FATFS read"]
+    A["WAV files on SD card"] --> B["FATFS and WAV parser"]
     B --> C["DMA half-buffer"]
     C --> D["Int16 to float"]
+    D --> E["Adaptive noise reduction (optional)"]
+    E --> F["Five-band equalizer (optional)"]
+    F --> G["Echo (optional)"]
+    G --> H["Schroeder reverb (optional)"]
+    H --> I["Limiter and float-to-Int16"]
 
-    D --> NR{"Noise reduction enabled?"}
-    NR -- Yes --> NRP["STFT, noise estimate, spectral gain, IFFT"]
-    NR -- No --> EQ
-    NRP --> EQ
+    I --> J["SAI2 DMA"]
+    J --> K["WM8994 audio codec"]
+    K --> L["Headphone output"]
 
-    EQ{"Equalizer enabled?"}
-    EQ -- Yes --> EQP["Headroom and five IIR bands"]
-    EQ -- No --> EC
-    EQP --> EC
-
-    EC{"Echo enabled?"}
-    EC -- Yes --> ECP["Delay and feedback"]
-    EC -- No --> RV
-    ECP --> RV
-
-    RV{"Reverb enabled?"}
-    RV -- Yes --> RVP["Comb and all-pass filters"]
-    RV -- No --> LIM
-    RVP --> LIM
-
-    LIM["Limiter and float-to-Int16 conversion"]
-    LIM --> DMA["SAI DMA and WM8994"]
-    LIM --> FFT["1024-point display FFT"]
-    FFT --> LCD["16 spectrum columns on LCD"]
-    DMA --> OUT["Headphone output"]
+    I --> M["1024-point display FFT"]
+    M --> N["16-column TouchGFX spectrum"]
 ```
 
 The display FFT is an analysis branch. It observes the processed signal but does not modify the audio. Codec volume is applied after this FFT, so hardware volume changes do not affect the displayed spectrum.

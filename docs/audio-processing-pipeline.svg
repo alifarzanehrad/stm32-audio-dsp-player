@@ -1,0 +1,85 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1500" viewBox="0 0 1200 1500">
+  <defs>
+    <linearGradient id="header" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0f4c81"/>
+      <stop offset="1" stop-color="#137c8b"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="5" stdDeviation="6" flood-color="#102a43" flood-opacity="0.18"/>
+    </filter>
+    <marker id="arrow" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+      <path d="M0,0 L12,6 L0,12 Z" fill="#334e68"/>
+    </marker>
+    <style>
+      .title { font: 700 38px Arial, sans-serif; fill: #102a43; }
+      .subtitle { font: 400 21px Arial, sans-serif; fill: #486581; }
+      .label { font: 600 24px Arial, sans-serif; fill: #102a43; text-anchor: middle; dominant-baseline: middle; }
+      .small { font: 400 19px Arial, sans-serif; fill: #486581; text-anchor: middle; dominant-baseline: middle; }
+      .white { fill: white; }
+      .node { fill: white; stroke: #7b9db4; stroke-width: 3; rx: 18; filter: url(#shadow); }
+      .dsp { fill: #e7f7f8; stroke: #137c8b; stroke-width: 3; rx: 18; filter: url(#shadow); }
+      .output { fill: #edf4ff; stroke: #0f4c81; stroke-width: 3; rx: 18; filter: url(#shadow); }
+      .arrow { fill: none; stroke: #334e68; stroke-width: 4; marker-end: url(#arrow); }
+      .branch { fill: none; stroke: #137c8b; stroke-width: 4; marker-end: url(#arrow); }
+    </style>
+  </defs>
+
+  <rect width="1200" height="1500" fill="#f8fbfd"/>
+  <text x="600" y="58" class="title" text-anchor="middle">Real-Time Audio Processing Pipeline</text>
+  <text x="600" y="94" class="subtitle" text-anchor="middle">STM32F746G-DISCO Audio DSP Player</text>
+
+  <rect x="390" y="135" width="420" height="82" class="node"/>
+  <text x="600" y="165" class="label">WAV Files on SD Card</text>
+  <text x="600" y="195" class="small">Stereo PCM16, 48 kHz</text>
+
+  <path d="M600 217 V255" class="arrow"/>
+  <rect x="390" y="260" width="420" height="82" class="node"/>
+  <text x="600" y="290" class="label">FATFS and WAV Parser</text>
+  <text x="600" y="320" class="small">Dynamic playlist and audio data read</text>
+
+  <path d="M600 342 V380" class="arrow"/>
+  <rect x="390" y="385" width="420" height="82" class="node"/>
+  <text x="600" y="415" class="label">DMA Half-Buffer</text>
+  <text x="600" y="445" class="small">1024 stereo frames, 21.333 ms deadline</text>
+
+  <path d="M600 467 V505" class="arrow"/>
+  <rect x="390" y="510" width="420" height="72" class="node"/>
+  <text x="600" y="546" class="label">Int16 to Float Conversion</text>
+
+  <path d="M600 582 V620" class="arrow"/>
+  <rect x="390" y="625" width="420" height="82" class="dsp"/>
+  <text x="600" y="655" class="label">Adaptive Noise Reduction</text>
+  <text x="600" y="685" class="small">512-point STFT, optional</text>
+
+  <path d="M600 707 V745" class="arrow"/>
+  <rect x="390" y="750" width="420" height="82" class="dsp"/>
+  <text x="600" y="780" class="label">Five-Band Equalizer</text>
+  <text x="600" y="810" class="small">IIR biquads and headroom, optional</text>
+
+  <path d="M600 832 V870" class="arrow"/>
+  <rect x="390" y="875" width="420" height="72" class="dsp"/>
+  <text x="600" y="911" class="label">Echo, Optional</text>
+
+  <path d="M600 947 V985" class="arrow"/>
+  <rect x="390" y="990" width="420" height="82" class="dsp"/>
+  <text x="600" y="1020" class="label">Schroeder Reverb</text>
+  <text x="600" y="1050" class="small">Comb and all-pass filters, optional</text>
+
+  <path d="M600 1072 V1110" class="arrow"/>
+  <rect x="390" y="1115" width="420" height="82" class="node"/>
+  <text x="600" y="1145" class="label">Limiter and Float to Int16</text>
+  <text x="600" y="1175" class="small">Processed audio output</text>
+
+  <path d="M510 1197 V1240 H270 V1275" class="arrow"/>
+  <rect x="90" y="1280" width="360" height="82" class="output"/>
+  <text x="270" y="1310" class="label">SAI2 DMA and WM8994</text>
+  <text x="270" y="1340" class="small">Codec output to headphones</text>
+
+  <path d="M690 1197 V1240 H930 V1275" class="branch"/>
+  <rect x="750" y="1280" width="360" height="82" class="output"/>
+  <text x="930" y="1310" class="label">1024-Point Display FFT</text>
+  <text x="930" y="1340" class="small">16-band TouchGFX spectrum</text>
+
+  <rect x="360" y="1410" width="480" height="52" rx="26" fill="url(#header)"/>
+  <text x="600" y="1436" class="label white">FreeRTOS Task Coordination</text>
+</svg>
